@@ -1,9 +1,9 @@
 "use client";
 
 import { create } from "zustand";
-import { EntityType } from "@/lib/types";
+import type { Task } from "@/lib/crm-types";
 
-type DrawerEntity = { type: EntityType; id: string } | null;
+type DrawerEntity = { type: Task["relatedType"]; id: string } | null;
 
 type UIState = {
   commandOpen: boolean;

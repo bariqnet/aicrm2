@@ -3,37 +3,181 @@
 @tailwind utilities;
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 240 10% 4%;
-  --border: 240 7% 89%;
-  --muted: 240 5% 96%;
-  --accent: 222 80% 55%;
+  --background: 210 20% 98%;
+  --foreground: 222 23% 10%;
+  --surface: 0 0% 100%;
+  --surface-2: 210 24% 97%;
+  --border: 220 16% 88%;
+  --muted: 220 18% 94%;
+  --muted-foreground: 220 10% 40%;
+  --accent: 221 83% 53%;
+  --accent-foreground: 0 0% 100%;
 }
 
 .dark {
-  --background: 240 10% 4%;
-  --foreground: 210 20% 95%;
-  --border: 240 4% 20%;
-  --muted: 240 4% 12%;
-  --accent: 216 90% 60%;
+  --background: 222 29% 10%;
+  --foreground: 210 24% 94%;
+  --surface: 222 24% 12%;
+  --surface-2: 222 20% 15%;
+  --border: 222 14% 24%;
+  --muted: 222 16% 18%;
+  --muted-foreground: 222 12% 68%;
+  --accent: 212 92% 62%;
+  --accent-foreground: 222 29% 10%;
 }
 
 * {
   @apply border-border;
 }
 
+html,
+body {
+  min-height: 100%;
+}
+
 body {
   @apply bg-bg text-fg antialiased;
+  font-family: var(--font-body), "IBM Plex Sans", sans-serif;
+  line-height: 1.45;
 }
 
-.input {
-  @apply rounded-md border border-border bg-bg px-3 py-2 text-sm outline-none ring-accent/40 transition focus:ring-2;
+code,
+pre,
+kbd {
+  font-family: var(--font-mono), "IBM Plex Mono", monospace;
 }
 
-.btn {
-  @apply inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm transition hover:bg-muted;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  letter-spacing: -0.01em;
 }
 
-.btn-primary {
-  @apply border-transparent bg-accent text-white hover:opacity-90;
+@layer components {
+  .app-page {
+    @apply mx-auto w-full max-w-6xl space-y-6;
+  }
+
+  .page-title {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+
+  .page-subtitle {
+    @apply mt-1 text-sm text-mutedfg;
+  }
+
+  .muted-label {
+    @apply text-[11px] font-medium uppercase tracking-[0.12em] text-mutedfg;
+  }
+
+  .panel {
+    @apply rounded-xl border bg-surface shadow-[0_1px_2px_rgba(15,23,42,0.06)];
+  }
+
+  .panel-soft {
+    @apply rounded-xl border bg-surface2;
+  }
+
+  .panel-dashed {
+    @apply rounded-xl border border-dashed bg-surface2/50;
+  }
+
+  .table-shell {
+    @apply overflow-hidden rounded-xl border bg-surface;
+  }
+
+  .metric-card {
+    @apply panel p-4;
+  }
+
+  .input {
+    @apply h-10 rounded-md border border-border bg-surface px-3 text-sm text-fg outline-none transition;
+  }
+
+  .input::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .input:focus {
+    border-color: hsl(var(--accent) / 0.58);
+    box-shadow: 0 0 0 3px hsl(var(--accent) / 0.15);
+  }
+
+  .btn {
+    @apply inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border bg-surface px-3 text-sm font-medium text-fg transition;
+  }
+
+  .btn:hover {
+    @apply bg-muted;
+  }
+
+  .btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px hsl(var(--accent) / 0.15);
+  }
+
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .btn-primary {
+    @apply border-transparent;
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+  }
+
+  .btn-primary:hover {
+    background: hsl(var(--foreground) / 0.9);
+  }
+
+  .btn-primary:focus-visible {
+    box-shadow: 0 0 0 3px hsl(var(--foreground) / 0.18);
+  }
+}
+
+.swal-popup {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.75rem;
+  background: hsl(var(--surface));
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.16);
+}
+
+.swal-title {
+  color: hsl(var(--foreground));
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.swal-text {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.9rem;
+}
+
+.swal-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.swal-confirm,
+.swal-cancel {
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border));
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.swal-confirm {
+  background: hsl(var(--foreground));
+  border-color: transparent;
+  color: hsl(var(--background));
+}
+
+.swal-cancel {
+  background: hsl(var(--surface-2));
+  color: hsl(var(--foreground));
 }

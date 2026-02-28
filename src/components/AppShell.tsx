@@ -15,11 +15,11 @@ export function AppShell({ children }: React.PropsWithChildren) {
   }, [dark]);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-bg text-fg">
       <SidebarNav />
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <Topbar />
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <div className="flex-1 px-4 pb-10 pt-6 md:px-8">{children}</div>
       </div>
       <CommandPalette />
       <DetailDrawer />

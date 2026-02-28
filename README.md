@@ -1,42 +1,40 @@
-# Lightfield-style Simple CRM
+# AI CRM (API-first Next.js)
 
-Production-quality Next.js App Router CRM with minimal, modern UI inspired by Lightfield vibes (original implementation).
-
-## Stack
-- Next.js (App Router) + TypeScript
-- Tailwind CSS
-- Zustand (UI state)
-- lucide-react icons
-- ESLint + Prettier
+Next.js App Router CRM scaffold aligned to the API-first architecture.
 
 ## Setup
+
 ```bash
 npm install
 npm run dev
 ```
+
 Open `http://localhost:3000`.
 
 ## Environment Variables
-Create `.env.local`:
-```bash
-NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api
-USE_MOCK_DATA=true
+
+Create `.env.local` using:
+
+```env
+SESSION_PASSWORD=replace-with-long-random-string
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+API_BASE_URL=https://t8xizhkeq6.execute-api.us-east-1.amazonaws.com/dev/
+NEXT_PUBLIC_API_BASE_URL=https://t8xizhkeq6.execute-api.us-east-1.amazonaws.com/dev/
 ```
 
-## Architecture
-- `src/lib/types.ts`: domain types for Person, Company, Deal, Task, Activity.
-- `src/lib/api/`:
-  - `mock.ts`: in-memory DB and realistic sample records.
-  - `client.ts`: fetch wrapper for future external API.
-  - `index.ts`: service layer abstraction with mock/default provider and create/list methods.
-- `src/components/`: reusable shell and UI primitives (`AppShell`, `SidebarNav`, `Topbar`, `DataTable`, `CommandPalette`, `DetailDrawer`, `Timeline`, `ModalForm`, etc.).
-- `src/app/(app)/...`: route pages for dashboard, people, companies, pipeline, tasks, inbox, settings.
-- `src/app/api/*`: route handlers showing proxy shape for eventual external integration.
+## Key Source Files
+
+- `src/lib/crm-api.ts`: external CRM API client (`apiRequest`, `listAll`)
+- `src/lib/auth.ts`, `src/lib/auth-client.ts`: session helpers
+- `src/lib/crm-types.ts`: core domain models
+- `src/lib/validators.ts`: request validation contracts
+- `src/app/(auth)/*`, `src/app/onboarding/*`, `src/app/(app)/*`: route groups and pages
+- `src/app/api/*`: active and stub internal Next API routes
+- `src/lib/visits-client.ts`: localStorage-only visits/calendar utilities
 
 ## Scripts
-- `npm run dev` – run local dev server
-- `npm run build` – production build
-- `npm run start` – start production server
-- `npm run lint` – lint project
-- `npm run typecheck` – TypeScript check
-- `npm run format` – prettier format
+
+- `npm run dev`
+- `npm run build`
+- `npm run lint`
+- `npm run typecheck`

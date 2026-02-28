@@ -1,47 +1,49 @@
-"use client";
+import Link from "next/link";
+import { listCompanies } from "@/lib/mock-db";
+import { getRequestContext } from "@/lib/request-context";
 
-import { useEffect, useState } from "react";
-import { DataTable } from "@/components/DataTable";
-import { FilterChips } from "@/components/FilterChips";
-import { ModalForm } from "@/components/ModalForm";
-import { createCompany, listCompanies, listDeals, listPeople } from "@/lib/api";
-import { Company, Deal, Person } from "@/lib/types";
-import { fmtDate } from "@/lib/utils";
-import { useUIStore } from "@/store/ui-store";
-
-export default function CompaniesPage() {
-  const [rows, setRows] = useState<Company[]>([]);
-  const [people, setPeople] = useState<Person[]>([]);
-  const [deals, setDeals] = useState<Deal[]>([]);
-  const { openDrawer } = useUIStore();
-
-  const load = async () => {
-    const [c, p, d] = await Promise.all([listCompanies(), listPeople(), listDeals()]);
-    setRows(c.rows);
-    setPeople(p.rows);
-    setDeals(d.rows);
-  };
-
-  useEffect(() => { load(); }, []);
+export default async function CompaniesPage() {
+  const ctx = await getRequestContext();
+  const companies = listCompanies(ctx);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Companies</h1>
-        <ModalForm title="New Company" fields={[{ name: "name", label: "Name" }, { name: "domain", label: "Domain" }, { name: "industry", label: "Industry" }, { name: "size", label: "Size", type: "number" }, { name: "location", label: "Location" }, { name: "owner", label: "Owner" }, { name: "tags", label: "Tags" }]} onSubmit={async (vals) => {
-          await createCompany({ ...vals, size: Number(vals.size), tags: vals.tags.split(",") } as any);
-          await load();
-        }} />
-      </div>
-      <FilterChips chips={["Industry", "Owner", "Size"]} />
-      <DataTable rows={rows} onRowClick={(row) => openDrawer({ type: "company", id: row.id })} columns={[
-        { key: "name", label: "Name", render: (r) => r.name },
-        { key: "industry", label: "Industry", render: (r) => r.industry },
-        { key: "owner", label: "Owner", render: (r) => r.owner },
-        { key: "people", label: "People", render: (r) => people.filter((p) => p.companyId === r.id).length },
-        { key: "open", label: "Open deals", render: (r) => deals.filter((d) => d.companyId === r.id && !["Won", "Lost"].includes(d.stage)).length },
-        { key: "touch", label: "Last touch", render: (r) => fmtDate(r.lastTouchAt) }
-      ]} />
-    </div>
+    <main className="app-page">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="page-title">Companies</h1>
+          <p className="page-subtitle">Account records with industry and ownership context.</p>
+        </div>
+        <Link href="/companies/new" className="btn btn-primary">New company</Link>
+      </header>
+
+      {companies.length === 0 ? (
+        <p className="panel panel-dashed p-10 text-sm text-mutedfg">No companies yet.</p>
+      ) : (
+        <div className="table-shell">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-border bg-surface2 text-xs uppercase tracking-[0.1em] text-mutedfg">
+              <tr>
+                <th className="px-4 py-3">Company</th>
+                <th className="px-4 py-3">Industry</th>
+                <th className="px-4 py-3">Domain</th>
+                <th className="px-4 py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {companies.map((company) => (
+                <tr key={company.id} className="border-b border-border last:border-b-0 hover:bg-muted/40">
+                  <td className="px-4 py-3 font-medium">{company.name}</td>
+                  <td className="px-4 py-3 text-mutedfg">{company.industry ?? "-"}</td>
+                  <td className="px-4 py-3 text-mutedfg">{company.domain ?? "-"}</td>
+                  <td className="px-4 py-3">
+                    <Link href={`/companies/${company.id}`} className="text-accent hover:underline">Open</Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </main>
   );
 }

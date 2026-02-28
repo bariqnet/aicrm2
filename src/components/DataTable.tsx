@@ -1,18 +1,27 @@
 import { cn } from "@/lib/utils";
 
-export function DataTable({
+type DataTableColumn<TRow> = {
+  key: string;
+  label: string;
+  render: (row: TRow) => React.ReactNode;
+  className?: string;
+};
+
+type DataTableProps<TRow extends { id: string | number }> = {
+  columns: DataTableColumn<TRow>[];
+  rows: TRow[];
+  onRowClick?: (row: TRow) => void;
+};
+
+export function DataTable<TRow extends { id: string | number }>({
   columns,
   rows,
   onRowClick
-}: {
-  columns: { key: string; label: string; render: (row: any) => React.ReactNode; className?: string }[];
-  rows: any[];
-  onRowClick?: (row: any) => void;
-}) {
+}: DataTableProps<TRow>) {
   return (
-    <div className="overflow-hidden rounded-xl border">
+    <div className="table-shell">
       <table className="w-full text-left text-sm">
-        <thead className="bg-muted/60 text-xs uppercase tracking-wide text-zinc-500">
+        <thead className="border-b border-border bg-surface2 text-xs uppercase tracking-[0.1em] text-mutedfg">
           <tr>
             {columns.map((col) => (
               <th key={col.key} className={cn("px-3 py-2 font-medium", col.className)}>
@@ -23,7 +32,11 @@ export function DataTable({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.id} className="cursor-pointer border-t hover:bg-muted/40" onClick={() => onRowClick?.(row)}>
+            <tr
+              key={row.id}
+              className="cursor-pointer border-t border-border transition hover:bg-muted/40"
+              onClick={() => onRowClick?.(row)}
+            >
               {columns.map((col) => (
                 <td key={col.key} className={cn("px-3 py-2", col.className)}>
                   {col.render(row)}

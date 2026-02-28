@@ -1,0 +1,2484 @@
+openapi: 3.0.3
+info:
+  title: AI CRM Backend API
+  version: 0.1.0
+  description: >
+    Skeleton OpenAPI contract for the CRM backend. This spec is intentionally
+    contract-first and can be refined endpoint-by-endpoint.
+servers:
+  - url: https://api.yourcrm.com/v1
+    description: Production
+  - url: https://{apiId}.execute-api.{region}.amazonaws.com/{stage}
+    description: AWS API Gateway
+    variables:
+      apiId:
+        default: your-api-id
+      region:
+        default: us-east-1
+      stage:
+        default: dev
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Workspaces
+  - name: Memberships
+  - name: Invites
+  - name: Stages
+  - name: Contacts
+  - name: Companies
+  - name: Deals
+  - name: Tasks
+  - name: Notes
+  - name: Activities
+  - name: Invoices
+  - name: Visits
+  - name: Reports
+  - name: Search
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      operationId: authRegister
+      summary: Register account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRegisterRequest"
+      responses:
+        "200":
+          description: Authenticated session payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthTokenResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      operationId: authLogin
+      summary: Login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthLoginRequest"
+      responses:
+        "200":
+          description: Authenticated session payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthTokenResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      operationId: authLogout
+      summary: Logout
+      responses:
+        "200":
+          description: Logout completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      operationId: authMe
+      summary: Current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      operationId: authRefresh
+      summary: Refresh access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRefreshRequest"
+      responses:
+        "200":
+          description: Refreshed session payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthTokenResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /workspaces:
+    get:
+      tags: [Workspaces]
+      operationId: listWorkspaces
+      summary: List workspaces for current user
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Workspace list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListWorkspacesResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    post:
+      tags: [Workspaces]
+      operationId: createWorkspace
+      summary: Create workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkspaceCreateRequest"
+      responses:
+        "201":
+          description: Workspace created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workspace"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /workspaces/switch:
+    post:
+      tags: [Workspaces]
+      operationId: switchWorkspace
+      summary: Switch current workspace context
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkspaceSwitchRequest"
+      responses:
+        "200":
+          description: New session context
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthTokenResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /memberships:
+    get:
+      tags: [Memberships]
+      operationId: listMemberships
+      summary: List workspace memberships
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Membership list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListMembershipsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /memberships/{id}:
+    patch:
+      tags: [Memberships]
+      operationId: updateMembership
+      summary: Update membership role
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MembershipUpdateRequest"
+      responses:
+        "200":
+          description: Membership updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Membership"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags: [Memberships]
+      operationId: deleteMembership
+      summary: Remove member from workspace
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Membership removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /users:
+    get:
+      tags: [Memberships]
+      operationId: listUsers
+      summary: List users in current workspace
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: User list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListUsersResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /invites:
+    get:
+      tags: [Invites]
+      operationId: listInvites
+      summary: List pending/accepted invites
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Invite list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListInvitesResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    post:
+      tags: [Invites]
+      operationId: createInvite
+      summary: Invite a workspace member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InviteCreateRequest"
+      responses:
+        "201":
+          description: Invite created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invite"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /invites/{id}:
+    delete:
+      tags: [Invites]
+      operationId: deleteInvite
+      summary: Revoke invite
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Invite revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /invites/accept:
+    post:
+      tags: [Invites]
+      operationId: acceptInvite
+      summary: Accept workspace invite
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InviteAcceptRequest"
+      responses:
+        "200":
+          description: Invite accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthTokenResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /stages:
+    get:
+      tags: [Stages]
+      operationId: listStages
+      summary: List deal stages
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Stage list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListStagesResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    post:
+      tags: [Stages]
+      operationId: createStage
+      summary: Create stage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StageCreateRequest"
+      responses:
+        "201":
+          description: Stage created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stage"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /stages/{id}:
+    patch:
+      tags: [Stages]
+      operationId: updateStage
+      summary: Update stage
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StageUpdateRequest"
+      responses:
+        "200":
+          description: Stage updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stage"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags: [Stages]
+      operationId: deleteStage
+      summary: Delete stage
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Stage deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /stages/reorder:
+    put:
+      tags: [Stages]
+      operationId: reorderStages
+      summary: Reorder stages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StageReorderRequest"
+      responses:
+        "200":
+          description: Reordered stage list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListStagesResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /contacts:
+    get:
+      tags: [Contacts]
+      operationId: listContacts
+      summary: List contacts
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/SearchOptionalParam"
+      responses:
+        "200":
+          description: Contact list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListContactsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    post:
+      tags: [Contacts]
+      operationId: createContact
+      summary: Create contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactCreateRequest"
+      responses:
+        "201":
+          description: Contact created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /contacts/{id}:
+    get:
+      tags: [Contacts]
+      operationId: getContactById
+      summary: Get contact by id
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Contact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    patch:
+      tags: [Contacts]
+      operationId: updateContact
+      summary: Update contact
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactUpdateRequest"
+      responses:
+        "200":
+          description: Contact updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags: [Contacts]
+      operationId: deleteContact
+      summary: Delete contact
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Contact deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /contacts/import:
+    post:
+      tags: [Contacts]
+      operationId: importContacts
+      summary: Bulk import contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactImportRequest"
+      responses:
+        "200":
+          description: Imported contacts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactImportResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /contacts/export:
+    get:
+      tags: [Contacts]
+      operationId: exportContacts
+      summary: Export contacts
+      parameters:
+        - $ref: "#/components/parameters/FormatParam"
+      responses:
+        "200":
+          description: CSV export
+          content:
+            text/csv:
+              schema:
+                type: string
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /contacts/bulk-delete:
+    post:
+      tags: [Contacts]
+      operationId: bulkDeleteContacts
+      summary: Bulk delete contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactBulkDeleteRequest"
+      responses:
+        "200":
+          description: Bulk delete result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkDeleteResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /companies:
+    get:
+      tags: [Companies]
+      operationId: listCompanies
+      summary: List companies
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/SearchOptionalParam"
+      responses:
+        "200":
+          description: Company list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListCompaniesResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    post:
+      tags: [Companies]
+      operationId: createCompany
+      summary: Create company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyCreateRequest"
+      responses:
+        "201":
+          description: Company created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /companies/{id}:
+    get:
+      tags: [Companies]
+      operationId: getCompanyById
+      summary: Get company by id
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Company
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    patch:
+      tags: [Companies]
+      operationId: updateCompany
+      summary: Update company
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyUpdateRequest"
+      responses:
+        "200":
+          description: Company updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags: [Companies]
+      operationId: deleteCompany
+      summary: Delete company
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Company deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /deals:
+    get:
+      tags: [Deals]
+      operationId: listDeals
+      summary: List deals
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/SearchOptionalParam"
+      responses:
+        "200":
+          description: Deal list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListDealsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    post:
+      tags: [Deals]
+      operationId: createDeal
+      summary: Create deal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DealCreateRequest"
+      responses:
+        "201":
+          description: Deal created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /deals/{id}:
+    get:
+      tags: [Deals]
+      operationId: getDealById
+      summary: Get deal by id
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Deal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    patch:
+      tags: [Deals]
+      operationId: updateDeal
+      summary: Update deal
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DealUpdateRequest"
+      responses:
+        "200":
+          description: Deal updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags: [Deals]
+      operationId: deleteDeal
+      summary: Delete deal
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Deal deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /tasks:
+    get:
+      tags: [Tasks]
+      operationId: listTasks
+      summary: List tasks
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Task list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListTasksResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    post:
+      tags: [Tasks]
+      operationId: createTask
+      summary: Create task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskCreateRequest"
+      responses:
+        "201":
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /tasks/{id}:
+    get:
+      tags: [Tasks]
+      operationId: getTaskById
+      summary: Get task by id
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    patch:
+      tags: [Tasks]
+      operationId: updateTask
+      summary: Update task
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskUpdateRequest"
+      responses:
+        "200":
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags: [Tasks]
+      operationId: deleteTask
+      summary: Delete task
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Task deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /notes:
+    get:
+      tags: [Notes]
+      operationId: listNotes
+      summary: List notes
+      parameters:
+        - $ref: "#/components/parameters/RelatedTypeParam"
+        - $ref: "#/components/parameters/RelatedIdParam"
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Note list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListNotesResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    post:
+      tags: [Notes]
+      operationId: createNote
+      summary: Create note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NoteCreateRequest"
+      responses:
+        "201":
+          description: Note created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Note"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /notes/{id}:
+    delete:
+      tags: [Notes]
+      operationId: deleteNote
+      summary: Delete note
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Note deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /activities:
+    get:
+      tags: [Activities]
+      operationId: listActivities
+      summary: List activity timeline
+      parameters:
+        - $ref: "#/components/parameters/EntityTypeParam"
+        - $ref: "#/components/parameters/EntityIdParam"
+        - $ref: "#/components/parameters/DateFromParam"
+        - $ref: "#/components/parameters/DateToParam"
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Activity list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListActivitiesResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /invoices:
+    get:
+      tags: [Invoices]
+      operationId: listInvoices
+      summary: List invoices
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Invoice list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListInvoicesResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    post:
+      tags: [Invoices]
+      operationId: createInvoice
+      summary: Create invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceCreateRequest"
+      responses:
+        "201":
+          description: Invoice created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /invoices/{id}:
+    get:
+      tags: [Invoices]
+      operationId: getInvoiceById
+      summary: Get invoice by id
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Invoice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    patch:
+      tags: [Invoices]
+      operationId: updateInvoice
+      summary: Update invoice
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceUpdateRequest"
+      responses:
+        "200":
+          description: Invoice updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags: [Invoices]
+      operationId: deleteInvoice
+      summary: Delete invoice
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Invoice deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /visits:
+    get:
+      tags: [Visits]
+      operationId: listVisits
+      summary: List visits
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Visit list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListVisitsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    post:
+      tags: [Visits]
+      operationId: createVisit
+      summary: Create visit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VisitCreateRequest"
+      responses:
+        "201":
+          description: Visit created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Visit"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /visits/{id}:
+    patch:
+      tags: [Visits]
+      operationId: updateVisit
+      summary: Update visit
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VisitUpdateRequest"
+      responses:
+        "200":
+          description: Visit updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Visit"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags: [Visits]
+      operationId: deleteVisit
+      summary: Delete visit
+      parameters:
+        - $ref: "#/components/parameters/IdPathParam"
+      responses:
+        "200":
+          description: Visit deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /reports/dashboard:
+    get:
+      tags: [Reports]
+      operationId: getDashboardReport
+      summary: Dashboard summary metrics
+      responses:
+        "200":
+          description: Dashboard report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportDashboard"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /reports/pipeline:
+    get:
+      tags: [Reports]
+      operationId: getPipelineReport
+      summary: Pipeline metrics by stage
+      responses:
+        "200":
+          description: Pipeline report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PipelineReport"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /reports/invoice-aging:
+    get:
+      tags: [Reports]
+      operationId: getInvoiceAgingReport
+      summary: Invoice aging report
+      responses:
+        "200":
+          description: Invoice aging report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceAgingReport"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /search:
+    get:
+      tags: [Search]
+      operationId: globalSearch
+      summary: Global search across CRM entities
+      parameters:
+        - $ref: "#/components/parameters/SearchParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdPathParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    CursorParam:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        type: string
+    LimitParam:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+    SearchParam:
+      name: q
+      in: query
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    SearchOptionalParam:
+      name: q
+      in: query
+      required: false
+      schema:
+        type: string
+    RelatedTypeParam:
+      name: relatedType
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [contact, company, deal, task]
+    RelatedIdParam:
+      name: relatedId
+      in: query
+      required: false
+      schema:
+        type: string
+    EntityTypeParam:
+      name: entityType
+      in: query
+      required: false
+      schema:
+        type: string
+    EntityIdParam:
+      name: entityId
+      in: query
+      required: false
+      schema:
+        type: string
+    DateFromParam:
+      name: dateFrom
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+    DateToParam:
+      name: dateTo
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+    FormatParam:
+      name: format
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [csv]
+        default: csv
+
+  responses:
+    ErrorResponse:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    ValidationIssue:
+      type: object
+      required: [path, message]
+      properties:
+        path:
+          type: string
+        message:
+          type: string
+
+    Error:
+      type: object
+      required: [error, code]
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidationIssue"
+
+    OkResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+
+    User:
+      type: object
+      required: [id, name, email, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Workspace:
+      type: object
+      required: [id, name, slug, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    MembershipRole:
+      type: string
+      enum: [OWNER, ADMIN, MEMBER]
+
+    Membership:
+      type: object
+      required: [id, workspaceId, userId, role, createdAt]
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        userId:
+          type: string
+        role:
+          $ref: "#/components/schemas/MembershipRole"
+        createdAt:
+          type: string
+          format: date-time
+
+    Invite:
+      type: object
+      required: [id, workspaceId, email, role, token, expiresAt]
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: "#/components/schemas/MembershipRole"
+        token:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        acceptedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    Stage:
+      type: object
+      required: [id, workspaceId, name, order, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        name:
+          type: string
+        order:
+          type: integer
+          minimum: 1
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CustomerType:
+      type: string
+      enum: [B2B, B2C, PATIENT]
+
+    DealStatus:
+      type: string
+      enum: [OPEN, WON, LOST]
+
+    TaskStatus:
+      type: string
+      enum: [OPEN, DONE]
+
+    InvoiceStatus:
+      type: string
+      enum: [DRAFT, SENT, PAID, OVERDUE, VOID]
+
+    VisitStatus:
+      type: string
+      enum: [SCHEDULED, COMPLETED, CANCELLED]
+
+    Company:
+      type: object
+      required: [id, workspaceId, ownerId, name, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        ownerId:
+          type: string
+        name:
+          type: string
+        domain:
+          type: string
+          nullable: true
+        industry:
+          type: string
+          nullable: true
+        size:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Contact:
+      type: object
+      required: [id, workspaceId, ownerId, firstName, lastName, tags, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        ownerId:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        jobTitle:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        companyId:
+          type: string
+          nullable: true
+        customerType:
+          $ref: "#/components/schemas/CustomerType"
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Deal:
+      type: object
+      required:
+        - id
+        - workspaceId
+        - ownerId
+        - title
+        - amount
+        - currency
+        - stageId
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        ownerId:
+          type: string
+        title:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        stageId:
+          type: string
+        companyId:
+          type: string
+          nullable: true
+        primaryContactId:
+          type: string
+          nullable: true
+        expectedCloseDate:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: "#/components/schemas/DealStatus"
+        description:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Task:
+      type: object
+      required:
+        - id
+        - workspaceId
+        - createdById
+        - title
+        - status
+        - relatedType
+        - relatedId
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        createdById:
+          type: string
+        assigneeId:
+          type: string
+          nullable: true
+        title:
+          type: string
+        dueAt:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+        relatedType:
+          type: string
+          enum: [contact, company, deal, task]
+        relatedId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Note:
+      type: object
+      required: [id, workspaceId, authorId, body, relatedType, relatedId, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        authorId:
+          type: string
+        body:
+          type: string
+        relatedType:
+          type: string
+          enum: [contact, company, deal, task]
+        relatedId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Activity:
+      type: object
+      required: [id, workspaceId, actorId, type, entityType, entityId, createdAt]
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        actorId:
+          type: string
+        type:
+          type: string
+        entityType:
+          type: string
+        entityId:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+
+    Invoice:
+      type: object
+      required:
+        - id
+        - workspaceId
+        - invoiceNumber
+        - title
+        - amount
+        - currency
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        createdById:
+          type: string
+          nullable: true
+        invoiceNumber:
+          type: string
+        title:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        amount:
+          type: number
+        currency:
+          type: string
+        status:
+          $ref: "#/components/schemas/InvoiceStatus"
+        relatedType:
+          type: string
+          enum: [contact, company]
+          nullable: true
+        relatedId:
+          type: string
+          nullable: true
+        issuedAt:
+          type: string
+          format: date-time
+          nullable: true
+        dueAt:
+          type: string
+          format: date-time
+          nullable: true
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Visit:
+      type: object
+      required:
+        - id
+        - workspaceId
+        - contactId
+        - contactName
+        - date
+        - time
+        - durationMinutes
+        - reason
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        contactId:
+          type: string
+        contactName:
+          type: string
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+          example: "14:30"
+        durationMinutes:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+        status:
+          $ref: "#/components/schemas/VisitStatus"
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AuthRegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        inviteToken:
+          type: string
+          nullable: true
+
+    AuthLoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+
+    AuthRefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+
+    AuthTokenResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+        workspaceId:
+          type: string
+          nullable: true
+
+    WorkspaceCreateRequest:
+      type: object
+      required: [name, slug]
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+
+    WorkspaceSwitchRequest:
+      type: object
+      required: [workspaceId]
+      properties:
+        workspaceId:
+          type: string
+
+    MembershipUpdateRequest:
+      type: object
+      required: [role]
+      properties:
+        role:
+          $ref: "#/components/schemas/MembershipRole"
+
+    InviteCreateRequest:
+      type: object
+      required: [email, role]
+      properties:
+        email:
+          type: string
+          format: email
+        role:
+          $ref: "#/components/schemas/MembershipRole"
+
+    InviteAcceptRequest:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+
+    StageCreateRequest:
+      type: object
+      required: [name, order]
+      properties:
+        name:
+          type: string
+        order:
+          type: integer
+          minimum: 1
+
+    StageUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        order:
+          type: integer
+          minimum: 1
+
+    StageReorderItem:
+      type: object
+      required: [id, order]
+      properties:
+        id:
+          type: string
+        order:
+          type: integer
+          minimum: 1
+
+    StageReorderRequest:
+      type: object
+      required: [stages]
+      properties:
+        stages:
+          type: array
+          items:
+            $ref: "#/components/schemas/StageReorderItem"
+
+    ContactCreateRequest:
+      type: object
+      required: [firstName, lastName]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        jobTitle:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        companyId:
+          type: string
+          nullable: true
+        customerType:
+          $ref: "#/components/schemas/CustomerType"
+        tags:
+          type: array
+          items:
+            type: string
+
+    ContactUpdateRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        jobTitle:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        companyId:
+          type: string
+          nullable: true
+        customerType:
+          $ref: "#/components/schemas/CustomerType"
+        tags:
+          type: array
+          items:
+            type: string
+
+    ContactImportRow:
+      type: object
+      required: [firstName, lastName]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        companyId:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+
+    ContactImportRequest:
+      type: object
+      properties:
+        csv:
+          type: string
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContactImportRow"
+
+    ContactImportResponse:
+      type: object
+      required: [imported, rows]
+      properties:
+        imported:
+          type: integer
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Contact"
+
+    ContactBulkDeleteRequest:
+      type: object
+      required: [ids]
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+          minItems: 1
+
+    BulkDeleteResponse:
+      type: object
+      required: [deleted]
+      properties:
+        deleted:
+          type: integer
+
+    CompanyCreateRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        domain:
+          type: string
+          nullable: true
+        industry:
+          type: string
+          nullable: true
+        size:
+          type: string
+          nullable: true
+
+    CompanyUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        domain:
+          type: string
+          nullable: true
+        industry:
+          type: string
+          nullable: true
+        size:
+          type: string
+          nullable: true
+
+    DealCreateRequest:
+      type: object
+      required: [title, amount, currency, stageId]
+      properties:
+        title:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        stageId:
+          type: string
+        companyId:
+          type: string
+          nullable: true
+        primaryContactId:
+          type: string
+          nullable: true
+        expectedCloseDate:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: "#/components/schemas/DealStatus"
+        description:
+          type: string
+          nullable: true
+
+    DealUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        stageId:
+          type: string
+        companyId:
+          type: string
+          nullable: true
+        primaryContactId:
+          type: string
+          nullable: true
+        expectedCloseDate:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: "#/components/schemas/DealStatus"
+        description:
+          type: string
+          nullable: true
+
+    TaskCreateRequest:
+      type: object
+      required: [title, relatedType, relatedId]
+      properties:
+        title:
+          type: string
+        dueAt:
+          type: string
+          format: date-time
+          nullable: true
+        assigneeId:
+          type: string
+          nullable: true
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+        relatedType:
+          type: string
+          enum: [contact, company, deal, task]
+        relatedId:
+          type: string
+
+    TaskUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        dueAt:
+          type: string
+          format: date-time
+          nullable: true
+        assigneeId:
+          type: string
+          nullable: true
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+
+    NoteCreateRequest:
+      type: object
+      required: [body, relatedType, relatedId]
+      properties:
+        body:
+          type: string
+        relatedType:
+          type: string
+          enum: [contact, company, deal, task]
+        relatedId:
+          type: string
+
+    InvoiceCreateRequest:
+      type: object
+      required: [invoiceNumber, title, amount, currency, status]
+      properties:
+        invoiceNumber:
+          type: string
+        title:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        amount:
+          type: number
+        currency:
+          type: string
+        status:
+          $ref: "#/components/schemas/InvoiceStatus"
+        relatedType:
+          type: string
+          enum: [contact, company]
+          nullable: true
+        relatedId:
+          type: string
+          nullable: true
+        issuedAt:
+          type: string
+          format: date-time
+          nullable: true
+        dueAt:
+          type: string
+          format: date-time
+          nullable: true
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    InvoiceUpdateRequest:
+      type: object
+      properties:
+        invoiceNumber:
+          type: string
+        title:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        amount:
+          type: number
+        currency:
+          type: string
+        status:
+          $ref: "#/components/schemas/InvoiceStatus"
+        relatedType:
+          type: string
+          enum: [contact, company]
+          nullable: true
+        relatedId:
+          type: string
+          nullable: true
+        issuedAt:
+          type: string
+          format: date-time
+          nullable: true
+        dueAt:
+          type: string
+          format: date-time
+          nullable: true
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    VisitCreateRequest:
+      type: object
+      required: [contactId, contactName, date, time, durationMinutes, reason, status]
+      properties:
+        contactId:
+          type: string
+        contactName:
+          type: string
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+        durationMinutes:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+        status:
+          $ref: "#/components/schemas/VisitStatus"
+        notes:
+          type: string
+          nullable: true
+
+    VisitUpdateRequest:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+        durationMinutes:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+        status:
+          $ref: "#/components/schemas/VisitStatus"
+        notes:
+          type: string
+          nullable: true
+
+    ReportDashboard:
+      type: object
+      required: [openDeals, openTasks, pipelineTotal, recentActivity]
+      properties:
+        openDeals:
+          type: integer
+        openTasks:
+          type: integer
+        pipelineTotal:
+          type: number
+        recentActivity:
+          type: integer
+
+    PipelineStageMetric:
+      type: object
+      required: [stageId, stageName, openDeals, totalAmount]
+      properties:
+        stageId:
+          type: string
+        stageName:
+          type: string
+        openDeals:
+          type: integer
+        totalAmount:
+          type: number
+
+    PipelineReport:
+      type: object
+      required: [stages, totalOpenDeals, totalPipelineAmount]
+      properties:
+        stages:
+          type: array
+          items:
+            $ref: "#/components/schemas/PipelineStageMetric"
+        totalOpenDeals:
+          type: integer
+        totalPipelineAmount:
+          type: number
+
+    InvoiceAgingBucket:
+      type: object
+      required: [bucket, count, amount]
+      properties:
+        bucket:
+          type: string
+          enum: [current, days_1_30, days_31_60, days_61_90, days_90_plus]
+        count:
+          type: integer
+        amount:
+          type: number
+
+    InvoiceAgingReport:
+      type: object
+      required: [buckets, totalOutstanding]
+      properties:
+        buckets:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvoiceAgingBucket"
+        totalOutstanding:
+          type: number
+
+    SearchHit:
+      type: object
+      required: [type, id, title]
+      properties:
+        type:
+          type: string
+          enum: [contact, company, deal, task, invoice, visit]
+        id:
+          type: string
+        title:
+          type: string
+        subtitle:
+          type: string
+          nullable: true
+
+    SearchResponse:
+      type: object
+      required: [rows, total]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchHit"
+        total:
+          type: integer
+
+    ListUsersResponse:
+      type: object
+      required: [rows, total]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        total:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
+
+    ListWorkspacesResponse:
+      type: object
+      required: [rows, total]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Workspace"
+        total:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
+
+    ListMembershipsResponse:
+      type: object
+      required: [rows, total]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Membership"
+        total:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
+
+    ListInvitesResponse:
+      type: object
+      required: [rows, total]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Invite"
+        total:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
+
+    ListStagesResponse:
+      type: object
+      required: [rows, total]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Stage"
+        total:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
+
+    ListContactsResponse:
+      type: object
+      required: [rows, total]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Contact"
+        total:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
+
+    ListCompaniesResponse:
+      type: object
+      required: [rows, total]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Company"
+        total:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
+
+    ListDealsResponse:
+      type: object
+      required: [rows, total]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Deal"
+        total:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
+
+    ListTasksResponse:
+      type: object
+      required: [rows, total]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Task"
+        total:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
+
+    ListNotesResponse:
+      type: object
+      required: [rows, total]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Note"
+        total:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
+
+    ListActivitiesResponse:
+      type: object
+      required: [rows, total]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Activity"
+        total:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
+
+    ListInvoicesResponse:
+      type: object
+      required: [rows, total]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Invoice"
+        total:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
+
+    ListVisitsResponse:
+      type: object
+      required: [rows, total]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Visit"
+        total:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
