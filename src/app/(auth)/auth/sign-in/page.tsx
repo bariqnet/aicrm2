@@ -2,13 +2,30 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { Suspense, type FormEvent, useState } from "react";
 import { apiRequest } from "@/lib/crm-api";
 import { normalizeSessionPayload, persistSession } from "@/lib/auth-flow";
 import { showErrorAlert, showSuccessAlert } from "@/lib/sweet-alert";
 import { signInSchema } from "@/lib/validators";
 
 export default function SignInPage() {
+  return (
+    <Suspense fallback={<SignInFallback />}>
+      <SignInPageContent />
+    </Suspense>
+  );
+}
+
+function SignInFallback() {
+  return (
+    <main className="panel w-full p-6">
+      <h1 className="page-title">Sign in</h1>
+      <p className="mt-1 text-sm text-mutedfg">Loading sign-in form...</p>
+    </main>
+  );
+}
+
+function SignInPageContent() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

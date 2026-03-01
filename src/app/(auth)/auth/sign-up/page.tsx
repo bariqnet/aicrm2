@@ -2,13 +2,30 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { Suspense, type FormEvent, useState } from "react";
 import { apiRequest } from "@/lib/crm-api";
 import { normalizeSessionPayload, persistSession } from "@/lib/auth-flow";
 import { showErrorAlert, showSuccessAlert } from "@/lib/sweet-alert";
 import { signUpSchema } from "@/lib/validators";
 
 export default function SignUpPage() {
+  return (
+    <Suspense fallback={<SignUpFallback />}>
+      <SignUpPageContent />
+    </Suspense>
+  );
+}
+
+function SignUpFallback() {
+  return (
+    <main className="panel w-full p-6">
+      <h1 className="page-title">Create account</h1>
+      <p className="mt-1 text-sm text-mutedfg">Loading sign-up form...</p>
+    </main>
+  );
+}
+
+function SignUpPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get("inviteToken");
