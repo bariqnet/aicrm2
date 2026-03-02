@@ -1,5 +1,9 @@
-import { NextResponse } from "next/server";
+import { proxyExternalApi } from "@/lib/api-proxy";
 
-export async function GET() {
-  return NextResponse.json({ rows: [{ id: "ws_default", name: "Default Workspace", slug: "default-workspace" }], total: 1 });
+export async function GET(request: Request) {
+  return proxyExternalApi(request, "/workspaces");
+}
+
+export async function POST(request: Request) {
+  return proxyExternalApi(request, "/workspaces");
 }

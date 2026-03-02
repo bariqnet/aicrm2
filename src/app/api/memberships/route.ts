@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
+import { proxyExternalApi } from "@/lib/api-proxy";
 
-export async function GET() {
-  return NextResponse.json({ rows: [{ id: "membership_default", userId: "user_demo", workspaceId: "ws_default", role: "OWNER", createdAt: new Date().toISOString() }], total: 1 });
+export async function GET(request: Request) {
+  return proxyExternalApi(request, "/memberships");
 }

@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { listCompanies } from "@/lib/mock-db";
-import { getRequestContext } from "@/lib/request-context";
+import type { Company } from "@/lib/crm-types";
+import { serverApiRequest, type ServerListResponse } from "@/lib/server-crm";
 
 export default async function CompaniesPage() {
-  const ctx = await getRequestContext();
-  const companies = listCompanies(ctx);
+  const payload = await serverApiRequest<ServerListResponse<Company>>("/companies");
+  const companies = payload.rows ?? [];
 
   return (
     <main className="app-page">

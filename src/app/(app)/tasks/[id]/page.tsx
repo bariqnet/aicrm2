@@ -1,20 +1,24 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  getTaskRecord,
-  listActivitiesByEntity,
-  listNotesByRelation
-} from "@/lib/mock-db";
-import { getRequestContext } from "@/lib/request-context";
+import type { Activity, Note, Task } from "@/lib/crm-types";
+import { serverApiRequest, serverApiRequestOrNull, type ServerListResponse } from "@/lib/server-crm";
 
 export default async function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const ctx = await getRequestContext();
-  const task = getTaskRecord(ctx, id);
+  const task = await serverApiRequestOrNull<Task>(`/tasks/${id}`);
   if (!task) notFound();
 
-  const notes = listNotesByRelation(ctx, "task", id);
-  const activity = listActivitiesByEntity(ctx, "task", id);
+  const [notesPayload, activityPayload] = await Promise.all([
+    serverApiRequest<ServerListResponse<Note>>("/notes", {
+      query: { relatedType: "task", relatedId: id }
+    }),
+    serverApiRequest<ServerListResponse<Activity>>("/activities", {
+      query: { entityType: "task", entityId: id }
+    })
+  ]);
+
+  const notes = notesPayload.rows ?? [];
+  const activity = activityPayload.rows ?? [];
 
   return (
     <main className="app-page">

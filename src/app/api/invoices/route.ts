@@ -1,5 +1,9 @@
-import { NextResponse } from "next/server";
+import { proxyExternalApi } from "@/lib/api-proxy";
 
-export async function GET() {
-  return NextResponse.json({ rows: [], total: 0 });
+export async function GET(request: Request) {
+  return proxyExternalApi(request, "/invoices");
+}
+
+export async function POST(request: Request) {
+  return proxyExternalApi(request, "/invoices");
 }

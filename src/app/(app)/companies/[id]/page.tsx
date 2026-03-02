@@ -1,22 +1,24 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  getCompanyRecord,
-  listActivitiesByEntity,
-  listContacts,
-  listDeals
-} from "@/lib/mock-db";
-import { getRequestContext } from "@/lib/request-context";
+import type { Activity, Company, Contact, Deal } from "@/lib/crm-types";
+import { serverApiRequest, serverApiRequestOrNull, type ServerListResponse } from "@/lib/server-crm";
 
 export default async function CompanyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const ctx = await getRequestContext();
-  const company = getCompanyRecord(ctx, id);
+  const company = await serverApiRequestOrNull<Company>(`/companies/${id}`);
   if (!company) notFound();
 
-  const contacts = listContacts(ctx).filter((contact) => contact.companyId === id);
-  const deals = listDeals(ctx).filter((deal) => deal.companyId === id);
-  const activity = listActivitiesByEntity(ctx, "company", id);
+  const [contactsPayload, dealsPayload, activityPayload] = await Promise.all([
+    serverApiRequest<ServerListResponse<Contact>>("/contacts", { query: { companyId: id } }),
+    serverApiRequest<ServerListResponse<Deal>>("/deals", { query: { companyId: id } }),
+    serverApiRequest<ServerListResponse<Activity>>("/activities", {
+      query: { entityType: "company", entityId: id }
+    })
+  ]);
+
+  const contacts = (contactsPayload.rows ?? []).filter((contact) => contact.companyId === id);
+  const deals = (dealsPayload.rows ?? []).filter((deal) => deal.companyId === id);
+  const activity = activityPayload.rows ?? [];
 
   return (
     <main className="app-page">

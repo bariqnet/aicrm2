@@ -1,11 +1,14 @@
 import Link from "next/link";
-import { listDeals, listStages } from "@/lib/mock-db";
-import { getRequestContext } from "@/lib/request-context";
+import type { Deal, Stage } from "@/lib/crm-types";
+import { serverApiRequest, type ServerListResponse } from "@/lib/server-crm";
 
 export default async function DealsPage() {
-  const ctx = await getRequestContext();
-  const deals = listDeals(ctx);
-  const stages = listStages(ctx);
+  const [dealsPayload, stagesPayload] = await Promise.all([
+    serverApiRequest<ServerListResponse<Deal>>("/deals"),
+    serverApiRequest<ServerListResponse<Stage>>("/stages")
+  ]);
+  const deals = dealsPayload.rows ?? [];
+  const stages = stagesPayload.rows ?? [];
 
   return (
     <main className="app-page">

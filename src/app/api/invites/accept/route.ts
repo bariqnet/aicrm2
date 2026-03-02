@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
+import { proxyExternalApi } from "@/lib/api-proxy";
 
-export async function POST() {
-  return NextResponse.json({ error: "Invite acceptance is handled client-side" }, { status: 501 });
+export async function POST(request: Request) {
+  return proxyExternalApi(request, "/invites/accept");
 }

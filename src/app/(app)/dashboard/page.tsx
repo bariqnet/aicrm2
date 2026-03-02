@@ -1,12 +1,17 @@
 import Link from "next/link";
-import { listActivities, listDeals, listTasks } from "@/lib/mock-db";
-import { getRequestContext } from "@/lib/request-context";
+import type { Activity, Deal, Task } from "@/lib/crm-types";
+import { serverApiRequest, type ServerListResponse } from "@/lib/server-crm";
 
 export default async function DashboardPage() {
-  const ctx = await getRequestContext();
-  const deals = listDeals(ctx);
-  const tasks = listTasks(ctx);
-  const activities = listActivities(ctx);
+  const [dealsPayload, tasksPayload, activitiesPayload] = await Promise.all([
+    serverApiRequest<ServerListResponse<Deal>>("/deals"),
+    serverApiRequest<ServerListResponse<Task>>("/tasks"),
+    serverApiRequest<ServerListResponse<Activity>>("/activities")
+  ]);
+
+  const deals = dealsPayload.rows ?? [];
+  const tasks = tasksPayload.rows ?? [];
+  const activities = activitiesPayload.rows ?? [];
 
   const openDeals = deals.filter((deal) => deal.status === "OPEN");
   const openTasks = tasks.filter((task) => task.status === "OPEN");

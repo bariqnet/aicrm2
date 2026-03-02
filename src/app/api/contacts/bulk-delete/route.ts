@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
+import { proxyExternalApi } from "@/lib/api-proxy";
 
-export async function POST() {
-  return NextResponse.json({ error: "Bulk delete is not supported" }, { status: 501 });
+export async function POST(request: Request) {
+  return proxyExternalApi(request, "/contacts/bulk-delete");
 }

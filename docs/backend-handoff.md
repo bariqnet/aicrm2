@@ -1,72 +1,26 @@
-# AI CRM Backend Handoff Document
+# CRM Frontend API Reference (With Request/Response Examples)
 
-Date: 2026-02-15  
-Owner: Frontend Team  
-Audience: Backend Team
+Date: 2026-03-01
+Owner: Backend Team
+Audience: Frontend Team
 
-## 1. Objective
+## 1) Base URL and Headers
 
-This document defines the backend contract required to move the current AI CRM frontend from scaffold mode to production-ready behavior.
+Base URL example:
 
-Primary goals:
+`https://<api-id>.execute-api.<region>.amazonaws.com/dev`
 
-1. Replace mock/in-memory behavior with real persistent APIs.
-2. Enforce secure auth, workspace isolation, and role-based access.
-3. Support full CRM operations for contacts, companies, deals, tasks, notes, activities, invoices, visits, onboarding, reporting, and global search.
+Required header for authenticated endpoints:
 
-## 2. Deliverables Requested From Backend Team
+`Authorization: Bearer <access_token>`
 
-1. Implement the API contract in `openapi/crm.openapi.yaml`.
-2. Provide production database models and migrations for all entities in Section 5.
-3. Enforce authentication and authorization (RBAC + workspace scoping).
-4. Provide stable pagination/filtering semantics for list endpoints.
-5. Provide error handling format compatible with frontend parsing rules.
-6. Provide staging environment URL and test credentials/workspace.
+Optional workspace override:
 
-## 3. Contract Artifacts
+`X-Workspace-Id: <workspaceId>`
 
-1. OpenAPI contract (source of truth): `openapi/crm.openapi.yaml`
-2. This handoff guide (implementation notes): `docs/backend-handoff.md`
+## 2) Global Response Contracts
 
-## 4. Global API Standards
-
-## 4.1 Base URL
-
-Use a single base URL (example):
-
-`https://api.company.com/v1`
-
-## 4.2 Authentication
-
-1. Use `Authorization: Bearer <access_token>`.
-2. Auth endpoints:
-   1. `POST /auth/register`
-   2. `POST /auth/login`
-   3. `POST /auth/logout`
-   4. `GET /auth/me`
-   5. `POST /auth/refresh` (recommended)
-
-## 4.3 Workspace Context
-
-1. Workspace must be derived from token and/or explicit switch endpoint.
-2. `POST /workspaces/switch` must return updated auth/session context.
-3. Optional: accept `X-Workspace-Id` if user has membership.
-
-## 4.4 Content Type
-
-1. Request: `application/json` unless export endpoint.
-2. Response: `application/json` unless CSV export.
-
-## 4.5 Date and Time Format
-
-1. Use ISO-8601 UTC for date-time fields (`createdAt`, `updatedAt`, etc.).
-2. For visit scheduling:
-   1. `date`: `YYYY-MM-DD`
-   2. `time`: `HH:mm`
-
-## 4.6 List Response Envelope
-
-List endpoints must return:
+List envelope:
 
 ```json
 {
@@ -76,11 +30,7 @@ List endpoints must return:
 }
 ```
 
-`nextCursor` can be omitted when not using cursor pagination, but `rows` and `total` are required.
-
-## 4.7 Error Response Envelope
-
-Use:
+Error envelope:
 
 ```json
 {
@@ -92,444 +42,1102 @@ Use:
 }
 ```
 
-Status codes expected:
+No-content responses:
 
-1. `400` validation/invalid request
-2. `401` unauthenticated
-3. `403` forbidden
-4. `404` not found
-5. `409` conflict
-6. `422` business rule violation
-7. `429` rate limited
-8. `500` internal error
+- HTTP `204`
+- Empty body
 
-## 5. Canonical Data Models
+## 3) Enums
 
-```ts
-type MembershipRole = "OWNER" | "ADMIN" | "MEMBER";
-type CustomerType = "B2B" | "B2C" | "PATIENT";
-type DealStatus = "OPEN" | "WON" | "LOST";
-type TaskStatus = "OPEN" | "DONE";
-type InvoiceStatus = "DRAFT" | "SENT" | "PAID" | "OVERDUE" | "VOID";
-type VisitStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED";
+- `MembershipRole`: `OWNER | ADMIN | MEMBER`
+- `CustomerType`: `B2B | B2C | PATIENT`
+- `DealStatus`: `OPEN | WON | LOST`
+- `TaskStatus`: `OPEN | DONE`
+- `InvoiceStatus`: `DRAFT | SENT | PARTIALLY_PAID | PAID | OVERDUE | VOID`
+- `VisitStatus`: `SCHEDULED | COMPLETED | CANCELLED`
+- `ReminderStatus`: `PENDING | SENT | CANCELLED | FAILED`
+- `ReminderPriority`: `LOW | MEDIUM | HIGH`
+- `NotificationStatus`: `UNREAD | READ | ARCHIVED`
+- `DeliveryChannel`: `IN_APP | EMAIL | SMS`
+- `ReminderRelatedType`: `contact | company | deal | task | invoice | visit`
 
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  createdAt: string;
-  updatedAt: string;
-};
+## 4) Auth Endpoints
 
-type Workspace = {
-  id: string;
-  name: string;
-  slug: string;
-  createdAt: string;
-  updatedAt: string;
-};
+### 4.1 POST /auth/register
 
-type Membership = {
-  id: string;
-  workspaceId: string;
-  userId: string;
-  role: MembershipRole;
-  createdAt: string;
-};
-
-type Invite = {
-  id: string;
-  workspaceId: string;
-  email: string;
-  role: MembershipRole;
-  token: string;
-  expiresAt: string;
-  acceptedAt?: string | null;
-};
-
-type Stage = {
-  id: string;
-  workspaceId: string;
-  name: string;
-  order: number;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type Company = {
-  id: string;
-  workspaceId: string;
-  ownerId: string;
-  name: string;
-  domain?: string | null;
-  industry?: string | null;
-  size?: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type Contact = {
-  id: string;
-  workspaceId: string;
-  ownerId: string;
-  firstName: string;
-  lastName: string;
-  jobTitle?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  companyId?: string | null;
-  customerType?: CustomerType | null;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-};
-
-type Deal = {
-  id: string;
-  workspaceId: string;
-  ownerId: string;
-  title: string;
-  amount: number;
-  currency: string;
-  stageId: string;
-  companyId?: string | null;
-  primaryContactId?: string | null;
-  expectedCloseDate?: string | null;
-  status: DealStatus;
-  description?: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type Task = {
-  id: string;
-  workspaceId: string;
-  createdById: string;
-  assigneeId?: string | null;
-  title: string;
-  dueAt?: string | null;
-  status: TaskStatus;
-  relatedType: "contact" | "company" | "deal" | "task";
-  relatedId: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type Note = {
-  id: string;
-  workspaceId: string;
-  authorId: string;
-  body: string;
-  relatedType: "contact" | "company" | "deal" | "task";
-  relatedId: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type Activity = {
-  id: string;
-  workspaceId: string;
-  actorId: string;
-  type: string;
-  entityType: string;
-  entityId: string;
-  metadata?: Record<string, unknown>;
-  createdAt: string;
-};
-
-type Invoice = {
-  id: string;
-  workspaceId: string;
-  createdById: string | null;
-  invoiceNumber: string;
-  title: string;
-  notes?: string | null;
-  amount: number;
-  currency: string;
-  status: InvoiceStatus;
-  relatedType?: "contact" | "company" | null;
-  relatedId?: string | null;
-  issuedAt?: string | null;
-  dueAt?: string | null;
-  paidAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type Visit = {
-  id: string;
-  workspaceId: string;
-  contactId: string;
-  contactName: string;
-  date: string;
-  time: string;
-  durationMinutes: number;
-  reason: string;
-  status: VisitStatus;
-  notes?: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
-```
-
-## 6. Endpoint Matrix (Full Scope)
-
-## 6.1 Auth
-
-1. `POST /auth/register`
-2. `POST /auth/login`
-3. `POST /auth/logout`
-4. `GET /auth/me`
-5. `POST /auth/refresh`
-
-Auth response used by frontend session must include:
+Request:
 
 ```json
 {
-  "token": "string",
-  "user": { "id": "string", "name": "string", "email": "string" },
-  "workspaceId": "string"
+  "name": "Jane Owner",
+  "email": "jane.owner@crm.local",
+  "password": "OwnerPass123!",
+  "workspaceName": "Jane Workspace"
 }
 ```
 
-## 6.2 Workspaces and Access
-
-1. `GET /workspaces`
-2. `POST /workspaces`
-3. `POST /workspaces/switch`
-4. `GET /memberships`
-5. `PATCH /memberships/{id}`
-6. `DELETE /memberships/{id}`
-7. `GET /users`
-8. `GET /invites`
-9. `POST /invites`
-10. `POST /invites/accept`
-11. `DELETE /invites/{id}`
-
-## 6.3 Stages
-
-1. `GET /stages`
-2. `POST /stages`
-3. `PATCH /stages/{id}`
-4. `DELETE /stages/{id}`
-5. `PUT /stages/reorder`
-
-## 6.4 Contacts
-
-1. `GET /contacts`
-2. `POST /contacts`
-3. `GET /contacts/{id}`
-4. `PATCH /contacts/{id}`
-5. `DELETE /contacts/{id}`
-6. `POST /contacts/import`
-7. `GET /contacts/export?format=csv`
-8. `POST /contacts/bulk-delete`
-
-## 6.5 Companies
-
-1. `GET /companies`
-2. `POST /companies`
-3. `GET /companies/{id}`
-4. `PATCH /companies/{id}`
-5. `DELETE /companies/{id}`
-
-## 6.6 Deals
-
-1. `GET /deals`
-2. `POST /deals`
-3. `GET /deals/{id}`
-4. `PATCH /deals/{id}`
-5. `DELETE /deals/{id}`
-
-## 6.7 Tasks
-
-1. `GET /tasks`
-2. `POST /tasks`
-3. `GET /tasks/{id}`
-4. `PATCH /tasks/{id}`
-5. `DELETE /tasks/{id}`
-
-## 6.8 Notes
-
-1. `GET /notes?relatedType=&relatedId=`
-2. `POST /notes`
-3. `DELETE /notes/{id}`
-
-## 6.9 Activities
-
-1. `GET /activities?entityType=&entityId=&dateFrom=&dateTo=`
-
-## 6.10 Invoices
-
-1. `GET /invoices`
-2. `POST /invoices`
-3. `GET /invoices/{id}`
-4. `PATCH /invoices/{id}`
-5. `DELETE /invoices/{id}`
-
-## 6.11 Visits
-
-1. `GET /visits`
-2. `POST /visits`
-3. `PATCH /visits/{id}`
-4. `DELETE /visits/{id}`
-
-## 6.12 Reports and Search
-
-1. `GET /reports/dashboard`
-2. `GET /reports/pipeline`
-3. `GET /reports/invoice-aging`
-4. `GET /search?q=...`
-
-## 7. Field/Enum Compatibility Requirements
-
-Strict enum values expected by frontend:
-
-1. Deal status: `OPEN`, `WON`, `LOST`
-2. Task status: `OPEN`, `DONE`
-3. Invoice status: `DRAFT`, `SENT`, `PAID`, `OVERDUE`, `VOID`
-4. Membership role: `OWNER`, `ADMIN`, `MEMBER`
-5. Visit status: `SCHEDULED`, `COMPLETED`, `CANCELLED`
-6. Related type: `contact`, `company`, `deal`, `task`
-7. Customer type: `B2B`, `B2C`, `PATIENT`
-
-## 8. Business Rules and Access Control
-
-1. Every resource must be workspace-scoped.
-2. User must only read/write records from workspaces they belong to.
-3. Owner/Admin-only operations:
-   1. Manage memberships/invites
-   2. Create/update/delete/reorder stages
-   3. Workspace-level settings actions
-4. Stage deletion should be blocked if active deals reference stage unless migration target stage is provided.
-5. Deleting company/contact/deal/task should enforce referential strategy (block, nullify, or cascade) consistently.
-
-## 9. Data Integrity Constraints
-
-1. Unique:
-   1. Workspace slug (global)
-   2. Invoice number within workspace
-2. Indexing:
-   1. `(workspaceId, createdAt)` on all primary entities
-   2. `(workspaceId, stageId)` for deals
-   3. `(workspaceId, relatedType, relatedId)` for tasks/notes/activities
-3. Soft-delete recommended for audit-sensitive entities (contacts, companies, deals, invoices).
-
-## 10. Pagination, Filtering, and Sorting
-
-1. Cursor-based pagination preferred for large datasets.
-2. Include stable sorting defaults:
-   1. Contacts/companies: `updatedAt desc`
-   2. Deals: `updatedAt desc`
-   3. Tasks: `dueAt asc`, then `createdAt desc`
-3. Filters requested for initial implementation:
-   1. Contacts: `q`, `companyId`, `customerType`, `tag`
-   2. Deals: `q`, `stageId`, `status`, `ownerId`
-   3. Tasks: `status`, `assigneeId`, `relatedType`, `relatedId`
-   4. Invoices: `status`, `relatedType`, `relatedId`, `date ranges`
-
-## 11. Reporting Payload Expectations
-
-## 11.1 `/reports/dashboard`
+Response `201`:
 
 ```json
 {
-  "openDeals": 12,
-  "openTasks": 27,
-  "pipelineTotal": 425000,
-  "recentActivity": 54
+  "token": "<jwt>",
+  "refreshToken": "<refresh>",
+  "user": {
+    "id": "65fb00112233445566778899",
+    "name": "Jane Owner",
+    "email": "jane.owner@crm.local"
+  },
+  "workspaceId": "65fb00112233445566770011"
 }
 ```
 
-## 11.2 `/reports/pipeline`
+### 4.2 POST /auth/login
+
+Request:
+
+```json
+{
+  "email": "jane.owner@crm.local",
+  "password": "OwnerPass123!"
+}
+```
+
+Response `200`: same shape as register.
+
+### 4.3 GET /auth/me
+
+Response `200`:
+
+```json
+{
+  "user": {
+    "id": "65fb00112233445566778899",
+    "name": "Jane Owner",
+    "email": "jane.owner@crm.local",
+    "createdAt": "2026-03-01T08:00:00.000Z",
+    "updatedAt": "2026-03-01T08:00:00.000Z"
+  },
+  "workspaceId": "65fb00112233445566770011",
+  "role": "OWNER"
+}
+```
+
+### 4.4 POST /auth/refresh
+
+Request:
+
+```json
+{
+  "refreshToken": "<refresh>"
+}
+```
+
+Response `200`: same shape as register.
+
+### 4.5 POST /auth/logout
+
+Request:
+
+```json
+{
+  "refreshToken": "<refresh>"
+}
+```
+
+Response `200`:
+
+```json
+{
+  "success": true
+}
+```
+
+## 5) Workspace and Access Endpoints
+
+### 5.1 GET /workspaces
+
+Response `200`:
+
+```json
+{
+  "rows": [
+    {
+      "id": "65fb00112233445566770011",
+      "name": "Jane Workspace",
+      "slug": "jane-workspace",
+      "createdAt": "2026-03-01T08:00:00.000Z",
+      "updatedAt": "2026-03-01T08:00:00.000Z",
+      "role": "OWNER"
+    }
+  ],
+  "total": 1,
+  "nextCursor": null
+}
+```
+
+### 5.2 POST /workspaces
+
+Request:
+
+```json
+{
+  "name": "Medical Sales",
+  "slug": "medical-sales"
+}
+```
+
+Response `201`:
+
+```json
+{
+  "id": "65fb00112233445566770012",
+  "name": "Medical Sales",
+  "slug": "medical-sales",
+  "createdAt": "2026-03-01T08:10:00.000Z",
+  "updatedAt": "2026-03-01T08:10:00.000Z"
+}
+```
+
+### 5.3 POST /workspaces/switch
+
+Request:
+
+```json
+{
+  "workspaceId": "65fb00112233445566770012"
+}
+```
+
+Response `200`:
+
+```json
+{
+  "token": "<jwt>",
+  "refreshToken": "<refresh>",
+  "user": {
+    "id": "65fb00112233445566778899",
+    "name": "Jane Owner",
+    "email": "jane.owner@crm.local"
+  },
+  "workspaceId": "65fb00112233445566770012"
+}
+```
+
+### 5.4 GET /memberships
+
+Response `200`:
+
+```json
+{
+  "rows": [
+    {
+      "id": "65fb00112233445566770101",
+      "workspaceId": "65fb00112233445566770011",
+      "userId": "65fb00112233445566778899",
+      "role": "OWNER",
+      "createdAt": "2026-03-01T08:00:00.000Z",
+      "updatedAt": "2026-03-01T08:00:00.000Z",
+      "user": {
+        "id": "65fb00112233445566778899",
+        "name": "Jane Owner",
+        "email": "jane.owner@crm.local",
+        "createdAt": "2026-03-01T08:00:00.000Z",
+        "updatedAt": "2026-03-01T08:00:00.000Z"
+      }
+    }
+  ],
+  "total": 1,
+  "nextCursor": null
+}
+```
+
+### 5.5 PATCH /memberships/{id}
+
+Request:
+
+```json
+{
+  "role": "ADMIN"
+}
+```
+
+Response `200`:
+
+```json
+{
+  "id": "65fb00112233445566770101",
+  "workspaceId": "65fb00112233445566770011",
+  "userId": "65fb00112233445566778899",
+  "role": "ADMIN",
+  "createdAt": "2026-03-01T08:00:00.000Z",
+  "updatedAt": "2026-03-01T08:20:00.000Z"
+}
+```
+
+### 5.6 DELETE /memberships/{id}
+
+Response `204` (empty body).
+
+### 5.7 GET /users
+
+Response `200`:
+
+```json
+{
+  "rows": [
+    {
+      "id": "65fb00112233445566778899",
+      "name": "Jane Owner",
+      "email": "jane.owner@crm.local",
+      "createdAt": "2026-03-01T08:00:00.000Z",
+      "updatedAt": "2026-03-01T08:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "nextCursor": null
+}
+```
+
+### 5.8 GET /invites
+
+Response `200`:
+
+```json
+{
+  "rows": [
+    {
+      "id": "65fb00112233445566770201",
+      "workspaceId": "65fb00112233445566770011",
+      "email": "new.user@crm.local",
+      "role": "MEMBER",
+      "token": "<invite-token>",
+      "expiresAt": "2026-03-08T10:00:00.000Z",
+      "acceptedAt": null,
+      "createdAt": "2026-03-01T10:00:00.000Z",
+      "updatedAt": "2026-03-01T10:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "nextCursor": null
+}
+```
+
+### 5.9 POST /invites
+
+Request:
+
+```json
+{
+  "email": "new.user@crm.local",
+  "role": "MEMBER"
+}
+```
+
+Response `201`: same object shape as invite in list.
+
+### 5.10 POST /invites/accept
+
+Request (logged-in user):
+
+```json
+{
+  "token": "<invite-token>"
+}
+```
+
+Request (new user signup through invite):
+
+```json
+{
+  "token": "<invite-token>",
+  "name": "New User",
+  "email": "new.user@crm.local",
+  "password": "UserPass123!"
+}
+```
+
+Response `200`: same shape as auth session.
+
+### 5.11 DELETE /invites/{id}
+
+Response `204`.
+
+## 6) Stage Endpoints
+
+### 6.1 GET /stages
+
+Response `200`:
+
+```json
+{
+  "rows": [
+    {
+      "id": "65fb00112233445566771001",
+      "workspaceId": "65fb00112233445566770011",
+      "name": "Lead",
+      "order": 0,
+      "createdAt": "2026-03-01T08:00:00.000Z",
+      "updatedAt": "2026-03-01T08:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "nextCursor": null
+}
+```
+
+### 6.2 POST /stages
+
+Request:
+
+```json
+{
+  "name": "Qualified",
+  "order": 1
+}
+```
+
+Response `201`: stage object.
+
+### 6.3 PATCH /stages/{id}
+
+Request:
+
+```json
+{
+  "name": "Proposal",
+  "order": 2
+}
+```
+
+Response `200`: stage object.
+
+### 6.4 PUT /stages/reorder
+
+Request:
 
 ```json
 {
   "stages": [
-    { "stageId": "stage_lead", "stageName": "Lead", "openDeals": 5, "totalAmount": 100000 }
-  ],
-  "totalOpenDeals": 12,
-  "totalPipelineAmount": 425000
+    { "id": "65fb00112233445566771001", "order": 0 },
+    { "id": "65fb00112233445566771002", "order": 1 }
+  ]
 }
 ```
 
-## 11.3 `/reports/invoice-aging`
+Response `200`:
 
 ```json
 {
-  "buckets": [
-    { "bucket": "current", "count": 4, "amount": 12000 },
-    { "bucket": "days_1_30", "count": 2, "amount": 4100 }
-  ],
-  "totalOutstanding": 16100
+  "rows": [
+    {
+      "id": "65fb00112233445566771001",
+      "workspaceId": "65fb00112233445566770011",
+      "name": "Lead",
+      "order": 0,
+      "createdAt": "2026-03-01T08:00:00.000Z",
+      "updatedAt": "2026-03-01T09:30:00.000Z"
+    }
+  ]
 }
 ```
 
-## 12. Performance and Reliability Requirements
+### 6.5 DELETE /stages/{id}?targetStageId=<id>
 
-1. P95 for list/read endpoints: <= 400ms under normal load.
-2. P95 for create/update/delete endpoints: <= 600ms.
-3. Availability target: 99.9% for production.
-4. Structured logs with request IDs.
-5. Rate limiting and abuse protection on auth and import endpoints.
+Response `204`.
 
-## 13. Security Requirements
+## 7) Contacts
 
-1. JWT validation and expiration enforcement.
-2. Refresh token rotation (if refresh flow is enabled).
-3. Password hashing with strong algorithm (Argon2 or bcrypt with current cost policy).
-4. Input validation server-side for all payloads.
-5. Audit trail for sensitive actions (role changes, stage changes, invoice status changes).
+### 7.1 GET /contacts
 
-## 14. Priority Plan
+Example query:
 
-## P0 (must-have to unblock current product)
+`/contacts?q=jane&companyId=65fb...&customerType=B2B&tag=priority&limit=20`
 
-1. Auth endpoints and secure workspace context.
-2. Workspaces/memberships/users/invites real implementation.
-3. Full CRUD for contacts, companies, deals, tasks.
-4. Notes and activities list/create support.
-5. Stages create/update/reorder/delete.
-6. Invoices and visits CRUD.
+Response `200`:
 
-## P1 (high value right after P0)
+```json
+{
+  "rows": [
+    {
+      "id": "65fb00112233445566772001",
+      "workspaceId": "65fb00112233445566770011",
+      "ownerId": "65fb00112233445566778899",
+      "firstName": "Jane",
+      "lastName": "Doe",
+      "jobTitle": "Procurement Manager",
+      "email": "jane.doe@acme.com",
+      "phone": "+1-555-1000",
+      "companyId": "65fb00112233445566773001",
+      "customerType": "B2B",
+      "tags": ["priority", "pilot"],
+      "createdAt": "2026-03-01T09:00:00.000Z",
+      "updatedAt": "2026-03-01T09:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "nextCursor": null
+}
+```
 
-1. Reports endpoints.
-2. Global search endpoint.
-3. CSV import/export hardening.
-4. Bulk delete.
+### 7.2 POST /contacts
 
-## P2 (optimization)
+Request:
 
-1. Webhooks/event streaming.
-2. Advanced analytics aggregations.
-3. Data retention and archive tools.
+```json
+{
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "jobTitle": "Procurement Manager",
+  "email": "jane.doe@acme.com",
+  "phone": "+1-555-1000",
+  "companyId": "65fb00112233445566773001",
+  "customerType": "B2B",
+  "tags": ["priority", "pilot"]
+}
+```
 
-## 15. Acceptance Criteria (Definition of Done)
+Response `201`: contact object.
 
-Backend delivery is accepted when:
+### 7.3 GET /contacts/{id}
 
-1. All endpoints in Section 6 are implemented and documented.
-2. OpenAPI spec is updated to match implementation and passes lint/validation.
-3. RBAC and workspace isolation verified in integration tests.
-4. Frontend can run end-to-end with no mock/in-memory fallbacks.
-5. Seed/staging data and credentials are provided for QA.
-6. Error and list response contracts match Section 4.
+Response `200`: contact object.
 
-## 16. Open Questions for Backend Team
+### 7.4 PATCH /contacts/{id}
 
-Please confirm:
+Request:
 
-1. Token strategy: JWT only, or JWT + refresh token?
-2. Soft-delete vs hard-delete policy per entity.
-3. Search backend: DB-native or dedicated engine.
-4. Invoice numbering strategy (manual vs auto-generated).
-5. Activity logging: server-generated only or mixed client/server events.
+```json
+{
+  "jobTitle": "Head of Procurement",
+  "tags": ["priority", "vip"]
+}
+```
 
-## 17. Immediate Next Step
+Response `200`: updated contact object.
 
-Backend team should start from:
+### 7.5 DELETE /contacts/{id}
 
-1. `openapi/crm.openapi.yaml` as implementation contract
-2. Section 14 P0 list as sprint scope
+Response `204`.
 
+## 8) Companies
+
+### 8.1 GET /companies
+
+Example query:
+
+`/companies?q=acme&limit=20`
+
+Response `200`: list envelope with company rows.
+
+### 8.2 POST /companies
+
+Request:
+
+```json
+{
+  "name": "Acme Health",
+  "domain": "acmehealth.example",
+  "industry": "Healthcare",
+  "size": "51-200"
+}
+```
+
+Response `201`: company object.
+
+### 8.3 GET /companies/{id}
+
+Response `200`: company object.
+
+### 8.4 PATCH /companies/{id}
+
+Request:
+
+```json
+{
+  "industry": "Medical Devices",
+  "size": "201-500"
+}
+```
+
+Response `200`: updated company object.
+
+### 8.5 DELETE /companies/{id}
+
+Response `204`.
+
+## 9) Deals
+
+### 9.1 GET /deals
+
+Example query:
+
+`/deals?q=contract&stageId=65fb...&status=OPEN&ownerId=65fb...&limit=20`
+
+Response `200`: list envelope with deal rows.
+
+### 9.2 POST /deals
+
+Request:
+
+```json
+{
+  "title": "Acme Annual Contract",
+  "amount": 125000,
+  "currency": "USD",
+  "stageId": "65fb00112233445566771001",
+  "companyId": "65fb00112233445566773001",
+  "primaryContactId": "65fb00112233445566772001",
+  "expectedCloseDate": "2026-04-15T00:00:00.000Z",
+  "status": "OPEN",
+  "description": "Enterprise license + onboarding"
+}
+```
+
+Response `201`: deal object.
+
+### 9.3 GET /deals/{id}
+
+Response `200`: deal object.
+
+### 9.4 PATCH /deals/{id}
+
+Request:
+
+```json
+{
+  "status": "WON",
+  "amount": 130000
+}
+```
+
+Response `200`: updated deal object.
+
+### 9.5 DELETE /deals/{id}
+
+Response `204`.
+
+## 10) Tasks
+
+### 10.1 GET /tasks
+
+Example query:
+
+`/tasks?status=OPEN&assigneeId=65fb...&relatedType=deal&relatedId=65fb...&limit=20`
+
+Response `200`: list envelope with task rows.
+
+### 10.2 POST /tasks
+
+Request:
+
+```json
+{
+  "title": "Schedule discovery call",
+  "dueAt": "2026-03-05T09:00:00.000Z",
+  "status": "OPEN",
+  "assigneeId": "65fb00112233445566778898",
+  "relatedType": "deal",
+  "relatedId": "65fb00112233445566774001"
+}
+```
+
+Response `201`: task object.
+
+### 10.3 GET /tasks/{id}
+
+Response `200`: task object.
+
+### 10.4 PATCH /tasks/{id}
+
+Request:
+
+```json
+{
+  "status": "DONE"
+}
+```
+
+Response `200`: updated task object.
+
+### 10.5 DELETE /tasks/{id}
+
+Response `204`.
+
+## 11) Notes
+
+### 11.1 GET /notes
+
+Example query:
+
+`/notes?relatedType=deal&relatedId=65fb...&limit=20`
+
+Response `200`: list envelope with note rows.
+
+### 11.2 POST /notes
+
+Request:
+
+```json
+{
+  "body": "Customer requested revised pricing.",
+  "relatedType": "deal",
+  "relatedId": "65fb00112233445566774001"
+}
+```
+
+Response `201`:
+
+```json
+{
+  "id": "65fb00112233445566775001",
+  "workspaceId": "65fb00112233445566770011",
+  "authorId": "65fb00112233445566778899",
+  "body": "Customer requested revised pricing.",
+  "relatedType": "deal",
+  "relatedId": "65fb00112233445566774001",
+  "createdAt": "2026-03-01T11:00:00.000Z",
+  "updatedAt": "2026-03-01T11:00:00.000Z"
+}
+```
+
+### 11.3 DELETE /notes/{id}
+
+Response `204`.
+
+## 12) Activities
+
+### 12.1 GET /activities
+
+Example query:
+
+`/activities?entityType=deal&entityId=65fb...&dateFrom=2026-03-01T00:00:00.000Z&dateTo=2026-03-31T23:59:59.999Z`
+
+Response `200`:
+
+```json
+{
+  "rows": [
+    {
+      "id": "65fb00112233445566776001",
+      "workspaceId": "65fb00112233445566770011",
+      "actorId": "65fb00112233445566778899",
+      "type": "deal.updated",
+      "entityType": "deal",
+      "entityId": "65fb00112233445566774001",
+      "metadata": {
+        "fields": ["status"],
+        "statusChanged": true
+      },
+      "createdAt": "2026-03-01T11:30:00.000Z"
+    }
+  ],
+  "total": 1,
+  "nextCursor": null
+}
+```
+
+## 13) Invoices (Expanded)
+
+### 13.1 GET /invoices
+
+Example query:
+
+`/invoices?status=SENT&relatedType=company&relatedId=65fb...&dueAtFrom=2026-03-01T00:00:00.000Z&dueAtTo=2026-03-31T23:59:59.999Z`
+
+Response `200`: list envelope with invoice rows.
+
+### 13.2 POST /invoices
+
+Request:
+
+```json
+{
+  "title": "Acme Setup + Subscription",
+  "notes": "Net 14",
+  "currency": "USD",
+  "status": "SENT",
+  "relatedType": "company",
+  "relatedId": "65fb00112233445566773001",
+  "issuedAt": "2026-03-01T00:00:00.000Z",
+  "dueAt": "2026-03-15T00:00:00.000Z",
+  "items": [
+    {
+      "description": "Setup Fee",
+      "quantity": 1,
+      "unitPrice": 5000,
+      "taxRate": 0
+    },
+    {
+      "description": "Subscription",
+      "quantity": 12,
+      "unitPrice": 1000,
+      "taxRate": 5
+    }
+  ],
+  "discountType": "PERCENT",
+  "discountValue": 10,
+  "payments": [
+    {
+      "amount": 2000,
+      "paidAt": "2026-03-02T10:00:00.000Z",
+      "method": "BANK_TRANSFER",
+      "reference": "TRX-1001"
+    }
+  ],
+  "customerName": "Acme Health",
+  "customerEmail": "finance@acmehealth.example",
+  "billingAddress": {
+    "line1": "10 Main St",
+    "city": "New York",
+    "state": "NY",
+    "postalCode": "10001",
+    "country": "US"
+  },
+  "terms": "Net 14",
+  "poNumber": "PO-2026-0005"
+}
+```
+
+Response `201`:
+
+```json
+{
+  "id": "65fb00112233445566777001",
+  "workspaceId": "65fb00112233445566770011",
+  "createdById": "65fb00112233445566778899",
+  "invoiceNumber": "INV-000123",
+  "title": "Acme Setup + Subscription",
+  "notes": "Net 14",
+  "amount": 15300,
+  "items": [
+    {
+      "description": "Setup Fee",
+      "quantity": 1,
+      "unitPrice": 5000,
+      "taxRate": 0,
+      "lineSubtotal": 5000,
+      "lineTax": 0,
+      "lineTotal": 5000
+    },
+    {
+      "description": "Subscription",
+      "quantity": 12,
+      "unitPrice": 1000,
+      "taxRate": 5,
+      "lineSubtotal": 12000,
+      "lineTax": 600,
+      "lineTotal": 12600
+    }
+  ],
+  "subtotal": 17000,
+  "discountType": "PERCENT",
+  "discountValue": 10,
+  "discountAmount": 1700,
+  "taxAmount": 600,
+  "totalAmount": 15900,
+  "amountPaid": 2000,
+  "balanceDue": 13900,
+  "payments": [
+    {
+      "amount": 2000,
+      "paidAt": "2026-03-02T10:00:00.000Z",
+      "method": "BANK_TRANSFER",
+      "reference": "TRX-1001",
+      "note": null,
+      "recordedById": "65fb00112233445566778899"
+    }
+  ],
+  "customerName": "Acme Health",
+  "customerEmail": "finance@acmehealth.example",
+  "billingAddress": {
+    "line1": "10 Main St",
+    "line2": null,
+    "city": "New York",
+    "state": "NY",
+    "postalCode": "10001",
+    "country": "US"
+  },
+  "terms": "Net 14",
+  "poNumber": "PO-2026-0005",
+  "currency": "USD",
+  "status": "PARTIALLY_PAID",
+  "relatedType": "company",
+  "relatedId": "65fb00112233445566773001",
+  "issuedAt": "2026-03-01T00:00:00.000Z",
+  "dueAt": "2026-03-15T00:00:00.000Z",
+  "paidAt": null,
+  "createdAt": "2026-03-01T12:00:00.000Z",
+  "updatedAt": "2026-03-01T12:00:00.000Z"
+}
+```
+
+### 13.3 GET /invoices/{id}
+
+Response `200`: invoice object (same shape as create response).
+
+### 13.4 PATCH /invoices/{id}
+
+Request:
+
+```json
+{
+  "status": "PAID",
+  "payments": [
+    {
+      "amount": 15900,
+      "paidAt": "2026-03-10T10:00:00.000Z",
+      "method": "WIRE"
+    }
+  ]
+}
+```
+
+Response `200`: updated invoice object.
+
+### 13.5 DELETE /invoices/{id}
+
+Response `204`.
+
+## 14) Visits
+
+### 14.1 GET /visits
+
+Example query:
+
+`/visits?status=SCHEDULED&contactId=65fb...&limit=20`
+
+Response `200`: list envelope with visit rows.
+
+### 14.2 POST /visits
+
+Request:
+
+```json
+{
+  "contactId": "65fb00112233445566772001",
+  "contactName": "Jane Doe",
+  "date": "2026-03-05",
+  "time": "10:00",
+  "durationMinutes": 60,
+  "reason": "Product walkthrough",
+  "status": "SCHEDULED",
+  "notes": "Bring pricing options"
+}
+```
+
+Response `201`: visit object.
+
+### 14.3 PATCH /visits/{id}
+
+Request:
+
+```json
+{
+  "status": "COMPLETED",
+  "notes": "Great meeting"
+}
+```
+
+Response `200`: updated visit object.
+
+### 14.4 DELETE /visits/{id}
+
+Response `204`.
+
+## 15) Reminders (New)
+
+### 15.1 GET /reminders
+
+Example query:
+
+`/reminders?status=PENDING&priority=HIGH&mine=true&remindAtFrom=2026-03-01T00:00:00.000Z`
+
+Response `200`: list envelope with reminder rows.
+
+### 15.2 POST /reminders
+
+Request:
+
+```json
+{
+  "title": "Follow up with Acme",
+  "message": "Call before EOD",
+  "remindAt": "2026-03-06T15:00:00.000Z",
+  "priority": "HIGH",
+  "channel": "IN_APP",
+  "assigneeId": "65fb00112233445566778898",
+  "relatedType": "deal",
+  "relatedId": "65fb00112233445566774001",
+  "metadata": {
+    "source": "manual"
+  }
+}
+```
+
+Response `201`:
+
+```json
+{
+  "id": "65fb00112233445566778001",
+  "workspaceId": "65fb00112233445566770011",
+  "createdById": "65fb00112233445566778899",
+  "assigneeId": "65fb00112233445566778898",
+  "title": "Follow up with Acme",
+  "message": "Call before EOD",
+  "remindAt": "2026-03-06T15:00:00.000Z",
+  "status": "PENDING",
+  "priority": "HIGH",
+  "channel": "IN_APP",
+  "relatedType": "deal",
+  "relatedId": "65fb00112233445566774001",
+  "sourceType": "MANUAL",
+  "dedupeKey": null,
+  "sentAt": null,
+  "cancelledAt": null,
+  "metadata": {
+    "source": "manual"
+  },
+  "createdAt": "2026-03-01T13:00:00.000Z",
+  "updatedAt": "2026-03-01T13:00:00.000Z"
+}
+```
+
+### 15.3 GET /reminders/{id}
+
+Response `200`: reminder object.
+
+### 15.4 PATCH /reminders/{id}
+
+Request:
+
+```json
+{
+  "status": "CANCELLED"
+}
+```
+
+Response `200`: updated reminder object.
+
+### 15.5 DELETE /reminders/{id}
+
+Response `204`.
+
+## 16) Notifications (New)
+
+### 16.1 GET /notifications
+
+Example query:
+
+`/notifications?status=UNREAD&channel=IN_APP&limit=30`
+
+Response `200`:
+
+```json
+{
+  "rows": [
+    {
+      "id": "65fb00112233445566779001",
+      "workspaceId": "65fb00112233445566770011",
+      "userId": "65fb00112233445566778898",
+      "reminderId": "65fb00112233445566778001",
+      "type": "reminder.triggered",
+      "title": "Follow up with Acme",
+      "message": "Call before EOD",
+      "status": "UNREAD",
+      "priority": "HIGH",
+      "channel": "IN_APP",
+      "relatedType": "deal",
+      "relatedId": "65fb00112233445566774001",
+      "deliveredAt": "2026-03-06T15:00:00.000Z",
+      "readAt": null,
+      "metadata": {
+        "sourceType": "MANUAL"
+      },
+      "createdAt": "2026-03-06T15:00:01.000Z",
+      "updatedAt": "2026-03-06T15:00:01.000Z"
+    }
+  ],
+  "total": 1,
+  "nextCursor": null
+}
+```
+
+### 16.2 POST /notifications/mark-all-read
+
+Request:
+
+```json
+{
+  "userId": "65fb00112233445566778898"
+}
+```
+
+Response `200`:
+
+```json
+{
+  "success": true
+}
+```
+
+### 16.3 PATCH /notifications/{id}
+
+Request:
+
+```json
+{
+  "status": "READ"
+}
+```
+
+Response `200`: notification object with `readAt` set.
+
+### 16.4 DELETE /notifications/{id}
+
+Response `204`.
+
+## 17) Common Error Examples
+
+Validation error `400`:
+
+```json
+{
+  "error": "Validation failed",
+  "code": "VALIDATION_ERROR",
+  "issues": [
+    {
+      "path": "dueAt",
+      "message": "dueAt must be a valid date"
+    }
+  ]
+}
+```
+
+Forbidden `403`:
+
+```json
+{
+  "error": "Admin role required",
+  "code": "FORBIDDEN",
+  "issues": []
+}
+```
+
+Business rule `422`:
+
+```json
+{
+  "error": "Cannot delete company with active references",
+  "code": "BUSINESS_RULE_VIOLATION",
+  "issues": []
+}
+```
+
+## 18) Frontend Notes
+
+- Use `PATCH` for partial updates.
+- Parse list data from `rows`.
+- For finance UI, use `Invoice.totalAmount`, `Invoice.amountPaid`, and `Invoice.balanceDue`.
+- Invoices can become `PARTIALLY_PAID` automatically when payments exist but balance is non-zero.
+- Reminders and notifications are workspace-scoped and role-filtered.
+- `activities` is the user-facing activity feed, while request-level auditing is backend-internal.

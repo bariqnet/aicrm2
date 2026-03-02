@@ -1,11 +1,10 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useMemo, useState } from "react";
-import { listVisits } from "@/lib/visits-client";
+import { useEffect, useMemo, useState } from "react";
 import type { Visit } from "@/lib/crm-types";
+import { showErrorAlert } from "@/lib/sweet-alert";
 
-const WORKSPACE_ID = "ws_default";
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function toDateKeyLocal(date: Date): string {
@@ -80,8 +79,30 @@ export default function CalendarPage() {
   const today = useMemo(() => new Date(), []);
   const [cursor, setCursor] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selectedDateKey, setSelectedDateKey] = useState(toDateKeyLocal(today));
+  const [visits, setVisits] = useState<Visit[]>([]);
 
-  const visits = useMemo(() => listVisits(WORKSPACE_ID), []);
+  useEffect(() => {
+    async function loadVisits() {
+      try {
+        const response = await fetch("/api/visits", { cache: "no-store" });
+        const payload = (await response.json().catch(() => null)) as
+          | { rows?: Visit[]; error?: string }
+          | null;
+
+        if (!response.ok) {
+          throw new Error(payload?.error ?? "Unable to load visits");
+        }
+        setVisits(payload?.rows ?? []);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unable to load visits";
+        await showErrorAlert("Calendar load failed", message);
+      }
+    }
+
+    loadVisits().catch(() => {
+      // handled above
+    });
+  }, []);
 
   const visitsByDate = useMemo(() => {
     const grouped = new Map<string, Visit[]>();

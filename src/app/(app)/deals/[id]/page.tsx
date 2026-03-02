@@ -1,24 +1,30 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  getDealRecord,
-  listActivitiesByEntity,
-  listNotesByRelation,
-  listStages,
-  listTasksByRelation
-} from "@/lib/mock-db";
-import { getRequestContext } from "@/lib/request-context";
+import type { Activity, Deal, Note, Stage, Task } from "@/lib/crm-types";
+import { serverApiRequest, serverApiRequestOrNull, type ServerListResponse } from "@/lib/server-crm";
 
 export default async function DealDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const ctx = await getRequestContext();
-  const deal = getDealRecord(ctx, id);
+  const deal = await serverApiRequestOrNull<Deal>(`/deals/${id}`);
   if (!deal) notFound();
 
-  const notes = listNotesByRelation(ctx, "deal", id);
-  const tasks = listTasksByRelation(ctx, "deal", id);
-  const activity = listActivitiesByEntity(ctx, "deal", id);
-  const stageName = listStages(ctx).find((stage) => stage.id === deal.stageId)?.name ?? deal.stageId;
+  const [notesPayload, tasksPayload, activityPayload, stagesPayload] = await Promise.all([
+    serverApiRequest<ServerListResponse<Note>>("/notes", {
+      query: { relatedType: "deal", relatedId: id }
+    }),
+    serverApiRequest<ServerListResponse<Task>>("/tasks", {
+      query: { relatedType: "deal", relatedId: id }
+    }),
+    serverApiRequest<ServerListResponse<Activity>>("/activities", {
+      query: { entityType: "deal", entityId: id }
+    }),
+    serverApiRequest<ServerListResponse<Stage>>("/stages")
+  ]);
+
+  const notes = notesPayload.rows ?? [];
+  const tasks = tasksPayload.rows ?? [];
+  const activity = activityPayload.rows ?? [];
+  const stageName = (stagesPayload.rows ?? []).find((stage) => stage.id === deal.stageId)?.name ?? deal.stageId;
 
   return (
     <main className="app-page">

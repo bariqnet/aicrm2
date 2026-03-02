@@ -3,6 +3,7 @@ import type { Activity, Company, Contact, Deal, Note, Stage, Task } from "@/lib/
 export type ListResponse<T> = {
   rows: T[];
   total: number;
+  nextCursor?: string | null;
 };
 
 // Internal API wrapper used by app routes/components.

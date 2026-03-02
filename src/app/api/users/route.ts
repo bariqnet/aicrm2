@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
+import { proxyExternalApi } from "@/lib/api-proxy";
 
-export async function GET() {
-  return NextResponse.json([{ id: "user_demo", name: "Demo User", email: "demo@example.com" }]);
+export async function GET(request: Request) {
+  return proxyExternalApi(request, "/users");
 }

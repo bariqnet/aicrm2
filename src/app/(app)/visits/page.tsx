@@ -1,23 +1,42 @@
 "use client";
 
-import { useState } from "react";
-import { createVisit, listVisits, updateVisitStatus } from "@/lib/visits-client";
-import type { VisitStatus } from "@/lib/crm-types";
+import { useEffect, useState } from "react";
+import type { Visit, VisitStatus } from "@/lib/crm-types";
 import {
+  showErrorAlert,
   showInfoAlert,
   showSuccessAlert
 } from "@/lib/sweet-alert";
 
-const WORKSPACE_ID = "ws_default";
-
 export default function VisitsPage() {
-  const [, setTick] = useState(0);
+  const [visits, setVisits] = useState<Visit[]>([]);
   const [contactName, setContactName] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [reason, setReason] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const visits = listVisits(WORKSPACE_ID);
+  async function loadVisits() {
+    try {
+      const response = await fetch("/api/visits", { cache: "no-store" });
+      const payload = (await response.json().catch(() => null)) as
+        | { rows?: Visit[]; error?: string }
+        | null;
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "Unable to load visits");
+      }
+      setVisits(payload?.rows ?? []);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to load visits";
+      await showErrorAlert("Visits load failed", message);
+    }
+  }
+
+  useEffect(() => {
+    loadVisits().catch(() => {
+      // handled in loadVisits
+    });
+  }, []);
 
   async function create() {
     if (!contactName || !date || !time || !reason) {
@@ -27,24 +46,61 @@ export default function VisitsPage() {
       );
       return;
     }
-    createVisit({
-      workspaceId: WORKSPACE_ID,
-      contactId: crypto.randomUUID(),
-      contactName,
-      date,
-      time,
-      durationMinutes: 30,
-      reason,
-      status: "SCHEDULED"
-    });
-    setTick((value) => value + 1);
-    await showSuccessAlert("Visit scheduled", `${contactName} on ${date} at ${time}`);
+    setLoading(true);
+    try {
+      const response = await fetch("/api/visits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contactId: crypto.randomUUID(),
+          contactName,
+          date,
+          time,
+          durationMinutes: 30,
+          reason,
+          status: "SCHEDULED"
+        })
+      });
+
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "Unable to create visit");
+      }
+
+      setContactName("");
+      setDate("");
+      setTime("");
+      setReason("");
+      await loadVisits();
+      await showSuccessAlert("Visit scheduled", `${contactName} on ${date} at ${time}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to create visit";
+      await showErrorAlert("Visit creation failed", message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function setStatus(id: string, status: VisitStatus) {
-    updateVisitStatus(id, status);
-    setTick((value) => value + 1);
-    await showSuccessAlert("Visit updated", `Status changed to ${status}`);
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/visits/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      });
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "Unable to update visit");
+      }
+      await loadVisits();
+      await showSuccessAlert("Visit updated", `Status changed to ${status}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to update visit";
+      await showErrorAlert("Visit update failed", message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -61,7 +117,9 @@ export default function VisitsPage() {
           <input className="input w-full" type="date" value={date} onChange={(event) => setDate(event.target.value)} />
           <input className="input w-full" type="time" value={time} onChange={(event) => setTime(event.target.value)} />
           <input className="input w-full" placeholder="Reason" value={reason} onChange={(event) => setReason(event.target.value)} />
-          <button type="button" className="btn btn-primary" onClick={create}>Add visit</button>
+          <button type="button" className="btn btn-primary" onClick={create} disabled={loading}>
+            {loading ? "Saving..." : "Add visit"}
+          </button>
         </section>
 
         <section className="panel space-y-2 p-4">

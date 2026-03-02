@@ -3,6 +3,7 @@ export type ApiQuery = Record<string, string | number | boolean | null | undefin
 export type ApiRequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
   token?: string | null;
+  workspaceId?: string | null;
   query?: ApiQuery;
   baseUrl?: string;
 };
@@ -13,6 +14,32 @@ type ListEnvelope<T> = {
   data?: T[];
   nextCursor?: string | null;
 };
+
+type ApiErrorIssue = {
+  path?: string;
+  message?: string;
+};
+
+type ApiErrorEnvelope = {
+  error?: string;
+  message?: string;
+  code?: string;
+  issues?: ApiErrorIssue[];
+};
+
+export class ApiRequestError extends Error {
+  status: number;
+  code?: string;
+  issues?: ApiErrorIssue[];
+
+  constructor(message: string, status: number, code?: string, issues?: ApiErrorIssue[]) {
+    super(message);
+    this.name = "ApiRequestError";
+    this.status = status;
+    this.code = code;
+    this.issues = issues;
+  }
+}
 
 function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
@@ -49,8 +76,33 @@ function buildUrl(path: string, query?: ApiQuery, baseUrl?: string): string {
   return withQuery(new URL(`${base}${normalizedPath}`), query).toString();
 }
 
+function formatErrorMessage(payload: unknown, status: number): string {
+  if (!payload || typeof payload !== "object") {
+    return `API request failed (${status})`;
+  }
+
+  const source = payload as ApiErrorEnvelope;
+  const baseMessage = source.error ?? source.message ?? `API request failed (${status})`;
+  const firstIssue = source.issues?.[0];
+  if (!firstIssue?.message) return baseMessage;
+  if (firstIssue.path) return `${baseMessage}: ${firstIssue.path} ${firstIssue.message}`;
+  return `${baseMessage}: ${firstIssue.message}`;
+}
+
+function extractErrorCode(payload: unknown): string | undefined {
+  if (!payload || typeof payload !== "object") return undefined;
+  const value = (payload as ApiErrorEnvelope).code;
+  return typeof value === "string" ? value : undefined;
+}
+
+function extractErrorIssues(payload: unknown): ApiErrorIssue[] | undefined {
+  if (!payload || typeof payload !== "object") return undefined;
+  const value = (payload as ApiErrorEnvelope).issues;
+  return Array.isArray(value) ? value : undefined;
+}
+
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
-  const { body, token, query, headers, baseUrl, ...init } = options;
+  const { body, token, workspaceId, query, headers, baseUrl, ...init } = options;
   const url = buildUrl(path, query, baseUrl);
 
   const response = await fetch(url, {
@@ -58,20 +110,29 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(workspaceId ? { "X-Workspace-Id": workspaceId } : {}),
       ...(headers ?? {})
     },
     body: body === undefined ? undefined : JSON.stringify(body)
   });
 
   const text = await response.text();
-  const payload = text ? (JSON.parse(text) as unknown) : null;
+  let payload: unknown = null;
+  if (text) {
+    try {
+      payload = JSON.parse(text) as unknown;
+    } catch {
+      payload = { message: text };
+    }
+  }
 
   if (!response.ok) {
-    const message =
-      payload && typeof payload === "object" && "message" in payload && typeof (payload as { message?: unknown }).message === "string"
-        ? (payload as { message: string }).message
-        : `API request failed (${response.status})`;
-    throw new Error(message);
+    throw new ApiRequestError(
+      formatErrorMessage(payload, response.status),
+      response.status,
+      extractErrorCode(payload),
+      extractErrorIssues(payload)
+    );
   }
 
   return payload as T;

@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { listContacts } from "@/lib/mock-db";
-import { getRequestContext } from "@/lib/request-context";
+import type { Contact } from "@/lib/crm-types";
+import { serverApiRequest, type ServerListResponse } from "@/lib/server-crm";
 
 export default async function ContactsPage() {
-  const ctx = await getRequestContext();
-  const contacts = listContacts(ctx);
+  const payload = await serverApiRequest<ServerListResponse<Contact>>("/contacts");
+  const contacts = payload.rows ?? [];
 
   return (
     <main className="app-page">

@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
+import { proxyExternalApi } from "@/lib/api-proxy";
 
-export async function POST() {
-  return NextResponse.json({ error: "This endpoint is disabled" }, { status: 410 });
+export async function POST(request: Request) {
+  return proxyExternalApi(request, "/auth/login");
 }

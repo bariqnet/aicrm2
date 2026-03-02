@@ -1,9 +1,5 @@
-import { NextResponse } from "next/server";
-import { getRequestContext } from "@/lib/request-context";
-import { listActivities } from "@/lib/mock-db";
+import { proxyExternalApi } from "@/lib/api-proxy";
 
-export async function GET() {
-  const ctx = await getRequestContext();
-  const rows = listActivities(ctx);
-  return NextResponse.json({ rows, total: rows.length });
+export async function GET(request: Request) {
+  return proxyExternalApi(request, "/activities");
 }

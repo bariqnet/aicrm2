@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { listTasks } from "@/lib/mock-db";
-import { getRequestContext } from "@/lib/request-context";
+import type { Task } from "@/lib/crm-types";
+import { serverApiRequest, type ServerListResponse } from "@/lib/server-crm";
 
 function groupKey(dueAt?: string | null): "Overdue" | "Today" | "Upcoming" {
   if (!dueAt) return "Upcoming";
@@ -16,8 +16,8 @@ function groupKey(dueAt?: string | null): "Overdue" | "Today" | "Upcoming" {
 }
 
 export default async function TasksPage() {
-  const ctx = await getRequestContext();
-  const tasks = listTasks(ctx);
+  const payload = await serverApiRequest<ServerListResponse<Task>>("/tasks");
+  const tasks = payload.rows ?? [];
 
   const grouped = {
     Overdue: tasks.filter((task) => task.status === "OPEN" && groupKey(task.dueAt) === "Overdue"),

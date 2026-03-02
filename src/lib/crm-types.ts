@@ -127,7 +127,7 @@ export type Invite = {
 };
 
 // Invoices
-export const INVOICE_STATUS_VALUES = ["DRAFT", "SENT", "PAID", "OVERDUE", "VOID"] as const;
+export const INVOICE_STATUS_VALUES = ["DRAFT", "SENT", "PARTIALLY_PAID", "PAID", "OVERDUE", "VOID"] as const;
 export type InvoiceStatus = (typeof INVOICE_STATUS_VALUES)[number];
 export type InvoiceRelatedType = "contact" | "company";
 
@@ -145,14 +145,14 @@ export type Invoice = {
   relatedId: string | null;
   contactId: string | null;
   companyId: string | null;
-  issuedAt: Date | null;
-  dueAt: Date | null;
-  paidAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
+  issuedAt: string | null;
+  dueAt: string | null;
+  paidAt: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
 };
 
-// Visits (localStorage only)
+// Visits
 export type VisitStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED";
 export type Visit = {
   id: string;
@@ -166,4 +166,54 @@ export type Visit = {
   status: VisitStatus;
   notes?: string | null;
   createdAt: string;
+};
+
+// Reminders/Notifications
+export type ReminderStatus = "PENDING" | "SENT" | "CANCELLED" | "FAILED";
+export type ReminderPriority = "LOW" | "MEDIUM" | "HIGH";
+export type DeliveryChannel = "IN_APP" | "EMAIL" | "SMS";
+export type ReminderRelatedType = "contact" | "company" | "deal" | "task" | "invoice" | "visit";
+
+export type Reminder = {
+  id: string;
+  workspaceId: string;
+  createdById: string;
+  assigneeId: string;
+  title: string;
+  message: string;
+  remindAt: string;
+  status: ReminderStatus;
+  priority: ReminderPriority;
+  channel: DeliveryChannel;
+  relatedType?: ReminderRelatedType | null;
+  relatedId?: string | null;
+  sourceType?: string | null;
+  dedupeKey?: string | null;
+  sentAt?: string | null;
+  cancelledAt?: string | null;
+  metadata?: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type NotificationStatus = "UNREAD" | "READ" | "ARCHIVED";
+
+export type Notification = {
+  id: string;
+  workspaceId: string;
+  userId: string;
+  reminderId?: string | null;
+  type: string;
+  title: string;
+  message: string;
+  status: NotificationStatus;
+  priority?: ReminderPriority | null;
+  channel: DeliveryChannel;
+  relatedType?: ReminderRelatedType | null;
+  relatedId?: string | null;
+  deliveredAt?: string | null;
+  readAt?: string | null;
+  metadata?: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
 };

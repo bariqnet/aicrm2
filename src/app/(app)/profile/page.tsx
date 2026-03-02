@@ -1,12 +1,14 @@
 import { redirect } from "next/navigation";
 import { SignOutButton } from "@/components/SignOutButton";
 import { getSessionData } from "@/lib/auth";
-import { apiRequest } from "@/lib/crm-api";
+import { serverApiRequest, SessionInvalidError } from "@/lib/server-crm";
 
 type AuthMeResponse = {
-  id?: string;
-  name?: string;
-  email?: string;
+  user?: {
+    id?: string;
+    name?: string;
+    email?: string;
+  };
 };
 
 export default async function ProfilePage() {
@@ -18,17 +20,17 @@ export default async function ProfilePage() {
 
   let me: AuthMeResponse | null = null;
   try {
-    me = await apiRequest<AuthMeResponse>("/auth/me", {
-      token: session.token,
-      cache: "no-store"
-    });
-  } catch {
+    me = await serverApiRequest<AuthMeResponse>("/auth/me");
+  } catch (error) {
+    if (error instanceof SessionInvalidError) {
+      redirect("/auth/sign-in?next=/profile");
+    }
     me = null;
   }
 
-  const displayName = me?.name ?? session.user.name;
-  const displayEmail = me?.email ?? session.user.email;
-  const displayId = me?.id ?? session.user.id;
+  const displayName = me?.user?.name ?? session.user.name;
+  const displayEmail = me?.user?.email ?? session.user.email;
+  const displayId = me?.user?.id ?? session.user.id;
 
   return (
     <main className="app-page">
