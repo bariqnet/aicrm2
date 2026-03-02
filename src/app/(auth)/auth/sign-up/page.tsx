@@ -19,8 +19,8 @@ export default function SignUpPage() {
 function SignUpFallback() {
   return (
     <main className="panel w-full p-6">
-      <h1 className="page-title">Create account</h1>
-      <p className="mt-1 text-sm text-mutedfg">Loading sign-up form...</p>
+      <h1 className="page-title">Create your Que account</h1>
+      <p className="mt-1 text-sm text-mutedfg">Loading onboarding registration step...</p>
     </main>
   );
 }
@@ -80,7 +80,7 @@ function SignUpPageContent() {
       }
 
       await persistSession(sessionPayload);
-      await showSuccessAlert("Account created", "Welcome to AI CRM");
+      await showSuccessAlert("Account created", "Welcome to Que");
       router.replace("/onboarding");
       router.refresh();
     } catch (submitError) {
@@ -97,8 +97,16 @@ function SignUpPageContent() {
 
   return (
     <main className="panel w-full p-6">
-      <h1 className="page-title">Create account</h1>
-      <p className="mt-1 text-sm text-mutedfg">Get started with your CRM workspace.</p>
+      <div className="rounded-lg border border-border bg-surface2/70 p-3">
+        <p className="muted-label">Onboarding flow</p>
+        <ol className="mt-2 grid gap-2 text-xs sm:grid-cols-3">
+          <li className="rounded-md border border-border bg-surface px-2 py-1.5 font-medium text-fg">1. Account</li>
+          <li className="rounded-md border border-border bg-surface px-2 py-1.5 text-mutedfg">2. Workspace setup</li>
+          <li className="rounded-md border border-border bg-surface px-2 py-1.5 text-mutedfg">3. Team + pipeline</li>
+        </ol>
+      </div>
+      <h1 className="page-title mt-5">Create your Que account</h1>
+      <p className="mt-1 text-sm text-mutedfg">Step 1 of onboarding. Set up your identity to start configuring your CRM.</p>
       {inviteToken ? (
         <p className="mt-2 rounded-md border bg-muted/20 px-3 py-2 text-xs text-mutedfg">
           Invite token detected. Your account will be linked to the invited workspace.
@@ -143,9 +151,13 @@ function SignUpPageContent() {
         </div>
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         <button type="submit" className="btn btn-primary w-full" disabled={submitting}>
-          {submitting ? "Creating account..." : "Create account"}
+          {submitting ? "Creating account..." : "Continue onboarding"}
         </button>
       </form>
+
+      <div className="mt-4 rounded-md border border-border bg-surface2 px-3 py-2 text-xs text-mutedfg">
+        Next step after account creation: workspace preferences, default stages, and invite settings.
+      </div>
 
       <p className="mt-4 text-sm text-mutedfg">
         Already have an account?{" "}

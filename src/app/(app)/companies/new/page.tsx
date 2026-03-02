@@ -65,7 +65,7 @@ export default function NewCompanyPage() {
           </label>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-wrap justify-end gap-2">
           <Link href="/companies" className="btn">Cancel</Link>
           <button className="btn btn-primary" type="submit">Create company</button>
         </div>

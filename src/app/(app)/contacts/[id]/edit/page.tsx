@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import type { Company } from "@/lib/crm-types";
 import {
   getResponseError,
   showErrorAlert,
@@ -30,30 +31,50 @@ export default function EditContactPage() {
   const [phone, setPhone] = useState("");
   const [companyId, setCompanyId] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const contactId = params.id;
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadContact() {
-      const response = await fetch(`/api/contacts/${contactId}`);
-      if (!response.ok) {
-        throw new Error(await getResponseError(response, "Unable to load contact"));
-      }
-      const payload = (await response.json()) as ContactPayload;
+    async function loadData() {
+      const [contactResult, companiesResult] = await Promise.allSettled([
+        fetch(`/api/contacts/${contactId}`),
+        fetch("/api/companies")
+      ]);
+
       if (cancelled) return;
-      setFirstName(payload.firstName ?? "");
-      setLastName(payload.lastName ?? "");
-      setJobTitle(payload.jobTitle ?? "");
-      setEmail(payload.email ?? "");
-      setPhone(payload.phone ?? "");
-      setCompanyId(payload.companyId ?? "");
-      setTags(payload.tags ?? []);
+
+      if (contactResult.status !== "fulfilled" || !contactResult.value.ok) {
+        const message =
+          contactResult.status === "fulfilled"
+            ? await getResponseError(contactResult.value, "Unable to load contact")
+            : "Unable to load contact";
+        throw new Error(message);
+      }
+
+      const contactPayload = (await contactResult.value.json()) as ContactPayload;
+      if (cancelled) return;
+
+      setFirstName(contactPayload.firstName ?? "");
+      setLastName(contactPayload.lastName ?? "");
+      setJobTitle(contactPayload.jobTitle ?? "");
+      setEmail(contactPayload.email ?? "");
+      setPhone(contactPayload.phone ?? "");
+      setCompanyId(contactPayload.companyId ?? "");
+      setTags(contactPayload.tags ?? []);
+
+      if (companiesResult.status === "fulfilled" && companiesResult.value.ok) {
+        const companiesPayload = await companiesResult.value.json() as { rows?: Company[] };
+        if (!cancelled) setCompanies(companiesPayload.rows ?? []);
+      }
+
       setLoading(false);
     }
 
-    loadContact().catch(async (error) => {
+    loadData().catch(async (error) => {
       const message = error instanceof Error ? error.message : "Unable to load contact";
       if (!cancelled) {
         await showErrorAlert("Unable to load contact", message);
@@ -68,31 +89,40 @@ export default function EditContactPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
+    setSaving(true);
 
-    const response = await fetch(`/api/contacts/${contactId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        firstName,
-        lastName,
-        jobTitle: jobTitle || undefined,
-        email: email || undefined,
-        phone: phone || undefined,
-        companyId: companyId || undefined,
-        tags
-      })
-    });
+    try {
+      const response = await fetch(`/api/contacts/${contactId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          jobTitle: jobTitle || undefined,
+          email: email || undefined,
+          phone: phone || undefined,
+          companyId: companyId || undefined,
+          tags
+        })
+      });
 
-    if (!response.ok) {
-      await showErrorAlert(
-        "Unable to update contact",
-        await getResponseError(response, "Please check your input and try again.")
-      );
-      return;
+      if (!response.ok) {
+        await showErrorAlert(
+          "Unable to update contact",
+          await getResponseError(response, "Please check your input and try again.")
+        );
+        return;
+      }
+      await showSuccessAlert("Contact updated");
+      router.push(`/contacts/${contactId}`);
+      router.refresh();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to update contact";
+      await showErrorAlert("Unable to update contact", message);
+    } finally {
+      setSaving(false);
     }
-    await showSuccessAlert("Contact updated");
-    router.push(`/contacts/${contactId}`);
-    router.refresh();
   }
 
   return (
@@ -103,7 +133,7 @@ export default function EditContactPage() {
         <p className="page-subtitle">Update primary contact details.</p>
       </header>
 
-      <form className="panel max-w-2xl space-y-4 p-5" onSubmit={submit}>
+      <form className="panel max-w-3xl space-y-4 p-5" onSubmit={submit}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm">
             First name
@@ -126,15 +156,25 @@ export default function EditContactPage() {
             <input className="input mt-1 w-full" placeholder="Phone number" value={phone} onChange={(event) => setPhone(event.target.value)} disabled={loading} />
           </label>
           <label className="text-sm">
-            Company ID
-            <input className="input mt-1 w-full" placeholder="company_xxx" value={companyId} onChange={(event) => setCompanyId(event.target.value)} disabled={loading} />
+            Company
+            <select
+              className="input mt-1 w-full"
+              value={companyId}
+              onChange={(event) => setCompanyId(event.target.value)}
+              disabled={loading}
+            >
+              <option value="">No company</option>
+              {companies.map((company) => (
+                <option key={company.id} value={company.id}>{company.name}</option>
+              ))}
+            </select>
           </label>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-wrap justify-end gap-2">
           <Link href={`/contacts/${contactId}`} className="btn">Cancel</Link>
-          <button className="btn btn-primary" type="submit" disabled={loading}>
-            {loading ? "Loading..." : "Save changes"}
+          <button className="btn btn-primary" type="submit" disabled={loading || saving}>
+            {loading ? "Loading..." : saving ? "Saving..." : "Save changes"}
           </button>
         </div>
       </form>

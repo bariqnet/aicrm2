@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
@@ -17,6 +18,7 @@ import {
   Users,
   type LucideIcon
 } from "lucide-react";
+import { SignOutButton } from "@/components/SignOutButton";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -54,52 +56,84 @@ const navSections: Array<{ label: string; items: NavItem[] }> = [
   }
 ];
 
-export function SidebarNav() {
+type SidebarNavProps = {
+  mobile?: boolean;
+  className?: string;
+  onNavigate?: () => void;
+};
+
+function SidebarLinks({ onNavigate }: { onNavigate?: () => void }) {
   const path = usePathname();
 
   return (
-    <aside className="hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-surface px-3 py-4 md:flex">
+    <nav className="space-y-4 overflow-y-auto pr-1">
+      {navSections.map((section) => (
+        <div key={section.label}>
+          <p className="mb-1 px-2 text-[11px] font-medium uppercase tracking-[0.12em] text-mutedfg">
+            {section.label}
+          </p>
+          <div className="space-y-0.5">
+            {section.items.map((item) => {
+              const Icon = item.icon;
+              const isActive =
+                path === item.href || (item.href !== "/dashboard" && path.startsWith(`${item.href}/`));
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onNavigate}
+                  className={cn(
+                    "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition",
+                    isActive
+                      ? "bg-muted font-medium text-fg"
+                      : "text-mutedfg hover:bg-muted/70 hover:text-fg"
+                  )}
+                >
+                  <Icon size={15} className={cn(isActive ? "text-fg" : "text-mutedfg group-hover:text-fg")} />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+export function SidebarNav({ mobile = false, className, onNavigate }: SidebarNavProps) {
+  return (
+    <aside
+      className={cn(
+        mobile
+          ? "flex h-full w-72 shrink-0 flex-col border-r border-border bg-surface px-3 py-4"
+          : "hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-surface px-3 py-4 md:flex",
+        className
+      )}
+    >
       <div className="mb-5 px-2">
-        <p className="text-[11px] uppercase tracking-[0.15em] text-mutedfg">Workspace</p>
-        <p className="text-lg font-semibold tracking-tight">AI CRM</p>
+        <Link href="/dashboard" onClick={onNavigate} className="inline-flex flex-col gap-2">
+          <Image
+            src="/logo.png"
+            alt="Que logo"
+            width={130}
+            height={42}
+            className="h-10 w-auto"
+            priority
+          />
+          <p className="text-[11px] uppercase tracking-[0.15em] text-mutedfg">AI-driven CRM</p>
+        </Link>
       </div>
 
       <button className="btn mb-5 w-full justify-start text-xs text-mutedfg">Default workspace</button>
 
-      <nav className="space-y-4 overflow-y-auto pr-1">
-        {navSections.map((section) => (
-          <div key={section.label}>
-            <p className="mb-1 px-2 text-[11px] font-medium uppercase tracking-[0.12em] text-mutedfg">
-              {section.label}
-            </p>
-            <div className="space-y-0.5">
-              {section.items.map((item) => {
-                const Icon = item.icon;
-                const isActive =
-                  path === item.href || (item.href !== "/dashboard" && path.startsWith(`${item.href}/`));
+      <SidebarLinks onNavigate={onNavigate} />
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition",
-                      isActive
-                        ? "bg-muted font-medium text-fg"
-                        : "text-mutedfg hover:bg-muted/70 hover:text-fg"
-                    )}
-                  >
-                    <Icon size={15} className={cn(isActive ? "text-fg" : "text-mutedfg group-hover:text-fg")} />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </nav>
-
-      <div className="mt-auto border-t border-border pt-3 text-xs text-mutedfg">alex@workspace.io</div>
+      <div className="mt-auto space-y-3 border-t border-border pt-3">
+        <div className="text-xs text-mutedfg">alex@workspace.io</div>
+        {mobile ? <SignOutButton className="btn w-full justify-center" /> : null}
+      </div>
     </aside>
   );
 }

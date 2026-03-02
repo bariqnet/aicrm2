@@ -17,8 +17,11 @@ const monoFont = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI CRM",
-  description: "API-first CRM workspace"
+  title: {
+    default: "Que",
+    template: "%s | Que"
+  },
+  description: "Que is an AI-driven CRM workspace for contacts, deals, tasks, and operations."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

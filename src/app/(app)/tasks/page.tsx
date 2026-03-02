@@ -18,11 +18,13 @@ function groupKey(dueAt?: string | null): "Overdue" | "Today" | "Upcoming" {
 export default async function TasksPage() {
   const payload = await serverApiRequest<ServerListResponse<Task>>("/tasks");
   const tasks = payload.rows ?? [];
+  const openTasks = tasks.filter((task) => task.status === "OPEN");
+  const doneTasks = tasks.filter((task) => task.status === "DONE");
 
   const grouped = {
-    Overdue: tasks.filter((task) => task.status === "OPEN" && groupKey(task.dueAt) === "Overdue"),
-    Today: tasks.filter((task) => groupKey(task.dueAt) === "Today"),
-    Upcoming: tasks.filter((task) => groupKey(task.dueAt) === "Upcoming")
+    Overdue: openTasks.filter((task) => groupKey(task.dueAt) === "Overdue"),
+    Today: openTasks.filter((task) => groupKey(task.dueAt) === "Today"),
+    Upcoming: openTasks.filter((task) => groupKey(task.dueAt) === "Upcoming")
   };
 
   return (
@@ -55,6 +57,27 @@ export default async function TasksPage() {
           </div>
         </section>
       ))}
+
+      <section className="panel p-4">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-mutedfg">
+          Completed ({doneTasks.length})
+        </h2>
+        <div className="space-y-2">
+          {doneTasks.length === 0 ? (
+            <p className="text-sm text-mutedfg">No completed tasks yet.</p>
+          ) : (
+            doneTasks.map((task) => (
+              <Link
+                href={`/tasks/${task.id}`}
+                key={task.id}
+                className="block rounded-md border border-border bg-surface2 px-3 py-2 text-sm hover:bg-muted/55"
+              >
+                {task.title}
+              </Link>
+            ))
+          )}
+        </div>
+      </section>
     </main>
   );
 }

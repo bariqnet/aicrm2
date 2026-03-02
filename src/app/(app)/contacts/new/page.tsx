@@ -185,7 +185,7 @@ export default function NewContactPage() {
           </label>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-wrap justify-end gap-2">
           <Link href="/contacts" className="btn">Cancel</Link>
           <button className="btn btn-primary" disabled={loading} type="submit">
             {loading ? "Creating..." : "Create contact"}

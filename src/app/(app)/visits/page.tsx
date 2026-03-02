@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { Visit, VisitStatus } from "@/lib/crm-types";
+import { useEffect, useMemo, useState } from "react";
+import type { Contact, Visit, VisitStatus } from "@/lib/crm-types";
 import {
   showErrorAlert,
   showInfoAlert,
@@ -10,11 +10,18 @@ import {
 
 export default function VisitsPage() {
   const [visits, setVisits] = useState<Visit[]>([]);
-  const [contactName, setContactName] = useState("");
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contactId, setContactId] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [reason, setReason] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState("30");
   const [loading, setLoading] = useState(false);
+
+  const selectedContact = useMemo(
+    () => contacts.find((contact) => contact.id === contactId) ?? null,
+    [contacts, contactId]
+  );
 
   async function loadVisits() {
     try {
@@ -32,31 +39,53 @@ export default function VisitsPage() {
     }
   }
 
+  async function loadContacts() {
+    try {
+      const response = await fetch("/api/contacts");
+      if (!response.ok) return;
+      const payload = (await response.json().catch(() => null)) as
+        | { rows?: Contact[] }
+        | null;
+      setContacts(payload?.rows ?? []);
+    } catch {
+      // Form still works with existing visits even if contacts fail to load.
+    }
+  }
+
   useEffect(() => {
     loadVisits().catch(() => {
       // handled in loadVisits
     });
+    loadContacts().catch(() => {
+      // handled in loadContacts
+    });
   }, []);
 
   async function create() {
-    if (!contactName || !date || !time || !reason) {
+    if (!contactId || !date || !time || !reason) {
       await showInfoAlert(
         "Missing details",
-        "Please fill contact name, date, time, and reason before adding a visit."
+        "Please fill contact, date, time, and reason before adding a visit."
       );
       return;
     }
+
+    if (!selectedContact) {
+      await showErrorAlert("Invalid contact", "Choose a valid contact before saving the visit.");
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch("/api/visits", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contactId: crypto.randomUUID(),
-          contactName,
+          contactId,
+          contactName: `${selectedContact.firstName} ${selectedContact.lastName}`.trim(),
           date,
           time,
-          durationMinutes: 30,
+          durationMinutes: Number(durationMinutes) || 30,
           reason,
           status: "SCHEDULED"
         })
@@ -67,12 +96,13 @@ export default function VisitsPage() {
         throw new Error(payload?.error ?? "Unable to create visit");
       }
 
-      setContactName("");
+      setContactId("");
       setDate("");
       setTime("");
       setReason("");
+      setDurationMinutes("30");
       await loadVisits();
-      await showSuccessAlert("Visit scheduled", `${contactName} on ${date} at ${time}`);
+      await showSuccessAlert("Visit scheduled", `${selectedContact.firstName} ${selectedContact.lastName} on ${date} at ${time}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to create visit";
       await showErrorAlert("Visit creation failed", message);
@@ -113,10 +143,26 @@ export default function VisitsPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         <section className="panel space-y-3 p-4">
           <h2 className="text-sm font-semibold">Schedule visit</h2>
-          <input className="input w-full" placeholder="Contact name" value={contactName} onChange={(event) => setContactName(event.target.value)} />
+          <select className="input w-full" value={contactId} onChange={(event) => setContactId(event.target.value)}>
+            <option value="">Select contact</option>
+            {contacts.map((contact) => (
+              <option key={contact.id} value={contact.id}>
+                {contact.firstName} {contact.lastName}
+              </option>
+            ))}
+          </select>
           <input className="input w-full" type="date" value={date} onChange={(event) => setDate(event.target.value)} />
           <input className="input w-full" type="time" value={time} onChange={(event) => setTime(event.target.value)} />
           <input className="input w-full" placeholder="Reason" value={reason} onChange={(event) => setReason(event.target.value)} />
+          <input
+            className="input w-full"
+            type="number"
+            min="5"
+            step="5"
+            value={durationMinutes}
+            onChange={(event) => setDurationMinutes(event.target.value)}
+            placeholder="Duration in minutes"
+          />
           <button type="button" className="btn btn-primary" onClick={create} disabled={loading}>
             {loading ? "Saving..." : "Add visit"}
           </button>
@@ -130,7 +176,10 @@ export default function VisitsPage() {
             visits.map((visit) => (
               <article key={visit.id} className="rounded-md border border-border bg-surface2 p-3">
                 <p className="font-medium">{visit.contactName}</p>
-                <p className="text-sm text-mutedfg">{visit.date} {visit.time} • {visit.reason}</p>
+                <p className="text-sm text-mutedfg">
+                  {visit.date} {visit.time} · {visit.reason}
+                </p>
+                <p className="mt-1 text-xs text-mutedfg">{visit.durationMinutes} minutes</p>
                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
                   <button className="btn h-8" onClick={() => setStatus(visit.id, "SCHEDULED")}>Scheduled</button>
                   <button className="btn h-8" onClick={() => setStatus(visit.id, "COMPLETED")}>Completed</button>

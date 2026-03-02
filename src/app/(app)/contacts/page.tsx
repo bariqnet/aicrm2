@@ -13,7 +13,7 @@ export default async function ContactsPage() {
           <h1 className="page-title">Contacts</h1>
           <p className="page-subtitle">Every person in your pipeline, organized for quick action.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link href="/contacts/import" className="btn">Import CSV</Link>
           <Link href="/contacts/new" className="btn btn-primary">New contact</Link>
         </div>
@@ -22,8 +22,8 @@ export default async function ContactsPage() {
       {contacts.length === 0 ? (
         <p className="panel panel-dashed p-10 text-sm text-mutedfg">No contacts yet. Create your first contact.</p>
       ) : (
-        <div className="table-shell">
-          <table className="w-full text-left text-sm">
+        <div className="table-shell overflow-x-auto">
+          <table className="min-w-[700px] w-full text-left text-sm">
             <thead className="border-b border-border bg-surface2 text-xs uppercase tracking-[0.1em] text-mutedfg">
               <tr>
                 <th className="px-4 py-3">Name</th>

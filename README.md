@@ -1,6 +1,6 @@
-# AI CRM (API-first Next.js)
+# Que (AI-driven CRM)
 
-Next.js App Router CRM scaffold aligned to the API-first architecture.
+Next.js App Router CRM application for Que, an AI-driven CRM platform.
 
 ## Setup
 

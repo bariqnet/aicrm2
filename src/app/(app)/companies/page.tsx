@@ -19,8 +19,8 @@ export default async function CompaniesPage() {
       {companies.length === 0 ? (
         <p className="panel panel-dashed p-10 text-sm text-mutedfg">No companies yet.</p>
       ) : (
-        <div className="table-shell">
-          <table className="w-full text-left text-sm">
+        <div className="table-shell overflow-x-auto">
+          <table className="min-w-[680px] w-full text-left text-sm">
             <thead className="border-b border-border bg-surface2 text-xs uppercase tracking-[0.1em] text-mutedfg">
               <tr>
                 <th className="px-4 py-3">Company</th>

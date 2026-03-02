@@ -44,7 +44,7 @@ export default function ContactImportPage() {
       </header>
 
       <div className="panel max-w-3xl space-y-3 p-4">
-        <textarea className="input min-h-48 w-full" value={csv} onChange={(event) => setCsv(event.target.value)} />
+        <textarea className="input h-auto min-h-48 w-full" value={csv} onChange={(event) => setCsv(event.target.value)} />
         <div className="flex justify-end">
           <button className="btn btn-primary" type="button" onClick={submit}>Import CSV</button>
         </div>

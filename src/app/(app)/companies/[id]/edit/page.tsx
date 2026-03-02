@@ -111,7 +111,7 @@ export default function EditCompanyPage() {
           </label>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-wrap justify-end gap-2">
           <Link href={`/companies/${companyId}`} className="btn">Cancel</Link>
           <button className="btn btn-primary" type="submit" disabled={loading}>
             {loading ? "Loading..." : "Save changes"}
