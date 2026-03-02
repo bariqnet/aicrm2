@@ -18,9 +18,9 @@ Create `.env.local` using:
 ```env
 SESSION_PASSWORD=replace-with-long-random-string
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-API_BASE_URL=https://t8xizhkeq6.execute-api.us-east-1.amazonaws.com/dev/
-NEXT_PUBLIC_API_BASE_URL=https://t8xizhkeq6.execute-api.us-east-1.amazonaws.com/dev/
 ```
+
+API base URL is hardcoded in [`src/lib/api-base.ts`](src/lib/api-base.ts).
 
 ## Key Source Files
 

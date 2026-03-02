@@ -1,3 +1,5 @@
+import { getExternalApiBaseUrl } from "@/lib/api-base";
+
 export type ApiQuery = Record<string, string | number | boolean | null | undefined>;
 
 export type ApiRequestOptions = Omit<RequestInit, "body"> & {
@@ -47,10 +49,7 @@ function trimTrailingSlash(value: string): string {
 
 function resolveBaseUrl(customBaseUrl?: string): string {
   if (customBaseUrl) return trimTrailingSlash(customBaseUrl);
-
-  const envBase = process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!envBase) return "";
-  return trimTrailingSlash(envBase);
+  return getExternalApiBaseUrl();
 }
 
 function withQuery(url: URL, query?: ApiQuery): URL {
@@ -68,9 +67,6 @@ function buildUrl(path: string, query?: ApiQuery, baseUrl?: string): string {
   }
 
   const base = resolveBaseUrl(baseUrl);
-  if (!base) {
-    throw new Error("Missing API base URL. Set API_BASE_URL or NEXT_PUBLIC_API_BASE_URL.");
-  }
 
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   return withQuery(new URL(`${base}${normalizedPath}`), query).toString();

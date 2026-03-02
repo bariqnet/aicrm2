@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSessionData } from "@/lib/auth";
+import { getExternalApiBaseUrl } from "@/lib/api-base";
 
 type ProxyOptions = {
   method?: string;
@@ -11,11 +12,7 @@ function trimTrailingSlash(value: string): string {
 }
 
 function resolveExternalApiBaseUrl(): string {
-  const base = process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!base) {
-    throw new Error("Missing API base URL. Set API_BASE_URL or NEXT_PUBLIC_API_BASE_URL.");
-  }
-  return trimTrailingSlash(base);
+  return trimTrailingSlash(getExternalApiBaseUrl());
 }
 
 function buildProxyHeaders(request: Request, token?: string, workspaceId?: string): Headers {
