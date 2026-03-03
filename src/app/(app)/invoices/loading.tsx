@@ -1,3 +1,9 @@
-export default function InvoicesLoading() {
-  return <div className="animate-pulse panel p-6 text-sm text-mutedfg">Loading invoices...</div>;
+import { PageLoadingShell } from "@/components/PageLoadingShell";
+import { getServerLanguage, pickByLanguage } from "@/lib/server-language";
+
+export default async function InvoicesLoading() {
+  const language = await getServerLanguage();
+  const title = pickByLanguage(language, "Loading invoices...", "جارٍ تحميل الفواتير...");
+
+  return <PageLoadingShell title={title} />;
 }

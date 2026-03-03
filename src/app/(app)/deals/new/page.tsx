@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
+import { useI18n } from "@/hooks/useI18n";
 import type { Company, Contact, Stage } from "@/lib/crm-types";
 import {
   getResponseError,
@@ -18,6 +19,9 @@ function toIsoDateTime(value: string): string | undefined {
 }
 
 export default function NewDealPage() {
+  const { language } = useI18n();
+  const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
+
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("0");
@@ -78,13 +82,13 @@ export default function NewDealPage() {
     if (saving) return;
 
     if (!stageId) {
-      await showErrorAlert("Missing stage", "Select a stage before creating the deal.");
+      await showErrorAlert(tr("Missing stage", "المرحلة مفقودة"), tr("Select a stage before creating the deal.", "اختر مرحلة قبل إنشاء الصفقة."));
       return;
     }
 
     const parsedAmount = Number(amount);
     if (!Number.isFinite(parsedAmount) || parsedAmount < 0) {
-      await showErrorAlert("Invalid amount", "Amount must be a valid non-negative number.");
+      await showErrorAlert(tr("Invalid amount", "مبلغ غير صالح"), tr("Amount must be a valid non-negative number.", "يجب أن يكون المبلغ رقمًا صالحًا غير سالب."));
       return;
     }
 
@@ -106,18 +110,18 @@ export default function NewDealPage() {
 
       if (!response.ok) {
         await showErrorAlert(
-          "Unable to create deal",
-          await getResponseError(response, "Please check your input and try again.")
+          tr("Unable to create deal", "تعذر إنشاء الصفقة"),
+          await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
         );
         return;
       }
 
-      await showSuccessAlert("Deal created");
+      await showSuccessAlert(tr("Deal created", "تم إنشاء الصفقة"));
       router.push("/deals");
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to create deal";
-      await showErrorAlert("Unable to create deal", message);
+      const message = error instanceof Error ? error.message : tr("Unable to create deal", "تعذر إنشاء الصفقة");
+      await showErrorAlert(tr("Unable to create deal", "تعذر إنشاء الصفقة"), message);
     } finally {
       setSaving(false);
     }
@@ -126,27 +130,27 @@ export default function NewDealPage() {
   return (
     <main className="app-page">
       <header>
-        <Link href="/deals" className="text-sm text-mutedfg hover:text-fg">← Back to deals</Link>
-        <h1 className="page-title mt-2">New deal</h1>
-        <p className="page-subtitle">Create a new opportunity and assign it to the right stage.</p>
+        <Link href="/deals" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to deals", "← العودة إلى الصفقات")}</Link>
+        <h1 className="page-title mt-2">{tr("New deal", "صفقة جديدة")}</h1>
+        <p className="page-subtitle">{tr("Create a new opportunity and assign it to the right stage.", "أنشئ فرصة جديدة وعيّنها للمرحلة المناسبة.")}</p>
       </header>
 
       <form className="panel max-w-3xl space-y-4 p-5" onSubmit={submit}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm sm:col-span-2">
-            Deal title
-            <input className="input mt-1 w-full" placeholder="Deal title" value={title} onChange={(event) => setTitle(event.target.value)} required />
+            {tr("Deal title", "عنوان الصفقة")}
+            <input className="input mt-1 w-full" placeholder={tr("Deal title", "عنوان الصفقة")} value={title} onChange={(event) => setTitle(event.target.value)} required />
           </label>
           <label className="text-sm">
-            Amount
-            <input className="input mt-1 w-full" placeholder="Amount" value={amount} onChange={(event) => setAmount(event.target.value)} type="number" min="0" required />
+            {tr("Amount", "المبلغ")}
+            <input className="input mt-1 w-full" placeholder={tr("Amount", "المبلغ")} value={amount} onChange={(event) => setAmount(event.target.value)} type="number" min="0" required />
           </label>
           <label className="text-sm">
-            Currency
+            {tr("Currency", "العملة")}
             <input className="input mt-1 w-full" placeholder="USD" value={currency} onChange={(event) => setCurrency(event.target.value)} required />
           </label>
           <label className="text-sm">
-            Stage
+            {tr("Stage", "المرحلة")}
             <select
               className="input mt-1 w-full"
               value={stageId}
@@ -154,14 +158,14 @@ export default function NewDealPage() {
               disabled={loadingOptions || stages.length === 0}
               required
             >
-              <option value="">{loadingOptions ? "Loading stages..." : "Select stage"}</option>
+              <option value="">{loadingOptions ? tr("Loading stages...", "جاري تحميل المراحل...") : tr("Select stage", "اختر مرحلة")}</option>
               {stages.map((stage) => (
                 <option key={stage.id} value={stage.id}>{stage.name}</option>
               ))}
             </select>
           </label>
           <label className="text-sm">
-            Expected close date
+            {tr("Expected close date", "تاريخ الإغلاق المتوقع")}
             <input
               className="input mt-1 w-full"
               type="date"
@@ -170,18 +174,18 @@ export default function NewDealPage() {
             />
           </label>
           <label className="text-sm">
-            Company (optional)
+            {tr("Company (optional)", "الشركة (اختياري)")}
             <select className="input mt-1 w-full" value={companyId} onChange={(event) => setCompanyId(event.target.value)}>
-              <option value="">No company</option>
+              <option value="">{tr("No company", "بدون شركة")}</option>
               {companies.map((company) => (
                 <option key={company.id} value={company.id}>{company.name}</option>
               ))}
             </select>
           </label>
           <label className="text-sm">
-            Primary contact (optional)
+            {tr("Primary contact (optional)", "جهة الاتصال الأساسية (اختياري)")}
             <select className="input mt-1 w-full" value={primaryContactId} onChange={(event) => setPrimaryContactId(event.target.value)}>
-              <option value="">No primary contact</option>
+              <option value="">{tr("No primary contact", "بدون جهة اتصال أساسية")}</option>
               {contacts.map((contact) => (
                 <option key={contact.id} value={contact.id}>
                   {contact.firstName} {contact.lastName}
@@ -192,9 +196,9 @@ export default function NewDealPage() {
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
-          <Link href="/deals" className="btn">Cancel</Link>
+          <Link href="/deals" className="btn">{tr("Cancel", "إلغاء")}</Link>
           <button className="btn btn-primary" type="submit" disabled={saving}>
-            {saving ? "Creating..." : "Create deal"}
+            {saving ? tr("Creating...", "جاري الإنشاء...") : tr("Create deal", "إنشاء الصفقة")}
           </button>
         </div>
       </form>

@@ -1,3 +1,9 @@
-export default function CompaniesLoading() {
-  return <div className="animate-pulse panel p-6 text-sm text-mutedfg">Loading companies...</div>;
+import { PageLoadingShell } from "@/components/PageLoadingShell";
+import { getServerLanguage, pickByLanguage } from "@/lib/server-language";
+
+export default async function CompaniesLoading() {
+  const language = await getServerLanguage();
+  const title = pickByLanguage(language, "Loading companies...", "جارٍ تحميل الشركات...");
+
+  return <PageLoadingShell title={title} />;
 }

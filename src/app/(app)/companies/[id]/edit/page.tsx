@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
+import { useI18n } from "@/hooks/useI18n";
 import {
   getResponseError,
   showErrorAlert,
@@ -18,6 +19,9 @@ type CompanyPayload = {
 };
 
 export default function EditCompanyPage() {
+  const { language } = useI18n();
+  const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
+
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const [name, setName] = useState("");
@@ -33,7 +37,7 @@ export default function EditCompanyPage() {
     async function loadCompany() {
       const response = await fetch(`/api/companies/${companyId}`);
       if (!response.ok) {
-        throw new Error(await getResponseError(response, "Unable to load company"));
+        throw new Error(await getResponseError(response, tr("Unable to load company", "تعذر تحميل الشركة")));
       }
       const payload = (await response.json()) as CompanyPayload;
       if (cancelled) return;
@@ -45,9 +49,9 @@ export default function EditCompanyPage() {
     }
 
     loadCompany().catch(async (error) => {
-      const message = error instanceof Error ? error.message : "Unable to load company";
+      const message = error instanceof Error ? error.message : tr("Unable to load company", "تعذر تحميل الشركة");
       if (!cancelled) {
-        await showErrorAlert("Unable to load company", message);
+        await showErrorAlert(tr("Unable to load company", "تعذر تحميل الشركة"), message);
         router.push("/companies");
       }
     });
@@ -55,7 +59,7 @@ export default function EditCompanyPage() {
     return () => {
       cancelled = true;
     };
-  }, [companyId, router]);
+  }, [companyId, router, language]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -73,12 +77,12 @@ export default function EditCompanyPage() {
 
     if (!response.ok) {
       await showErrorAlert(
-        "Unable to update company",
-        await getResponseError(response, "Please check your input and try again.")
+        tr("Unable to update company", "تعذر تحديث الشركة"),
+        await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
       );
       return;
     }
-    await showSuccessAlert("Company updated");
+    await showSuccessAlert(tr("Company updated", "تم تحديث الشركة"));
     router.push(`/companies/${companyId}`);
     router.refresh();
   }
@@ -86,35 +90,35 @@ export default function EditCompanyPage() {
   return (
     <main className="app-page">
       <header>
-        <Link href={`/companies/${companyId}`} className="text-sm text-mutedfg hover:text-fg">← Back to company</Link>
-        <h1 className="page-title mt-2">Edit company</h1>
-        <p className="page-subtitle">Update core company details.</p>
+        <Link href={`/companies/${companyId}`} className="text-sm text-mutedfg hover:text-fg">{tr("← Back to company", "← العودة إلى الشركة")}</Link>
+        <h1 className="page-title mt-2">{tr("Edit company", "تعديل الشركة")}</h1>
+        <p className="page-subtitle">{tr("Update core company details.", "تحديث بيانات الشركة الأساسية.")}</p>
       </header>
 
       <form className="panel max-w-2xl space-y-4 p-5" onSubmit={submit}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm">
-            Company name
-            <input className="input mt-1 w-full" placeholder="Company name" value={name} onChange={(event) => setName(event.target.value)} required disabled={loading} />
+            {tr("Company name", "اسم الشركة")}
+            <input className="input mt-1 w-full" placeholder={tr("Company name", "اسم الشركة")} value={name} onChange={(event) => setName(event.target.value)} required disabled={loading} />
           </label>
           <label className="text-sm">
-            Domain
+            {tr("Domain", "النطاق")}
             <input className="input mt-1 w-full" placeholder="acme.com" value={domain} onChange={(event) => setDomain(event.target.value)} disabled={loading} />
           </label>
           <label className="text-sm">
-            Industry
-            <input className="input mt-1 w-full" placeholder="Industry" value={industry} onChange={(event) => setIndustry(event.target.value)} disabled={loading} />
+            {tr("Industry", "القطاع")}
+            <input className="input mt-1 w-full" placeholder={tr("Industry", "القطاع")} value={industry} onChange={(event) => setIndustry(event.target.value)} disabled={loading} />
           </label>
           <label className="text-sm">
-            Size
+            {tr("Size", "الحجم")}
             <input className="input mt-1 w-full" placeholder="51-200" value={size} onChange={(event) => setSize(event.target.value)} disabled={loading} />
           </label>
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
-          <Link href={`/companies/${companyId}`} className="btn">Cancel</Link>
+          <Link href={`/companies/${companyId}`} className="btn">{tr("Cancel", "إلغاء")}</Link>
           <button className="btn btn-primary" type="submit" disabled={loading}>
-            {loading ? "Loading..." : "Save changes"}
+            {loading ? tr("Loading...", "جاري التحميل...") : tr("Save changes", "حفظ التغييرات")}
           </button>
         </div>
       </form>

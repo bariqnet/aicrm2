@@ -14,10 +14,13 @@ import {
   Handshake,
   Home,
   LineChart,
+  PhoneCall,
   UserRound,
   Users,
   type LucideIcon
 } from "lucide-react";
+import { LanguageToggle } from "@/components/LanguageToggle";
+import { useI18n } from "@/hooks/useI18n";
 import { SignOutButton } from "@/components/SignOutButton";
 import { cn } from "@/lib/utils";
 
@@ -27,35 +30,6 @@ type NavItem = {
   icon: LucideIcon;
 };
 
-const navSections: Array<{ label: string; items: NavItem[] }> = [
-  {
-    label: "Workspace",
-    items: [
-      { href: "/dashboard", label: "Dashboard", icon: Home },
-      { href: "/contacts", label: "Contacts", icon: Users },
-      { href: "/companies", label: "Companies", icon: Building2 },
-      { href: "/deals", label: "Deals", icon: Handshake },
-      { href: "/tasks", label: "Tasks", icon: CheckSquare }
-    ]
-  },
-  {
-    label: "Operations",
-    items: [
-      { href: "/invoices", label: "Invoices", icon: FileText },
-      { href: "/visits", label: "Visits", icon: UserRound },
-      { href: "/calendar", label: "Calendar", icon: CalendarDays },
-      { href: "/reports", label: "Reports", icon: LineChart }
-    ]
-  },
-  {
-    label: "System",
-    items: [
-      { href: "/profile", label: "Profile", icon: CircleUserRound },
-      { href: "/settings", label: "Settings", icon: Cog }
-    ]
-  }
-];
-
 type SidebarNavProps = {
   mobile?: boolean;
   className?: string;
@@ -64,6 +38,36 @@ type SidebarNavProps = {
 
 function SidebarLinks({ onNavigate }: { onNavigate?: () => void }) {
   const path = usePathname();
+  const { t } = useI18n();
+  const navSections: Array<{ label: string; items: NavItem[] }> = [
+    {
+      label: t("sidebar.section.workspace"),
+      items: [
+        { href: "/dashboard", label: t("nav.dashboard"), icon: Home },
+        { href: "/contacts", label: t("nav.contacts"), icon: Users },
+        { href: "/companies", label: t("nav.companies"), icon: Building2 },
+        { href: "/deals", label: t("nav.deals"), icon: Handshake },
+        { href: "/tasks", label: t("nav.tasks"), icon: CheckSquare }
+      ]
+    },
+    {
+      label: t("sidebar.section.operations"),
+      items: [
+        { href: "/invoices", label: t("nav.invoices"), icon: FileText },
+        { href: "/callops", label: t("nav.callops"), icon: PhoneCall },
+        { href: "/visits", label: t("nav.visits"), icon: UserRound },
+        { href: "/calendar", label: t("nav.calendar"), icon: CalendarDays },
+        { href: "/reports", label: t("nav.reports"), icon: LineChart }
+      ]
+    },
+    {
+      label: t("sidebar.section.system"),
+      items: [
+        { href: "/profile", label: t("nav.profile"), icon: CircleUserRound },
+        { href: "/settings", label: t("nav.settings"), icon: Cog }
+      ]
+    }
+  ];
 
   return (
     <nav className="space-y-4 overflow-y-auto pr-1">
@@ -103,6 +107,8 @@ function SidebarLinks({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 export function SidebarNav({ mobile = false, className, onNavigate }: SidebarNavProps) {
+  const { t } = useI18n();
+
   return (
     <aside
       className={cn(
@@ -113,24 +119,24 @@ export function SidebarNav({ mobile = false, className, onNavigate }: SidebarNav
       )}
     >
       <div className="mb-5 px-2">
-        <Link href="/dashboard" onClick={onNavigate} className="inline-flex flex-col gap-2">
+        <Link href="/dashboard" onClick={onNavigate} className="inline-flex">
           <Image
-            src="/logo.png"
+            src="/fav.png"
             alt="Que logo"
-            width={130}
-            height={42}
-            className="h-10 w-auto"
+            width={100}
+            height={32}
+            className="h-auto w-[100px]"
             priority
           />
-          <p className="text-[11px] uppercase tracking-[0.15em] text-mutedfg">AI-driven CRM</p>
         </Link>
       </div>
 
-      <button className="btn mb-5 w-full justify-start text-xs text-mutedfg">Default workspace</button>
+      <button className="btn mb-5 w-full justify-start text-xs text-mutedfg">{t("sidebar.defaultWorkspace")}</button>
 
       <SidebarLinks onNavigate={onNavigate} />
 
       <div className="mt-auto space-y-3 border-t border-border pt-3">
+        <LanguageToggle />
         <div className="text-xs text-mutedfg">alex@workspace.io</div>
         {mobile ? <SignOutButton className="btn w-full justify-center" /> : null}
       </div>

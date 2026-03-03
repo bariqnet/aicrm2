@@ -1,14 +1,21 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { InvoiceDetailActions } from "@/components/InvoiceDetailActions";
+import { InvoiceInlineEditor } from "@/components/InvoiceInlineEditor";
 import type { Activity, Company, Contact, Invoice } from "@/lib/crm-types";
-import { serverApiRequest, serverApiRequestOrNull, type ServerListResponse } from "@/lib/server-crm";
-import { fmtMoney } from "@/lib/utils";
+import { getDateLocale, getServerLanguage, pickByLanguage } from "@/lib/server-language";
+import {
+  serverApiRequest,
+  serverApiRequestOrNull,
+  SessionInvalidError,
+  type ServerListResponse
+} from "@/lib/server-crm";
 
-function fmtDateTime(value?: string | null): string {
+function fmtDateTime(value: string | null | undefined, locale: string): string {
   if (!value) return "-";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleString();
+  return parsed.toLocaleString(locale);
 }
 
 function statusClass(status: Invoice["status"]): string {
@@ -20,26 +27,61 @@ function statusClass(status: Invoice["status"]): string {
   return "bg-surface2 text-mutedfg";
 }
 
+function statusLabel(status: Invoice["status"], tr: (english: string, arabic: string) => string): string {
+  if (status === "DRAFT") return tr("Draft", "مسودة");
+  if (status === "SENT") return tr("Sent", "مرسلة");
+  if (status === "PARTIALLY_PAID") return tr("Partially paid", "مدفوعة جزئيًا");
+  if (status === "PAID") return tr("Paid", "مدفوعة");
+  if (status === "OVERDUE") return tr("Overdue", "متأخرة");
+  if (status === "VOID") return tr("Void", "ملغاة");
+  return status;
+}
+
 export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const language = await getServerLanguage();
+  const locale = getDateLocale(language);
+  const tr = (english: string, arabic: string) => pickByLanguage(language, english, arabic);
+
   const { id } = await params;
-  const invoice = await serverApiRequestOrNull<Invoice>(`/invoices/${id}`);
+  let invoice: Invoice | null = null;
+
+  try {
+    invoice = await serverApiRequestOrNull<Invoice>(`/invoices/${id}`);
+  } catch (error) {
+    if (error instanceof SessionInvalidError) {
+      redirect(`/auth/sign-in?next=/invoices/${id}`);
+    }
+    throw error;
+  }
+
   if (!invoice) notFound();
 
-  const [relatedContact, relatedCompany, activityPayload] = await Promise.all([
-    invoice.relatedType === "contact" && invoice.relatedId
-      ? serverApiRequestOrNull<Contact>(`/contacts/${invoice.relatedId}`)
-      : invoice.contactId
-        ? serverApiRequestOrNull<Contact>(`/contacts/${invoice.contactId}`)
-        : Promise.resolve(null),
-    invoice.relatedType === "company" && invoice.relatedId
-      ? serverApiRequestOrNull<Company>(`/companies/${invoice.relatedId}`)
-      : invoice.companyId
-        ? serverApiRequestOrNull<Company>(`/companies/${invoice.companyId}`)
-        : Promise.resolve(null),
-    serverApiRequest<ServerListResponse<Activity>>("/activities", {
-      query: { entityType: "invoice", entityId: id }
-    })
-  ]);
+  let relatedContact: Contact | null = null;
+  let relatedCompany: Company | null = null;
+  let activityPayload: ServerListResponse<Activity>;
+
+  try {
+    [relatedContact, relatedCompany, activityPayload] = await Promise.all([
+      invoice.relatedType === "contact" && invoice.relatedId
+        ? serverApiRequestOrNull<Contact>(`/contacts/${invoice.relatedId}`)
+        : invoice.contactId
+          ? serverApiRequestOrNull<Contact>(`/contacts/${invoice.contactId}`)
+          : Promise.resolve(null),
+      invoice.relatedType === "company" && invoice.relatedId
+        ? serverApiRequestOrNull<Company>(`/companies/${invoice.relatedId}`)
+        : invoice.companyId
+          ? serverApiRequestOrNull<Company>(`/companies/${invoice.companyId}`)
+          : Promise.resolve(null),
+      serverApiRequest<ServerListResponse<Activity>>("/activities", {
+        query: { entityType: "invoice", entityId: id }
+      })
+    ]);
+  } catch (error) {
+    if (error instanceof SessionInvalidError) {
+      redirect(`/auth/sign-in?next=/invoices/${id}`);
+    }
+    throw error;
+  }
 
   const activity = (activityPayload.rows ?? [])
     .filter((entry) => entry.entityType === "invoice" && entry.entityId === id)
@@ -48,65 +90,38 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   return (
     <main className="app-page">
       <header className="space-y-2">
-        <Link href="/invoices" className="text-sm text-mutedfg hover:text-fg">← Back to invoices</Link>
+        <Link href="/invoices" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to invoices", "← العودة إلى الفواتير")}</Link>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="page-title">Invoice detail</h1>
-            <p className="page-subtitle">Billing context, status, and linked records.</p>
+            <h1 className="page-title">{tr("Invoice detail", "تفاصيل الفاتورة")}</h1>
+            <p className="page-subtitle">{tr("Billing context, status, and linked records.", "سياق الفوترة والحالة والسجلات المرتبطة.")}</p>
           </div>
-          <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusClass(invoice.status)}`}>
-            {invoice.status}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusClass(invoice.status)}`}>
+              {statusLabel(invoice.status, tr)}
+            </span>
+            <InvoiceDetailActions invoiceId={id} />
+          </div>
         </div>
       </header>
 
-      <section className="panel p-4">
-        <div className="grid gap-2 text-sm sm:grid-cols-2">
-          <p>Invoice: <span className="font-medium">{invoice.invoiceNumber}</span></p>
-          <p>Title: <span className="text-mutedfg">{invoice.title}</span></p>
-          <p>Amount: <span className="text-mutedfg">{fmtMoney(invoice.amount, invoice.currency)}</span></p>
-          <p>Issued: <span className="text-mutedfg">{fmtDateTime(invoice.issuedAt)}</span></p>
-          <p>Due: <span className="text-mutedfg">{fmtDateTime(invoice.dueAt)}</span></p>
-          <p>Paid: <span className="text-mutedfg">{fmtDateTime(invoice.paidAt)}</span></p>
-          <p>
-            Related contact:{" "}
-            {relatedContact ? (
-              <Link href={`/contacts/${relatedContact.id}`} className="text-accent hover:underline">
-                {relatedContact.firstName} {relatedContact.lastName}
-              </Link>
-            ) : (
-              <span className="text-mutedfg">-</span>
-            )}
-          </p>
-          <p>
-            Related company:{" "}
-            {relatedCompany ? (
-              <Link href={`/companies/${relatedCompany.id}`} className="text-accent hover:underline">
-                {relatedCompany.name}
-              </Link>
-            ) : (
-              <span className="text-mutedfg">-</span>
-            )}
-          </p>
-        </div>
-        {invoice.notes ? (
-          <div className="mt-3 rounded-md border border-border bg-surface2 px-3 py-2 text-sm">
-            <p className="muted-label">Notes</p>
-            <p className="mt-1">{invoice.notes}</p>
-          </div>
-        ) : null}
-      </section>
+      <InvoiceInlineEditor
+        invoiceId={id}
+        initialInvoice={invoice}
+        initialRelatedContact={relatedContact}
+        initialRelatedCompany={relatedCompany}
+      />
 
       <section className="panel p-4">
-        <h2 className="text-sm font-semibold">Recent activity</h2>
+        <h2 className="text-sm font-semibold">{tr("Recent activity", "آخر الأنشطة")}</h2>
         {activity.length === 0 ? (
-          <p className="mt-2 text-sm text-mutedfg">No activity yet.</p>
+          <p className="mt-2 text-sm text-mutedfg">{tr("No activity yet.", "لا يوجد نشاط بعد.")}</p>
         ) : (
           <ul className="mt-2 space-y-2">
             {activity.slice(0, 8).map((entry) => (
               <li key={entry.id} className="rounded-md border border-border bg-surface2 px-3 py-2 text-sm">
                 <p className="font-medium">{entry.type}</p>
-                <p className="text-xs text-mutedfg">{fmtDateTime(entry.createdAt)}</p>
+                <p className="text-xs text-mutedfg">{fmtDateTime(entry.createdAt, locale)}</p>
               </li>
             ))}
           </ul>

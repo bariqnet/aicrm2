@@ -1,8 +1,12 @@
 import Link from "next/link";
 import type { Company } from "@/lib/crm-types";
 import { serverApiRequest, type ServerListResponse } from "@/lib/server-crm";
+import { getServerLanguage, pickByLanguage } from "@/lib/server-language";
 
 export default async function CompaniesPage() {
+  const language = await getServerLanguage();
+  const tr = (english: string, arabic: string) => pickByLanguage(language, english, arabic);
+
   const payload = await serverApiRequest<ServerListResponse<Company>>("/companies");
   const companies = payload.rows ?? [];
 
@@ -10,23 +14,23 @@ export default async function CompaniesPage() {
     <main className="app-page">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="page-title">Companies</h1>
-          <p className="page-subtitle">Account records with industry and ownership context.</p>
+          <h1 className="page-title">{tr("Companies", "الشركات")}</h1>
+          <p className="page-subtitle">{tr("Account records with industry and ownership context.", "سجلات الحسابات مع سياق القطاع والملكية.")}</p>
         </div>
-        <Link href="/companies/new" className="btn btn-primary">New company</Link>
+        <Link href="/companies/new" className="btn btn-primary">{tr("New company", "شركة جديدة")}</Link>
       </header>
 
       {companies.length === 0 ? (
-        <p className="panel panel-dashed p-10 text-sm text-mutedfg">No companies yet.</p>
+        <p className="panel panel-dashed p-10 text-sm text-mutedfg">{tr("No companies yet.", "لا توجد شركات بعد.")}</p>
       ) : (
         <div className="table-shell overflow-x-auto">
           <table className="min-w-[680px] w-full text-left text-sm">
             <thead className="border-b border-border bg-surface2 text-xs uppercase tracking-[0.1em] text-mutedfg">
               <tr>
-                <th className="px-4 py-3">Company</th>
-                <th className="px-4 py-3">Industry</th>
-                <th className="px-4 py-3">Domain</th>
-                <th className="px-4 py-3">Actions</th>
+                <th className="px-4 py-3">{tr("Company", "الشركة")}</th>
+                <th className="px-4 py-3">{tr("Industry", "القطاع")}</th>
+                <th className="px-4 py-3">{tr("Domain", "النطاق")}</th>
+                <th className="px-4 py-3">{tr("Actions", "الإجراءات")}</th>
               </tr>
             </thead>
             <tbody>
@@ -36,7 +40,7 @@ export default async function CompaniesPage() {
                   <td className="px-4 py-3 text-mutedfg">{company.industry ?? "-"}</td>
                   <td className="px-4 py-3 text-mutedfg">{company.domain ?? "-"}</td>
                   <td className="px-4 py-3">
-                    <Link href={`/companies/${company.id}`} className="text-accent hover:underline">Open</Link>
+                    <Link href={`/companies/${company.id}`} className="text-accent hover:underline">{tr("Open", "فتح")}</Link>
                   </td>
                 </tr>
               ))}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useI18n } from "@/hooks/useI18n";
 import type { Company } from "@/lib/crm-types";
 import {
   getResponseError,
@@ -22,6 +23,9 @@ type ContactPayload = {
 };
 
 export default function EditContactPage() {
+  const { language } = useI18n();
+  const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
+
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const [firstName, setFirstName] = useState("");
@@ -50,8 +54,8 @@ export default function EditContactPage() {
       if (contactResult.status !== "fulfilled" || !contactResult.value.ok) {
         const message =
           contactResult.status === "fulfilled"
-            ? await getResponseError(contactResult.value, "Unable to load contact")
-            : "Unable to load contact";
+            ? await getResponseError(contactResult.value, tr("Unable to load contact", "تعذر تحميل جهة الاتصال"))
+            : tr("Unable to load contact", "تعذر تحميل جهة الاتصال");
         throw new Error(message);
       }
 
@@ -75,9 +79,9 @@ export default function EditContactPage() {
     }
 
     loadData().catch(async (error) => {
-      const message = error instanceof Error ? error.message : "Unable to load contact";
+      const message = error instanceof Error ? error.message : tr("Unable to load contact", "تعذر تحميل جهة الاتصال");
       if (!cancelled) {
-        await showErrorAlert("Unable to load contact", message);
+        await showErrorAlert(tr("Unable to load contact", "تعذر تحميل جهة الاتصال"), message);
         router.push("/contacts");
       }
     });
@@ -85,7 +89,7 @@ export default function EditContactPage() {
     return () => {
       cancelled = true;
     };
-  }, [contactId, router]);
+  }, [contactId, router, language]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -109,17 +113,17 @@ export default function EditContactPage() {
 
       if (!response.ok) {
         await showErrorAlert(
-          "Unable to update contact",
-          await getResponseError(response, "Please check your input and try again.")
+          tr("Unable to update contact", "تعذر تحديث جهة الاتصال"),
+          await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
         );
         return;
       }
-      await showSuccessAlert("Contact updated");
+      await showSuccessAlert(tr("Contact updated", "تم تحديث جهة الاتصال"));
       router.push(`/contacts/${contactId}`);
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to update contact";
-      await showErrorAlert("Unable to update contact", message);
+      const message = error instanceof Error ? error.message : tr("Unable to update contact", "تعذر تحديث جهة الاتصال");
+      await showErrorAlert(tr("Unable to update contact", "تعذر تحديث جهة الاتصال"), message);
     } finally {
       setSaving(false);
     }
@@ -128,42 +132,42 @@ export default function EditContactPage() {
   return (
     <main className="app-page">
       <header>
-        <Link href={`/contacts/${contactId}`} className="text-sm text-mutedfg hover:text-fg">← Back to contact</Link>
-        <h1 className="page-title mt-2">Edit contact</h1>
-        <p className="page-subtitle">Update primary contact details.</p>
+        <Link href={`/contacts/${contactId}`} className="text-sm text-mutedfg hover:text-fg">{tr("← Back to contact", "← العودة إلى جهة الاتصال")}</Link>
+        <h1 className="page-title mt-2">{tr("Edit contact", "تعديل جهة الاتصال")}</h1>
+        <p className="page-subtitle">{tr("Update primary contact details.", "تحديث البيانات الأساسية لجهة الاتصال.")}</p>
       </header>
 
       <form className="panel max-w-3xl space-y-4 p-5" onSubmit={submit}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm">
-            First name
-            <input className="input mt-1 w-full" placeholder="First name" value={firstName} onChange={(event) => setFirstName(event.target.value)} required disabled={loading} />
+            {tr("First name", "الاسم الأول")}
+            <input className="input mt-1 w-full" placeholder={tr("First name", "الاسم الأول")} value={firstName} onChange={(event) => setFirstName(event.target.value)} required disabled={loading} />
           </label>
           <label className="text-sm">
-            Last name
-            <input className="input mt-1 w-full" placeholder="Last name" value={lastName} onChange={(event) => setLastName(event.target.value)} required disabled={loading} />
+            {tr("Last name", "الاسم الأخير")}
+            <input className="input mt-1 w-full" placeholder={tr("Last name", "الاسم الأخير")} value={lastName} onChange={(event) => setLastName(event.target.value)} required disabled={loading} />
           </label>
           <label className="text-sm">
-            Job title
-            <input className="input mt-1 w-full" placeholder="Job title" value={jobTitle} onChange={(event) => setJobTitle(event.target.value)} disabled={loading} />
+            {tr("Job title", "المسمى الوظيفي")}
+            <input className="input mt-1 w-full" placeholder={tr("Job title", "المسمى الوظيفي")} value={jobTitle} onChange={(event) => setJobTitle(event.target.value)} disabled={loading} />
           </label>
           <label className="text-sm">
-            Email
+            {tr("Email", "البريد الإلكتروني")}
             <input className="input mt-1 w-full" placeholder="name@company.com" value={email} onChange={(event) => setEmail(event.target.value)} disabled={loading} />
           </label>
           <label className="text-sm">
-            Phone
-            <input className="input mt-1 w-full" placeholder="Phone number" value={phone} onChange={(event) => setPhone(event.target.value)} disabled={loading} />
+            {tr("Phone", "الهاتف")}
+            <input className="input mt-1 w-full" placeholder={tr("Phone number", "رقم الهاتف")} value={phone} onChange={(event) => setPhone(event.target.value)} disabled={loading} />
           </label>
           <label className="text-sm">
-            Company
+            {tr("Company", "الشركة")}
             <select
               className="input mt-1 w-full"
               value={companyId}
               onChange={(event) => setCompanyId(event.target.value)}
               disabled={loading}
             >
-              <option value="">No company</option>
+              <option value="">{tr("No company", "بدون شركة")}</option>
               {companies.map((company) => (
                 <option key={company.id} value={company.id}>{company.name}</option>
               ))}
@@ -172,9 +176,9 @@ export default function EditContactPage() {
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
-          <Link href={`/contacts/${contactId}`} className="btn">Cancel</Link>
+          <Link href={`/contacts/${contactId}`} className="btn">{tr("Cancel", "إلغاء")}</Link>
           <button className="btn btn-primary" type="submit" disabled={loading || saving}>
-            {loading ? "Loading..." : saving ? "Saving..." : "Save changes"}
+            {loading ? tr("Loading...", "جاري التحميل...") : saving ? tr("Saving...", "جاري الحفظ...") : tr("Save changes", "حفظ التغييرات")}
           </button>
         </div>
       </form>

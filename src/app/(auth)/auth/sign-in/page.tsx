@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, type FormEvent, useState } from "react";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, EyeOff, LoaderCircle } from "lucide-react";
+import { useI18n } from "@/hooks/useI18n";
 import { apiRequest } from "@/lib/crm-api";
 import { normalizeSessionPayload, persistSession } from "@/lib/auth-flow";
-import { showErrorAlert, showSuccessAlert } from "@/lib/sweet-alert";
-import { signInSchema } from "@/lib/validators";
+import { showErrorAlert, showInfoAlert, showSuccessAlert } from "@/lib/sweet-alert";
 
 export default function SignInPage() {
   return (
@@ -18,20 +18,29 @@ export default function SignInPage() {
 }
 
 function SignInFallback() {
+  const { language } = useI18n();
+  const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
+
   return (
-    <main className="panel w-full overflow-hidden">
-      <div className="h-1 w-full bg-gradient-to-r from-fg via-mutedfg to-border" />
-      <div className="p-6">
-        <h1 className="page-title">Welcome back</h1>
-        <p className="mt-1 text-sm text-mutedfg">Loading sign-in form...</p>
+    <main className="mx-auto w-full max-w-[560px] animate-pulse">
+      <div className="rounded-2xl border border-border bg-surface p-6">
+        <h1 className="text-3xl font-semibold tracking-tight text-fg">{tr("Welcome back", "مرحبًا بعودتك")}</h1>
+        <p className="mt-2 text-sm text-mutedfg">{tr("Loading sign-in form...", "جاري تحميل نموذج الدخول...")}</p>
+        <div className="mt-6 h-11 rounded-xl border border-border bg-surface2" />
+        <div className="mt-3 h-11 rounded-xl border border-border bg-surface2" />
+        <div className="mt-4 h-11 rounded-xl border border-border bg-surface2" />
       </div>
     </main>
   );
 }
 
 function SignInPageContent() {
+  const { t, language } = useI18n();
+  const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
+  const isArabic = language === "ar";
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState("");
+
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -41,12 +50,18 @@ function SignInPageContent() {
     event.preventDefault();
     setError(null);
 
-    const validated = signInSchema.safeParse({ email, password });
-    if (!validated.success) {
-      const issue = validated.error.issues[0];
-      const message = issue ? `${issue.path}: ${issue.message}` : "Invalid form input";
+    const cleanIdentifier = identifier.trim();
+    if (cleanIdentifier.length < 3) {
+      const message = tr("Username is too short.", "اسم المستخدم قصير جدًا.");
       setError(message);
-      await showErrorAlert("Invalid sign-in data", message);
+      await showErrorAlert(t("signin.invalidDataTitle"), message);
+      return;
+    }
+
+    if (password.length < 8) {
+      const message = tr("Password must be at least 8 characters.", "يجب أن تكون كلمة المرور 8 أحرف على الأقل.");
+      setError(message);
+      await showErrorAlert(t("signin.invalidDataTitle"), message);
       return;
     }
 
@@ -54,10 +69,17 @@ function SignInPageContent() {
     try {
       const authPayload = await apiRequest<unknown>("/auth/login", {
         method: "POST",
-        body: validated.data
+        body: {
+          email: cleanIdentifier,
+          username: cleanIdentifier,
+          login: cleanIdentifier,
+          password
+        }
       });
+
+      const fallbackEmail = cleanIdentifier.includes("@") ? cleanIdentifier : `${cleanIdentifier}@que.local`;
       const sessionPayload = normalizeSessionPayload(authPayload, {
-        email: validated.data.email
+        email: fallbackEmail
       });
 
       if (!sessionPayload) {
@@ -65,93 +87,126 @@ function SignInPageContent() {
       }
 
       await persistSession(sessionPayload);
-      await showSuccessAlert("Signed in", "Redirecting to your workspace");
+      await showSuccessAlert(t("signin.successTitle"), t("signin.successText"));
       const nextParam = searchParams.get("next");
       const nextPath = nextParam && nextParam.startsWith("/") ? nextParam : "/dashboard";
       window.location.assign(nextPath);
     } catch (submitError) {
-      const message = submitError instanceof Error ? submitError.message : "Unable to sign in";
+      const message = submitError instanceof Error ? submitError.message : t("signin.failureFallback");
       setError(message);
-      await showErrorAlert("Sign in failed", message);
+      await showErrorAlert(t("signin.failureTitle"), message);
     } finally {
       setSubmitting(false);
     }
   }
 
+  async function onForgotPassword() {
+    await showInfoAlert(
+      tr("Password reset is not configured yet.", "إعادة تعيين كلمة المرور غير مفعلة بعد."),
+      tr("Please contact your administrator.", "يرجى التواصل مع مسؤول النظام.")
+    );
+  }
+
   return (
-    <main className="panel w-full overflow-hidden">
-      <div className="h-1 w-full bg-gradient-to-r from-fg via-mutedfg to-border" />
-      <div className="p-6 sm:p-7">
-        <div className="flex items-center justify-between text-xs text-mutedfg">
-          <span>Sign in</span>
-          <span>Que workspace</span>
+    <main className="mx-auto w-full max-w-[560px]">
+      <section className="rounded-2xl border border-border bg-surface p-5 shadow-[0_12px_32px_rgba(15,23,42,0.06)] sm:p-7">
+        <div className="mb-6">
+          <p className="text-xs font-medium uppercase tracking-[0.12em] text-mutedfg">
+            {tr("Secure sign in", "تسجيل دخول آمن")}
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-fg">{tr("Welcome back", "مرحبًا بعودتك")}</h1>
+          <p className="mt-1 text-sm text-mutedfg">
+            {tr("Use your username and password to access Que.", "استخدم اسم المستخدم وكلمة المرور للوصول إلى كيو.")}
+          </p>
         </div>
 
-        <h1 className="mt-4 text-2xl font-semibold tracking-tight">Welcome back to Que</h1>
-        <p className="mt-1 text-sm text-mutedfg">Access your workspace account.</p>
-
         {searchParams.get("next") ? (
-          <p className="mt-3 rounded-md border border-border bg-surface2 px-3 py-2 text-xs text-mutedfg">
-            You were redirected here because this page requires authentication.
+          <p className="mb-4 rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-mutedfg">
+            {t("signin.redirectedInfo")}
           </p>
         ) : null}
 
-        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
-          <label className="block space-y-1.5 text-sm">
-            <span className="text-mutedfg">Work email</span>
+        <form className="space-y-4" onSubmit={onSubmit}>
+          <label className="block space-y-1.5">
+            <span className="text-sm font-medium text-fg">{tr("Username", "اسم المستخدم")}</span>
             <input
-              className="input w-full"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              type="email"
-              placeholder="you@company.com"
-              autoComplete="email"
+              className="input h-11 w-full rounded-xl border-border bg-surface2 px-3"
+              value={identifier}
+              onChange={(event) => setIdentifier(event.target.value)}
+              type="text"
+              placeholder={tr("Enter username or email", "أدخل اسم المستخدم أو البريد الإلكتروني")}
+              autoComplete="username"
               required
             />
           </label>
 
-          <label className="block space-y-1.5 text-sm">
-            <span className="text-mutedfg">Password</span>
+          <label className="block space-y-1.5">
+            <span className="text-sm font-medium text-fg">{t("signin.password")}</span>
             <div className="relative">
               <input
-                className="input w-full pr-11"
+                className={[
+                  "input h-11 w-full rounded-xl border-border bg-surface2 px-3",
+                  isArabic ? "pl-11" : "pr-11"
+                ].join(" ")}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
+                placeholder={t("signin.passwordPlaceholder")}
                 autoComplete="current-password"
                 required
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 inline-flex w-10 items-center justify-center text-mutedfg hover:text-fg"
+                className={[
+                  "absolute inset-y-0 inline-flex w-10 items-center justify-center text-mutedfg transition hover:text-fg",
+                  isArabic ? "left-0" : "right-0"
+                ].join(" ")}
                 onClick={() => setShowPassword((value) => !value)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-label={showPassword ? t("signin.hidePassword") : t("signin.showPassword")}
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </label>
 
+          <div className="flex items-center justify-end">
+            <button
+              className="text-sm text-mutedfg transition hover:text-fg"
+              onClick={onForgotPassword}
+              type="button"
+            >
+              {tr("Forgot password?", "نسيت كلمة المرور؟")}
+            </button>
+          </div>
+
           {error ? (
-            <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
+            <p className="rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
               {error}
             </p>
           ) : null}
 
-          <button type="submit" className="btn btn-primary w-full" disabled={submitting}>
-            {submitting ? "Signing in..." : "Sign in"}
-            {!submitting ? <ArrowRight size={14} /> : null}
+          <button className="btn btn-primary h-11 w-full rounded-xl text-sm font-semibold" type="submit" disabled={submitting}>
+            {submitting ? (
+              <>
+                <LoaderCircle size={16} className="animate-spin" />
+                {t("signin.submitting")}
+              </>
+            ) : (
+              <>
+                {t("signin.submit")}
+                {isArabic ? <ArrowLeft size={15} /> : <ArrowRight size={15} />}
+              </>
+            )}
           </button>
         </form>
 
-        <div className="mt-5 flex items-center justify-between text-sm text-mutedfg">
-          <span>New to Que?</span>
-          <Link className="text-accent hover:underline" href="/auth/sign-up">
-            Create account
+        <p className="mt-5 text-sm text-mutedfg">
+          {t("signin.newToQue")}{" "}
+          <Link className="font-medium text-fg hover:underline" href="/auth/sign-up">
+            {t("signin.createAccount")}
           </Link>
-        </div>
-      </div>
+        </p>
+      </section>
     </main>
   );
 }

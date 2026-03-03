@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { useI18n } from "@/hooks/useI18n";
 import type { Company, Contact, Deal, Task } from "@/lib/crm-types";
 import {
   getResponseError,
@@ -20,6 +21,9 @@ function toIsoDateTime(value: string): string | undefined {
 }
 
 export default function NewTaskPage() {
+  const { language } = useI18n();
+  const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
+
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [relatedType, setRelatedType] = useState<RelatedType>("contact");
@@ -98,7 +102,7 @@ export default function NewTaskPage() {
 
     const trimmedRelatedId = relatedId.trim();
     if (!trimmedRelatedId) {
-      await showErrorAlert("Missing related ID", "Select or enter the related record ID.");
+      await showErrorAlert(tr("Missing related ID", "المعرّف المرتبط مفقود"), tr("Select or enter the related record ID.", "اختر أو أدخل معرّف السجل المرتبط."));
       return;
     }
 
@@ -118,17 +122,17 @@ export default function NewTaskPage() {
 
       if (!response.ok) {
         await showErrorAlert(
-          "Unable to create task",
-          await getResponseError(response, "Please check your input and try again.")
+          tr("Unable to create task", "تعذر إنشاء المهمة"),
+          await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
         );
         return;
       }
-      await showSuccessAlert("Task created");
+      await showSuccessAlert(tr("Task created", "تم إنشاء المهمة"));
       router.push("/tasks");
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to create task";
-      await showErrorAlert("Unable to create task", message);
+      const message = error instanceof Error ? error.message : tr("Unable to create task", "تعذر إنشاء المهمة");
+      await showErrorAlert(tr("Unable to create task", "تعذر إنشاء المهمة"), message);
     } finally {
       setSaving(false);
     }
@@ -137,19 +141,19 @@ export default function NewTaskPage() {
   return (
     <main className="app-page">
       <header>
-        <Link href="/tasks" className="text-sm text-mutedfg hover:text-fg">← Back to tasks</Link>
-        <h1 className="page-title mt-2">New task</h1>
-        <p className="page-subtitle">Create a follow-up tied to a record in the workspace.</p>
+        <Link href="/tasks" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to tasks", "← العودة إلى المهام")}</Link>
+        <h1 className="page-title mt-2">{tr("New task", "مهمة جديدة")}</h1>
+        <p className="page-subtitle">{tr("Create a follow-up tied to a record in the workspace.", "أنشئ متابعة مرتبطة بسجل داخل مساحة العمل.")}</p>
       </header>
 
       <form className="panel max-w-3xl space-y-4 p-5" onSubmit={submit}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm sm:col-span-2">
-            Task title
-            <input className="input mt-1 w-full" placeholder="Task title" value={title} onChange={(event) => setTitle(event.target.value)} required />
+            {tr("Task title", "عنوان المهمة")}
+            <input className="input mt-1 w-full" placeholder={tr("Task title", "عنوان المهمة")} value={title} onChange={(event) => setTitle(event.target.value)} required />
           </label>
           <label className="text-sm">
-            Related type
+            {tr("Related type", "نوع الارتباط")}
             <select
               className="input mt-1 w-full"
               value={relatedType}
@@ -158,18 +162,18 @@ export default function NewTaskPage() {
                 setRelatedId("");
               }}
             >
-              <option value="contact">Contact</option>
-              <option value="company">Company</option>
-              <option value="deal">Deal</option>
-              <option value="task">Task</option>
+              <option value="contact">{tr("Contact", "جهة اتصال")}</option>
+              <option value="company">{tr("Company", "شركة")}</option>
+              <option value="deal">{tr("Deal", "صفقة")}</option>
+              <option value="task">{tr("Task", "مهمة")}</option>
             </select>
           </label>
           <label className="text-sm">
-            Due date (optional)
+            {tr("Due date (optional)", "تاريخ الاستحقاق (اختياري)")}
             <input className="input mt-1 w-full" type="date" value={dueAt} onChange={(event) => setDueAt(event.target.value)} />
           </label>
           <label className="text-sm sm:col-span-2">
-            Related record
+            {tr("Related record", "السجل المرتبط")}
             <select
               className="input mt-1 w-full"
               value={relatedId}
@@ -178,29 +182,19 @@ export default function NewTaskPage() {
               required
             >
               <option value="">
-                {loadingOptions ? "Loading records..." : `Select ${relatedType}`}
+                {loadingOptions ? tr("Loading records...", "جاري تحميل السجلات...") : `${tr("Select", "اختر")} ${relatedType}`}
               </option>
               {relatedOptions.map((option) => (
                 <option key={option.id} value={option.id}>{option.label}</option>
               ))}
             </select>
           </label>
-          <label className="text-sm sm:col-span-2">
-            Or paste related ID
-            <input
-              className="input mt-1 w-full"
-              placeholder="Paste ID if not listed"
-              value={relatedId}
-              onChange={(event) => setRelatedId(event.target.value)}
-              required
-            />
-          </label>
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
-          <Link href="/tasks" className="btn">Cancel</Link>
+          <Link href="/tasks" className="btn">{tr("Cancel", "إلغاء")}</Link>
           <button className="btn btn-primary" type="submit" disabled={saving}>
-            {saving ? "Creating..." : "Create task"}
+            {saving ? tr("Creating...", "جاري الإنشاء...") : tr("Create task", "إنشاء مهمة")}
           </button>
         </div>
       </form>

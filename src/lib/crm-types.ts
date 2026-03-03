@@ -130,6 +130,11 @@ export type Invite = {
 export const INVOICE_STATUS_VALUES = ["DRAFT", "SENT", "PARTIALLY_PAID", "PAID", "OVERDUE", "VOID"] as const;
 export type InvoiceStatus = (typeof INVOICE_STATUS_VALUES)[number];
 export type InvoiceRelatedType = "contact" | "company";
+export type InvoiceLineItem = {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+};
 
 export type Invoice = {
   id: string;
@@ -150,6 +155,7 @@ export type Invoice = {
   paidAt: string | null;
   createdAt: string | null;
   updatedAt: string | null;
+  items?: InvoiceLineItem[] | null;
 };
 
 // Visits

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useI18n } from "@/hooks/useI18n";
 import { listCompaniesApi, listContactsApi, listDealsApi } from "@/lib/api";
 import { useUIStore } from "@/store/ui-store";
 
@@ -8,6 +9,7 @@ type Hit = { id: string; name: string; type: "contact" | "company" | "deal" };
 
 export function CommandPalette() {
   const { commandOpen, setCommandOpen, openDrawer } = useUIStore();
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<Hit[]>([]);
 
@@ -56,7 +58,13 @@ export function CommandPalette() {
       onClick={() => setCommandOpen(false)}
     >
       <div className="panel w-full max-w-2xl p-3" onClick={(e) => e.stopPropagation()}>
-        <input className="input mb-2 w-full" autoFocus placeholder="Search everything..." value={query} onChange={(e) => setQuery(e.target.value)} />
+        <input
+          className="input mb-2 w-full"
+          autoFocus
+          placeholder={t("command.searchPlaceholder")}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
         <div className="space-y-1">
           {results.map((r) => (
             <button
@@ -68,9 +76,10 @@ export function CommandPalette() {
               }}
             >
               <span>{r.name}</span>
-              <span className="text-xs uppercase text-mutedfg">{r.type}</span>
+              <span className="text-xs uppercase text-mutedfg">{t(`command.type.${r.type}`)}</span>
             </button>
           ))}
+          {results.length === 0 ? <p className="px-3 py-2 text-sm text-mutedfg">{t("command.empty")}</p> : null}
         </div>
       </div>
     </div>

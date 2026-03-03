@@ -29,9 +29,10 @@ declare namespace __next_route_internal_types__ {
     S extends `${string}${SearchOrHash}` ? never : S
 
   type StaticRoutes = 
-    | `/api/auth/refresh`
-    | `/api/auth/me`
+    | `/api/ai/relationship-intelligence`
     | `/api/activities`
+    | `/api/auth/me`
+    | `/api/auth/refresh`
     | `/api/auth/sign-in`
     | `/api/auth/sign-out`
     | `/api/auth/sign-up`
@@ -42,13 +43,13 @@ declare namespace __next_route_internal_types__ {
     | `/api/contacts`
     | `/api/deals`
     | `/api/invites/accept`
-    | `/api/invites`
     | `/api/invoices`
+    | `/api/invites`
     | `/api/memberships`
     | `/api/notes`
     | `/api/notifications/mark-all-read`
-    | `/api/onboarding/invites`
     | `/api/notifications`
+    | `/api/onboarding/invites`
     | `/api/onboarding/stages`
     | `/api/onboarding/workspace`
     | `/api/reminders`
@@ -60,47 +61,52 @@ declare namespace __next_route_internal_types__ {
     | `/api/workspaces`
     | `/api/workspaces/switch`
     | `/api/visits`
-    | `/calendar`
-    | `/companies/new`
+    | `/`
+    | `/callops`
     | `/companies`
-    | `/contacts/import`
+    | `/companies/new`
+    | `/calendar`
     | `/contacts/new`
-    | `/dashboard`
-    | `/deals`
     | `/contacts`
-    | `/invoices`
+    | `/contacts/import`
+    | `/dashboard`
     | `/deals/new`
-    | `/profile`
+    | `/deals`
     | `/invoices/new`
+    | `/`
+    | `/invoices`
+    | `/profile`
     | `/reports`
-    | `/tasks/new`
     | `/settings`
     | `/tasks`
+    | `/tasks/new`
     | `/visits`
-    | `/auth`
     | `/auth/sign-in`
     | `/auth/sign-up`
+    | `/auth`
     | `/onboarding`
   type DynamicRoutes<T extends string = string> = 
     | `/api/companies/${SafeSlug<T>}`
     | `/api/contacts/${SafeSlug<T>}`
     | `/api/deals/${SafeSlug<T>}`
-    | `/api/invites/${SafeSlug<T>}`
     | `/api/invoices/${SafeSlug<T>}`
-    | `/api/notes/${SafeSlug<T>}`
+    | `/api/invites/${SafeSlug<T>}`
     | `/api/memberships/${SafeSlug<T>}`
     | `/api/notifications/${SafeSlug<T>}`
+    | `/api/notes/${SafeSlug<T>}`
     | `/api/reminders/${SafeSlug<T>}`
     | `/api/stages/${SafeSlug<T>}`
     | `/api/tasks/${SafeSlug<T>}`
     | `/api/visits/${SafeSlug<T>}`
+    | `/print/invoices/${SafeSlug<T>}`
+    | `/companies/${SafeSlug<T>}/edit`
     | `/companies/${SafeSlug<T>}`
     | `/contacts/${SafeSlug<T>}/edit`
     | `/contacts/${SafeSlug<T>}`
-    | `/companies/${SafeSlug<T>}/edit`
     | `/deals/${SafeSlug<T>}/edit`
-    | `/invoices/${SafeSlug<T>}`
     | `/deals/${SafeSlug<T>}`
+    | `/invoices/${SafeSlug<T>}/edit`
+    | `/invoices/${SafeSlug<T>}`
     | `/tasks/${SafeSlug<T>}`
     | `/auth/invite/${SafeSlug<T>}`
 

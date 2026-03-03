@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useI18n } from "@/hooks/useI18n";
 
 export function ModalForm({
   title,
@@ -11,6 +12,9 @@ export function ModalForm({
   fields: { name: string; label: string; type?: string }[];
   onSubmit: (vals: Record<string, string>) => Promise<void>;
 }) {
+  const { language } = useI18n();
+  const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
+
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   return (
@@ -37,8 +41,8 @@ export function ModalForm({
               </label>
             ))}
             <div className="flex justify-end gap-2">
-              <button type="button" className="btn" onClick={() => setOpen(false)}>Cancel</button>
-              <button disabled={loading} className="btn btn-primary">Save</button>
+              <button type="button" className="btn" onClick={() => setOpen(false)}>{tr("Cancel", "إلغاء")}</button>
+              <button disabled={loading} className="btn btn-primary">{tr("Save", "حفظ")}</button>
             </div>
           </form>
         </div>

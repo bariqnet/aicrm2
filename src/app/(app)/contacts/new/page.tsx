@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Building2, Link2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
+import { useI18n } from "@/hooks/useI18n";
 import {
   getResponseError,
   showErrorAlert,
@@ -21,6 +22,9 @@ type DealOption = {
 };
 
 export default function NewContactPage() {
+  const { language } = useI18n();
+  const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
+
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -86,8 +90,8 @@ export default function NewContactPage() {
 
       if (!response.ok) {
         await showErrorAlert(
-          "Unable to create contact",
-          await getResponseError(response, "Please check your input and try again.")
+          tr("Unable to create contact", "تعذر إنشاء جهة الاتصال"),
+          await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
         );
         return;
       }
@@ -102,13 +106,13 @@ export default function NewContactPage() {
         });
       }
 
-      await showSuccessAlert("Contact created");
+      await showSuccessAlert(tr("Contact created", "تم إنشاء جهة الاتصال"));
       router.push("/contacts");
       router.refresh();
     } catch {
       await showErrorAlert(
-        "Unable to create contact",
-        "Something went wrong. Please check your connection and try again."
+        tr("Unable to create contact", "تعذر إنشاء جهة الاتصال"),
+        tr("Something went wrong. Please check your connection and try again.", "حدث خطأ ما. يرجى التحقق من الاتصال والمحاولة مرة أخرى.")
       );
     } finally {
       setLoading(false);
@@ -118,15 +122,15 @@ export default function NewContactPage() {
   return (
     <main className="app-page">
       <header>
-        <Link href="/contacts" className="text-sm text-mutedfg hover:text-fg">← Back to contacts</Link>
-        <h1 className="page-title mt-2">New contact</h1>
-        <p className="page-subtitle">Capture person details, account link, and opportunity context.</p>
+        <Link href="/contacts" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to contacts", "← العودة إلى جهات الاتصال")}</Link>
+        <h1 className="page-title mt-2">{tr("New contact", "جهة اتصال جديدة")}</h1>
+        <p className="page-subtitle">{tr("Capture person details, account link, and opportunity context.", "سجّل تفاصيل الشخص وربط الحساب وسياق الفرصة.")}</p>
       </header>
 
       <form className="panel max-w-3xl space-y-4 p-5" onSubmit={submit}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm sm:col-span-2">
-            Account
+            {tr("Account", "الحساب")}
             <div className="relative mt-1">
               <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-mutedfg" />
               <select
@@ -134,7 +138,7 @@ export default function NewContactPage() {
                 onChange={(event) => setCompanyId(event.target.value)}
                 value={companyId}
               >
-                <option value="">Select account</option>
+                <option value="">{tr("Select account", "اختر حسابًا")}</option>
                 {companies.map((company) => (
                   <option key={company.id} value={company.id}>{company.name}</option>
                 ))}
@@ -143,32 +147,32 @@ export default function NewContactPage() {
           </label>
 
           <label className="text-sm">
-            First name <span className="text-red-500">*</span>
-            <input className="input mt-1 w-full" onChange={(event) => setFirstName(event.target.value)} placeholder="First" required value={firstName} />
+            {tr("First name", "الاسم الأول")} <span className="text-red-500">*</span>
+            <input className="input mt-1 w-full" onChange={(event) => setFirstName(event.target.value)} placeholder={tr("First", "الاسم الأول")} required value={firstName} />
           </label>
 
           <label className="text-sm">
-            Last name <span className="text-red-500">*</span>
-            <input className="input mt-1 w-full" onChange={(event) => setLastName(event.target.value)} placeholder="Last" required value={lastName} />
+            {tr("Last name", "الاسم الأخير")} <span className="text-red-500">*</span>
+            <input className="input mt-1 w-full" onChange={(event) => setLastName(event.target.value)} placeholder={tr("Last", "الاسم الأخير")} required value={lastName} />
           </label>
 
           <label className="text-sm">
-            Email
+            {tr("Email", "البريد الإلكتروني")}
             <input className="input mt-1 w-full" onChange={(event) => setEmail(event.target.value)} placeholder="name@company.com" type="email" value={email} />
           </label>
 
           <label className="text-sm">
-            Phone
-            <input className="input mt-1 w-full" onChange={(event) => setPhone(event.target.value)} placeholder="Phone number" value={phone} />
+            {tr("Phone", "الهاتف")}
+            <input className="input mt-1 w-full" onChange={(event) => setPhone(event.target.value)} placeholder={tr("Phone number", "رقم الهاتف")} value={phone} />
           </label>
 
           <label className="text-sm">
-            Title (optional)
-            <input className="input mt-1 w-full" onChange={(event) => setJobTitle(event.target.value)} placeholder="Co-founder, CEO" value={jobTitle} />
+            {tr("Title (optional)", "المنصب (اختياري)")}
+            <input className="input mt-1 w-full" onChange={(event) => setJobTitle(event.target.value)} placeholder={tr("Co-founder, CEO", "شريك مؤسس، مدير تنفيذي")} value={jobTitle} />
           </label>
 
           <label className="text-sm">
-            Opportunity (optional)
+            {tr("Opportunity (optional)", "الفرصة (اختياري)")}
             <div className="relative mt-1">
               <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-mutedfg" />
               <select
@@ -176,7 +180,7 @@ export default function NewContactPage() {
                 onChange={(event) => setOpportunityId(event.target.value)}
                 value={opportunityId}
               >
-                <option value="">No opportunity</option>
+                <option value="">{tr("No opportunity", "بدون فرصة")}</option>
                 {deals.map((deal) => (
                   <option key={deal.id} value={deal.id}>{deal.title}</option>
                 ))}
@@ -186,9 +190,9 @@ export default function NewContactPage() {
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
-          <Link href="/contacts" className="btn">Cancel</Link>
+          <Link href="/contacts" className="btn">{tr("Cancel", "إلغاء")}</Link>
           <button className="btn btn-primary" disabled={loading} type="submit">
-            {loading ? "Creating..." : "Create contact"}
+            {loading ? tr("Creating...", "جاري الإنشاء...") : tr("Create contact", "إنشاء جهة اتصال")}
           </button>
         </div>
       </form>

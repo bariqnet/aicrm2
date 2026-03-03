@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useI18n } from "@/hooks/useI18n";
 import type { Contact, Visit, VisitStatus } from "@/lib/crm-types";
 import {
   showErrorAlert,
@@ -9,6 +10,16 @@ import {
 } from "@/lib/sweet-alert";
 
 export default function VisitsPage() {
+  const { language } = useI18n();
+  const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
+  const visitStatusLabel = (status: VisitStatus) => (
+    status === "COMPLETED"
+      ? tr("Completed", "مكتملة")
+      : status === "CANCELLED"
+        ? tr("Cancelled", "ملغاة")
+        : tr("Scheduled", "مجدولة")
+  );
+
   const [visits, setVisits] = useState<Visit[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [contactId, setContactId] = useState("");
@@ -30,12 +41,12 @@ export default function VisitsPage() {
         | { rows?: Visit[]; error?: string }
         | null;
       if (!response.ok) {
-        throw new Error(payload?.error ?? "Unable to load visits");
+        throw new Error(payload?.error ?? tr("Unable to load visits", "تعذر تحميل الزيارات"));
       }
       setVisits(payload?.rows ?? []);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to load visits";
-      await showErrorAlert("Visits load failed", message);
+      const message = error instanceof Error ? error.message : tr("Unable to load visits", "تعذر تحميل الزيارات");
+      await showErrorAlert(tr("Visits load failed", "فشل تحميل الزيارات"), message);
     }
   }
 
@@ -64,14 +75,14 @@ export default function VisitsPage() {
   async function create() {
     if (!contactId || !date || !time || !reason) {
       await showInfoAlert(
-        "Missing details",
-        "Please fill contact, date, time, and reason before adding a visit."
+        tr("Missing details", "بيانات ناقصة"),
+        tr("Please fill contact, date, time, and reason before adding a visit.", "يرجى تعبئة جهة الاتصال والتاريخ والوقت والسبب قبل إضافة زيارة.")
       );
       return;
     }
 
     if (!selectedContact) {
-      await showErrorAlert("Invalid contact", "Choose a valid contact before saving the visit.");
+      await showErrorAlert(tr("Invalid contact", "جهة اتصال غير صالحة"), tr("Choose a valid contact before saving the visit.", "اختر جهة اتصال صالحة قبل حفظ الزيارة."));
       return;
     }
 
@@ -93,7 +104,7 @@ export default function VisitsPage() {
 
       const payload = (await response.json().catch(() => null)) as { error?: string } | null;
       if (!response.ok) {
-        throw new Error(payload?.error ?? "Unable to create visit");
+        throw new Error(payload?.error ?? tr("Unable to create visit", "تعذر إنشاء الزيارة"));
       }
 
       setContactId("");
@@ -102,10 +113,13 @@ export default function VisitsPage() {
       setReason("");
       setDurationMinutes("30");
       await loadVisits();
-      await showSuccessAlert("Visit scheduled", `${selectedContact.firstName} ${selectedContact.lastName} on ${date} at ${time}`);
+      await showSuccessAlert(
+        tr("Visit scheduled", "تمت جدولة الزيارة"),
+        `${selectedContact.firstName} ${selectedContact.lastName} ${tr("on", "في")} ${date} ${tr("at", "الساعة")} ${time}`
+      );
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to create visit";
-      await showErrorAlert("Visit creation failed", message);
+      const message = error instanceof Error ? error.message : tr("Unable to create visit", "تعذر إنشاء الزيارة");
+      await showErrorAlert(tr("Visit creation failed", "فشل إنشاء الزيارة"), message);
     } finally {
       setLoading(false);
     }
@@ -121,13 +135,13 @@ export default function VisitsPage() {
       });
       const payload = (await response.json().catch(() => null)) as { error?: string } | null;
       if (!response.ok) {
-        throw new Error(payload?.error ?? "Unable to update visit");
+        throw new Error(payload?.error ?? tr("Unable to update visit", "تعذر تحديث الزيارة"));
       }
       await loadVisits();
-      await showSuccessAlert("Visit updated", `Status changed to ${status}`);
+      await showSuccessAlert(tr("Visit updated", "تم تحديث الزيارة"), `${tr("Status changed to", "تم تغيير الحالة إلى")} ${visitStatusLabel(status)}`);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to update visit";
-      await showErrorAlert("Visit update failed", message);
+      const message = error instanceof Error ? error.message : tr("Unable to update visit", "تعذر تحديث الزيارة");
+      await showErrorAlert(tr("Visit update failed", "فشل تحديث الزيارة"), message);
     } finally {
       setLoading(false);
     }
@@ -136,15 +150,15 @@ export default function VisitsPage() {
   return (
     <main className="app-page">
       <header>
-        <h1 className="page-title">Visits</h1>
-        <p className="page-subtitle">Plan, confirm, and track every customer visit.</p>
+        <h1 className="page-title">{tr("Visits", "الزيارات")}</h1>
+        <p className="page-subtitle">{tr("Plan, confirm, and track every customer visit.", "خطط وأكّد وتابع كل زيارة عميل.")}</p>
       </header>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <section className="panel space-y-3 p-4">
-          <h2 className="text-sm font-semibold">Schedule visit</h2>
+          <h2 className="text-sm font-semibold">{tr("Schedule visit", "جدولة زيارة")}</h2>
           <select className="input w-full" value={contactId} onChange={(event) => setContactId(event.target.value)}>
-            <option value="">Select contact</option>
+            <option value="">{tr("Select contact", "اختر جهة اتصال")}</option>
             {contacts.map((contact) => (
               <option key={contact.id} value={contact.id}>
                 {contact.firstName} {contact.lastName}
@@ -153,7 +167,7 @@ export default function VisitsPage() {
           </select>
           <input className="input w-full" type="date" value={date} onChange={(event) => setDate(event.target.value)} />
           <input className="input w-full" type="time" value={time} onChange={(event) => setTime(event.target.value)} />
-          <input className="input w-full" placeholder="Reason" value={reason} onChange={(event) => setReason(event.target.value)} />
+          <input className="input w-full" placeholder={tr("Reason", "السبب")} value={reason} onChange={(event) => setReason(event.target.value)} />
           <input
             className="input w-full"
             type="number"
@@ -161,17 +175,17 @@ export default function VisitsPage() {
             step="5"
             value={durationMinutes}
             onChange={(event) => setDurationMinutes(event.target.value)}
-            placeholder="Duration in minutes"
+            placeholder={tr("Duration in minutes", "المدة بالدقائق")}
           />
           <button type="button" className="btn btn-primary" onClick={create} disabled={loading}>
-            {loading ? "Saving..." : "Add visit"}
+            {loading ? tr("Saving...", "جاري الحفظ...") : tr("Add visit", "إضافة زيارة")}
           </button>
         </section>
 
         <section className="panel space-y-2 p-4">
-          <h2 className="text-sm font-semibold">Scheduled visits</h2>
+          <h2 className="text-sm font-semibold">{tr("Scheduled visits", "الزيارات المجدولة")}</h2>
           {visits.length === 0 ? (
-            <p className="text-sm text-mutedfg">No visits yet.</p>
+            <p className="text-sm text-mutedfg">{tr("No visits yet.", "لا توجد زيارات بعد.")}</p>
           ) : (
             visits.map((visit) => (
               <article key={visit.id} className="rounded-md border border-border bg-surface2 p-3">
@@ -179,11 +193,11 @@ export default function VisitsPage() {
                 <p className="text-sm text-mutedfg">
                   {visit.date} {visit.time} · {visit.reason}
                 </p>
-                <p className="mt-1 text-xs text-mutedfg">{visit.durationMinutes} minutes</p>
+                <p className="mt-1 text-xs text-mutedfg">{visit.durationMinutes} {tr("minutes", "دقيقة")}</p>
                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                  <button className="btn h-8" onClick={() => setStatus(visit.id, "SCHEDULED")}>Scheduled</button>
-                  <button className="btn h-8" onClick={() => setStatus(visit.id, "COMPLETED")}>Completed</button>
-                  <button className="btn h-8" onClick={() => setStatus(visit.id, "CANCELLED")}>Cancelled</button>
+                  <button className="btn h-8" onClick={() => setStatus(visit.id, "SCHEDULED")}>{tr("Scheduled", "مجدولة")}</button>
+                  <button className="btn h-8" onClick={() => setStatus(visit.id, "COMPLETED")}>{tr("Completed", "مكتملة")}</button>
+                  <button className="btn h-8" onClick={() => setStatus(visit.id, "CANCELLED")}>{tr("Cancelled", "ملغاة")}</button>
                 </div>
               </article>
             ))

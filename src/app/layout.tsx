@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { DocumentLanguageSync } from "@/components/DocumentLanguageSync";
 
 const bodyFont = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -27,7 +28,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${bodyFont.variable} ${monoFont.variable}`}>{children}</body>
+      <body className={`${bodyFont.variable} ${monoFont.variable}`}>
+        <DocumentLanguageSync />
+        {children}
+      </body>
     </html>
   );
 }

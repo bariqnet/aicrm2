@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
+import { useI18n } from "@/hooks/useI18n";
 import type { Company, Contact, Stage } from "@/lib/crm-types";
 import {
   getResponseError,
@@ -30,6 +31,9 @@ function toIsoDateTime(value: string): string | undefined {
 }
 
 export default function EditDealPage() {
+  const { language } = useI18n();
+  const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
+
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const [title, setTitle] = useState("");
@@ -63,8 +67,8 @@ export default function EditDealPage() {
       if (dealResult.status !== "fulfilled" || !dealResult.value.ok) {
         const message =
           dealResult.status === "fulfilled"
-            ? await getResponseError(dealResult.value, "Unable to load deal")
-            : "Unable to load deal";
+            ? await getResponseError(dealResult.value, tr("Unable to load deal", "تعذر تحميل الصفقة"))
+            : tr("Unable to load deal", "تعذر تحميل الصفقة");
         throw new Error(message);
       }
 
@@ -101,9 +105,9 @@ export default function EditDealPage() {
     }
 
     loadDealAndOptions().catch(async (error) => {
-      const message = error instanceof Error ? error.message : "Unable to load deal";
+      const message = error instanceof Error ? error.message : tr("Unable to load deal", "تعذر تحميل الصفقة");
       if (!cancelled) {
-        await showErrorAlert("Unable to load deal", message);
+        await showErrorAlert(tr("Unable to load deal", "تعذر تحميل الصفقة"), message);
         router.push("/deals");
       }
     });
@@ -111,7 +115,7 @@ export default function EditDealPage() {
     return () => {
       cancelled = true;
     };
-  }, [dealId, router]);
+  }, [dealId, router, language]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -119,7 +123,7 @@ export default function EditDealPage() {
 
     const parsedAmount = Number(amount);
     if (!Number.isFinite(parsedAmount) || parsedAmount < 0) {
-      await showErrorAlert("Invalid amount", "Amount must be a valid non-negative number.");
+      await showErrorAlert(tr("Invalid amount", "مبلغ غير صالح"), tr("Amount must be a valid non-negative number.", "يجب أن يكون المبلغ رقمًا صالحًا غير سالب."));
       return;
     }
 
@@ -143,17 +147,17 @@ export default function EditDealPage() {
 
       if (!response.ok) {
         await showErrorAlert(
-          "Unable to update deal",
-          await getResponseError(response, "Please check your input and try again.")
+          tr("Unable to update deal", "تعذر تحديث الصفقة"),
+          await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
         );
         return;
       }
-      await showSuccessAlert("Deal updated");
+      await showSuccessAlert(tr("Deal updated", "تم تحديث الصفقة"));
       router.push(`/deals/${dealId}`);
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to update deal";
-      await showErrorAlert("Unable to update deal", message);
+      const message = error instanceof Error ? error.message : tr("Unable to update deal", "تعذر تحديث الصفقة");
+      await showErrorAlert(tr("Unable to update deal", "تعذر تحديث الصفقة"), message);
     } finally {
       setSaving(false);
     }
@@ -162,27 +166,27 @@ export default function EditDealPage() {
   return (
     <main className="app-page">
       <header>
-        <Link href={`/deals/${dealId}`} className="text-sm text-mutedfg hover:text-fg">← Back to deal</Link>
-        <h1 className="page-title mt-2">Edit deal</h1>
-        <p className="page-subtitle">Update opportunity details, stage, and ownership links.</p>
+        <Link href={`/deals/${dealId}`} className="text-sm text-mutedfg hover:text-fg">{tr("← Back to deal", "← العودة إلى الصفقة")}</Link>
+        <h1 className="page-title mt-2">{tr("Edit deal", "تعديل الصفقة")}</h1>
+        <p className="page-subtitle">{tr("Update opportunity details, stage, and ownership links.", "تحديث تفاصيل الفرصة والمرحلة وروابط المسؤولية.")}</p>
       </header>
 
       <form className="panel max-w-3xl space-y-4 p-5" onSubmit={submit}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm sm:col-span-2">
-            Deal title
-            <input className="input mt-1 w-full" placeholder="Deal title" value={title} onChange={(event) => setTitle(event.target.value)} disabled={loading} required />
+            {tr("Deal title", "عنوان الصفقة")}
+            <input className="input mt-1 w-full" placeholder={tr("Deal title", "عنوان الصفقة")} value={title} onChange={(event) => setTitle(event.target.value)} disabled={loading} required />
           </label>
           <label className="text-sm">
-            Amount
-            <input className="input mt-1 w-full" placeholder="Amount" value={amount} onChange={(event) => setAmount(event.target.value)} type="number" min="0" disabled={loading} required />
+            {tr("Amount", "المبلغ")}
+            <input className="input mt-1 w-full" placeholder={tr("Amount", "المبلغ")} value={amount} onChange={(event) => setAmount(event.target.value)} type="number" min="0" disabled={loading} required />
           </label>
           <label className="text-sm">
-            Currency
+            {tr("Currency", "العملة")}
             <input className="input mt-1 w-full" placeholder="USD" value={currency} onChange={(event) => setCurrency(event.target.value)} disabled={loading} required />
           </label>
           <label className="text-sm">
-            Stage
+            {tr("Stage", "المرحلة")}
             <select
               className="input mt-1 w-full"
               value={stageId}
@@ -190,33 +194,33 @@ export default function EditDealPage() {
               disabled={loading || stages.length === 0}
               required
             >
-              <option value="">{loading ? "Loading stages..." : "Select stage"}</option>
+              <option value="">{loading ? tr("Loading stages...", "جاري تحميل المراحل...") : tr("Select stage", "اختر مرحلة")}</option>
               {stages.map((stage) => (
                 <option key={stage.id} value={stage.id}>{stage.name}</option>
               ))}
             </select>
           </label>
           <label className="text-sm">
-            Status
+            {tr("Status", "الحالة")}
             <select className="input mt-1 w-full" value={status} onChange={(event) => setStatus(event.target.value as "OPEN" | "WON" | "LOST")} disabled={loading}>
-              <option value="OPEN">OPEN</option>
-              <option value="WON">WON</option>
-              <option value="LOST">LOST</option>
+              <option value="OPEN">{tr("OPEN", "مفتوحة")}</option>
+              <option value="WON">{tr("WON", "مربوحة")}</option>
+              <option value="LOST">{tr("LOST", "مفقودة")}</option>
             </select>
           </label>
           <label className="text-sm">
-            Company (optional)
+            {tr("Company (optional)", "الشركة (اختياري)")}
             <select className="input mt-1 w-full" value={companyId} onChange={(event) => setCompanyId(event.target.value)} disabled={loading}>
-              <option value="">No company</option>
+              <option value="">{tr("No company", "بدون شركة")}</option>
               {companies.map((company) => (
                 <option key={company.id} value={company.id}>{company.name}</option>
               ))}
             </select>
           </label>
           <label className="text-sm">
-            Primary contact (optional)
+            {tr("Primary contact (optional)", "جهة الاتصال الأساسية (اختياري)")}
             <select className="input mt-1 w-full" value={primaryContactId} onChange={(event) => setPrimaryContactId(event.target.value)} disabled={loading}>
-              <option value="">No primary contact</option>
+              <option value="">{tr("No primary contact", "بدون جهة اتصال أساسية")}</option>
               {contacts.map((contact) => (
                 <option key={contact.id} value={contact.id}>
                   {contact.firstName} {contact.lastName}
@@ -225,15 +229,15 @@ export default function EditDealPage() {
             </select>
           </label>
           <label className="text-sm sm:col-span-2">
-            Expected close date
+            {tr("Expected close date", "تاريخ الإغلاق المتوقع")}
             <input className="input mt-1 w-full" type="date" value={expectedCloseDate} onChange={(event) => setExpectedCloseDate(event.target.value)} disabled={loading} />
           </label>
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
-          <Link href={`/deals/${dealId}`} className="btn">Cancel</Link>
+          <Link href={`/deals/${dealId}`} className="btn">{tr("Cancel", "إلغاء")}</Link>
           <button className="btn btn-primary" type="submit" disabled={loading || saving}>
-            {loading ? "Loading..." : saving ? "Saving..." : "Save changes"}
+            {loading ? tr("Loading...", "جاري التحميل...") : saving ? tr("Saving...", "جاري الحفظ...") : tr("Save changes", "حفظ التغييرات")}
           </button>
         </div>
       </form>

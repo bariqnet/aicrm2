@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Task } from "@/lib/crm-types";
 import { serverApiRequest, type ServerListResponse } from "@/lib/server-crm";
+import { getServerLanguage, pickByLanguage } from "@/lib/server-language";
 
 function groupKey(dueAt?: string | null): "Overdue" | "Today" | "Upcoming" {
   if (!dueAt) return "Upcoming";
@@ -16,6 +17,9 @@ function groupKey(dueAt?: string | null): "Overdue" | "Today" | "Upcoming" {
 }
 
 export default async function TasksPage() {
+  const language = await getServerLanguage();
+  const tr = (english: string, arabic: string) => pickByLanguage(language, english, arabic);
+
   const payload = await serverApiRequest<ServerListResponse<Task>>("/tasks");
   const tasks = payload.rows ?? [];
   const openTasks = tasks.filter((task) => task.status === "OPEN");
@@ -27,22 +31,28 @@ export default async function TasksPage() {
     Upcoming: openTasks.filter((task) => groupKey(task.dueAt) === "Upcoming")
   };
 
+  const groupLabels: Record<keyof typeof grouped, string> = {
+    Overdue: tr("Overdue", "متأخرة"),
+    Today: tr("Today", "اليوم"),
+    Upcoming: tr("Upcoming", "قادمة")
+  };
+
   return (
     <main className="app-page">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="page-title">Tasks</h1>
-          <p className="page-subtitle">Keep work focused by urgency and due date.</p>
+          <h1 className="page-title">{tr("Tasks", "المهام")}</h1>
+          <p className="page-subtitle">{tr("Keep work focused by urgency and due date.", "حافظ على تركيز العمل حسب الأولوية وتاريخ الاستحقاق.")}</p>
         </div>
-        <Link href="/tasks/new" className="btn btn-primary">New task</Link>
+        <Link href="/tasks/new" className="btn btn-primary">{tr("New task", "مهمة جديدة")}</Link>
       </header>
 
       {Object.entries(grouped).map(([label, rows]) => (
         <section key={label} className="panel p-4">
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-mutedfg">{label}</h2>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-mutedfg">{groupLabels[label as keyof typeof grouped]}</h2>
           <div className="space-y-2">
             {rows.length === 0 ? (
-              <p className="text-sm text-mutedfg">No tasks.</p>
+              <p className="text-sm text-mutedfg">{tr("No tasks.", "لا توجد مهام.")}</p>
             ) : (
               rows.map((task) => (
                 <Link
@@ -60,11 +70,11 @@ export default async function TasksPage() {
 
       <section className="panel p-4">
         <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-mutedfg">
-          Completed ({doneTasks.length})
+          {tr("Completed", "مكتملة")} ({doneTasks.length})
         </h2>
         <div className="space-y-2">
           {doneTasks.length === 0 ? (
-            <p className="text-sm text-mutedfg">No completed tasks yet.</p>
+            <p className="text-sm text-mutedfg">{tr("No completed tasks yet.", "لا توجد مهام مكتملة بعد.")}</p>
           ) : (
             doneTasks.map((task) => (
               <Link

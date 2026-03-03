@@ -7,5 +7,5 @@ export default async function OnboardingLayout({ children }: { children: React.R
     redirect("/auth/sign-in?next=/onboarding");
   }
 
-  return <div className="mx-auto w-full max-w-5xl px-4 py-8 md:px-8">{children}</div>;
+  return <div className="min-h-screen">{children}</div>;
 }
