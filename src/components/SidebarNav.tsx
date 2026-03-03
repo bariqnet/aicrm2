@@ -11,8 +11,8 @@ import {
   CircleUserRound,
   Cog,
   FileText,
-  Handshake,
   Home,
+  KanbanSquare,
   LineChart,
   PhoneCall,
   UserRound,
@@ -46,7 +46,7 @@ function SidebarLinks({ onNavigate }: { onNavigate?: () => void }) {
         { href: "/dashboard", label: t("nav.dashboard"), icon: Home },
         { href: "/contacts", label: t("nav.contacts"), icon: Users },
         { href: "/companies", label: t("nav.companies"), icon: Building2 },
-        { href: "/deals", label: t("nav.deals"), icon: Handshake },
+        { href: "/deals", label: t("nav.deals"), icon: KanbanSquare },
         { href: "/tasks", label: t("nav.tasks"), icon: CheckSquare }
       ]
     },

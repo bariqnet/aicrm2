@@ -67,8 +67,8 @@ export default function EditDealPage() {
       if (dealResult.status !== "fulfilled" || !dealResult.value.ok) {
         const message =
           dealResult.status === "fulfilled"
-            ? await getResponseError(dealResult.value, tr("Unable to load deal", "تعذر تحميل الصفقة"))
-            : tr("Unable to load deal", "تعذر تحميل الصفقة");
+            ? await getResponseError(dealResult.value, tr("Unable to load card", "تعذر تحميل البطاقة"))
+            : tr("Unable to load card", "تعذر تحميل البطاقة");
         throw new Error(message);
       }
 
@@ -105,9 +105,9 @@ export default function EditDealPage() {
     }
 
     loadDealAndOptions().catch(async (error) => {
-      const message = error instanceof Error ? error.message : tr("Unable to load deal", "تعذر تحميل الصفقة");
+      const message = error instanceof Error ? error.message : tr("Unable to load card", "تعذر تحميل البطاقة");
       if (!cancelled) {
-        await showErrorAlert(tr("Unable to load deal", "تعذر تحميل الصفقة"), message);
+        await showErrorAlert(tr("Unable to load card", "تعذر تحميل البطاقة"), message);
         router.push("/deals");
       }
     });
@@ -147,17 +147,17 @@ export default function EditDealPage() {
 
       if (!response.ok) {
         await showErrorAlert(
-          tr("Unable to update deal", "تعذر تحديث الصفقة"),
+          tr("Unable to update card", "تعذر تحديث البطاقة"),
           await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
         );
         return;
       }
-      await showSuccessAlert(tr("Deal updated", "تم تحديث الصفقة"));
+      await showSuccessAlert(tr("Card updated", "تم تحديث البطاقة"));
       router.push(`/deals/${dealId}`);
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : tr("Unable to update deal", "تعذر تحديث الصفقة");
-      await showErrorAlert(tr("Unable to update deal", "تعذر تحديث الصفقة"), message);
+      const message = error instanceof Error ? error.message : tr("Unable to update card", "تعذر تحديث البطاقة");
+      await showErrorAlert(tr("Unable to update card", "تعذر تحديث البطاقة"), message);
     } finally {
       setSaving(false);
     }
@@ -166,16 +166,16 @@ export default function EditDealPage() {
   return (
     <main className="app-page">
       <header>
-        <Link href={`/deals/${dealId}`} className="text-sm text-mutedfg hover:text-fg">{tr("← Back to deal", "← العودة إلى الصفقة")}</Link>
-        <h1 className="page-title mt-2">{tr("Edit deal", "تعديل الصفقة")}</h1>
-        <p className="page-subtitle">{tr("Update opportunity details, stage, and ownership links.", "تحديث تفاصيل الفرصة والمرحلة وروابط المسؤولية.")}</p>
+        <Link href={`/deals/${dealId}`} className="text-sm text-mutedfg hover:text-fg">{tr("← Back to card", "← العودة إلى البطاقة")}</Link>
+        <h1 className="page-title mt-2">{tr("Edit pipeline card", "تعديل بطاقة البايبلاين")}</h1>
+        <p className="page-subtitle">{tr("Update card details, stage, and ownership links.", "تحديث تفاصيل البطاقة والمرحلة وروابط المسؤولية.")}</p>
       </header>
 
       <form className="panel max-w-3xl space-y-4 p-5" onSubmit={submit}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm sm:col-span-2">
-            {tr("Deal title", "عنوان الصفقة")}
-            <input className="input mt-1 w-full" placeholder={tr("Deal title", "عنوان الصفقة")} value={title} onChange={(event) => setTitle(event.target.value)} disabled={loading} required />
+            {tr("Card title", "عنوان البطاقة")}
+            <input className="input mt-1 w-full" placeholder={tr("Card title", "عنوان البطاقة")} value={title} onChange={(event) => setTitle(event.target.value)} disabled={loading} required />
           </label>
           <label className="text-sm">
             {tr("Amount", "المبلغ")}

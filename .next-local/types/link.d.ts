@@ -29,10 +29,10 @@ declare namespace __next_route_internal_types__ {
     S extends `${string}${SearchOrHash}` ? never : S
 
   type StaticRoutes = 
-    | `/api/ai/relationship-intelligence`
     | `/api/activities`
-    | `/api/auth/me`
+    | `/api/ai/relationship-intelligence`
     | `/api/auth/refresh`
+    | `/api/auth/me`
     | `/api/auth/sign-in`
     | `/api/auth/sign-out`
     | `/api/auth/sign-up`
@@ -43,54 +43,54 @@ declare namespace __next_route_internal_types__ {
     | `/api/contacts`
     | `/api/deals`
     | `/api/invites/accept`
-    | `/api/invoices`
     | `/api/invites`
+    | `/api/invoices`
     | `/api/memberships`
     | `/api/notes`
     | `/api/notifications/mark-all-read`
     | `/api/notifications`
-    | `/api/onboarding/invites`
     | `/api/onboarding/stages`
+    | `/api/onboarding/invites`
     | `/api/onboarding/workspace`
     | `/api/reminders`
     | `/api/stages`
     | `/api/stages/reorder`
+    | `/api/session`
     | `/api/tasks`
     | `/api/users`
-    | `/api/session`
     | `/api/workspaces`
     | `/api/workspaces/switch`
     | `/api/visits`
     | `/`
+    | `/calendar`
+    | `/companies/new`
     | `/callops`
     | `/companies`
-    | `/companies/new`
-    | `/calendar`
-    | `/contacts/new`
-    | `/contacts`
     | `/contacts/import`
+    | `/contacts`
     | `/dashboard`
     | `/deals/new`
+    | `/contacts/new`
     | `/deals`
+    | `/invoices`
     | `/invoices/new`
     | `/`
-    | `/invoices`
     | `/profile`
     | `/reports`
     | `/settings`
     | `/tasks`
-    | `/tasks/new`
     | `/visits`
-    | `/auth/sign-in`
-    | `/auth/sign-up`
+    | `/tasks/new`
     | `/auth`
+    | `/auth/sign-up`
+    | `/auth/sign-in`
     | `/onboarding`
   type DynamicRoutes<T extends string = string> = 
     | `/api/companies/${SafeSlug<T>}`
     | `/api/contacts/${SafeSlug<T>}`
     | `/api/deals/${SafeSlug<T>}`
-    | `/api/invoices/${SafeSlug<T>}`
     | `/api/invites/${SafeSlug<T>}`
+    | `/api/invoices/${SafeSlug<T>}`
     | `/api/memberships/${SafeSlug<T>}`
     | `/api/notifications/${SafeSlug<T>}`
     | `/api/notes/${SafeSlug<T>}`
@@ -100,13 +100,13 @@ declare namespace __next_route_internal_types__ {
     | `/api/visits/${SafeSlug<T>}`
     | `/print/invoices/${SafeSlug<T>}`
     | `/companies/${SafeSlug<T>}/edit`
-    | `/companies/${SafeSlug<T>}`
     | `/contacts/${SafeSlug<T>}/edit`
+    | `/companies/${SafeSlug<T>}`
     | `/contacts/${SafeSlug<T>}`
     | `/deals/${SafeSlug<T>}/edit`
     | `/deals/${SafeSlug<T>}`
-    | `/invoices/${SafeSlug<T>}/edit`
     | `/invoices/${SafeSlug<T>}`
+    | `/invoices/${SafeSlug<T>}/edit`
     | `/tasks/${SafeSlug<T>}`
     | `/auth/invite/${SafeSlug<T>}`
 

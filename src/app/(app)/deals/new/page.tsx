@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import type { Company, Contact, Stage } from "@/lib/crm-types";
@@ -23,6 +23,8 @@ export default function NewDealPage() {
   const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedStageId = searchParams.get("stageId");
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("0");
   const [currency, setCurrency] = useState("USD");
@@ -53,7 +55,13 @@ export default function NewDealPage() {
           const payload = await stagesResult.value.json() as { rows?: Stage[] };
           const rows = payload.rows ?? [];
           setStages(rows);
-          setStageId((current) => current || rows[0]?.id || "");
+          setStageId((current) => {
+            if (current) return current;
+            if (requestedStageId && rows.some((stage) => stage.id === requestedStageId)) {
+              return requestedStageId;
+            }
+            return rows[0]?.id || "";
+          });
         }
         if (companiesResult.status === "fulfilled" && companiesResult.value.ok) {
           const payload = await companiesResult.value.json() as { rows?: Company[] };
@@ -75,14 +83,17 @@ export default function NewDealPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [requestedStageId]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (saving) return;
 
     if (!stageId) {
-      await showErrorAlert(tr("Missing stage", "المرحلة مفقودة"), tr("Select a stage before creating the deal.", "اختر مرحلة قبل إنشاء الصفقة."));
+      await showErrorAlert(
+        tr("Missing stage", "المرحلة مفقودة"),
+        tr("Select a stage before creating the pipeline card.", "اختر مرحلة قبل إنشاء بطاقة البايبلاين.")
+      );
       return;
     }
 
@@ -110,18 +121,18 @@ export default function NewDealPage() {
 
       if (!response.ok) {
         await showErrorAlert(
-          tr("Unable to create deal", "تعذر إنشاء الصفقة"),
+          tr("Unable to create pipeline card", "تعذر إنشاء بطاقة البايبلاين"),
           await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
         );
         return;
       }
 
-      await showSuccessAlert(tr("Deal created", "تم إنشاء الصفقة"));
+      await showSuccessAlert(tr("Pipeline card created", "تم إنشاء بطاقة البايبلاين"));
       router.push("/deals");
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : tr("Unable to create deal", "تعذر إنشاء الصفقة");
-      await showErrorAlert(tr("Unable to create deal", "تعذر إنشاء الصفقة"), message);
+      const message = error instanceof Error ? error.message : tr("Unable to create pipeline card", "تعذر إنشاء بطاقة البايبلاين");
+      await showErrorAlert(tr("Unable to create pipeline card", "تعذر إنشاء بطاقة البايبلاين"), message);
     } finally {
       setSaving(false);
     }
@@ -130,16 +141,16 @@ export default function NewDealPage() {
   return (
     <main className="app-page">
       <header>
-        <Link href="/deals" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to deals", "← العودة إلى الصفقات")}</Link>
-        <h1 className="page-title mt-2">{tr("New deal", "صفقة جديدة")}</h1>
-        <p className="page-subtitle">{tr("Create a new opportunity and assign it to the right stage.", "أنشئ فرصة جديدة وعيّنها للمرحلة المناسبة.")}</p>
+        <Link href="/deals" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to pipeline", "← العودة إلى البايبلاين")}</Link>
+        <h1 className="page-title mt-2">{tr("New pipeline card", "بطاقة بايبلاين جديدة")}</h1>
+        <p className="page-subtitle">{tr("Create a new card and assign it to the right stage.", "أنشئ بطاقة جديدة وعيّنها للمرحلة المناسبة.")}</p>
       </header>
 
       <form className="panel max-w-3xl space-y-4 p-5" onSubmit={submit}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm sm:col-span-2">
-            {tr("Deal title", "عنوان الصفقة")}
-            <input className="input mt-1 w-full" placeholder={tr("Deal title", "عنوان الصفقة")} value={title} onChange={(event) => setTitle(event.target.value)} required />
+            {tr("Card title", "عنوان البطاقة")}
+            <input className="input mt-1 w-full" placeholder={tr("Card title", "عنوان البطاقة")} value={title} onChange={(event) => setTitle(event.target.value)} required />
           </label>
           <label className="text-sm">
             {tr("Amount", "المبلغ")}
@@ -198,7 +209,7 @@ export default function NewDealPage() {
         <div className="flex flex-wrap justify-end gap-2">
           <Link href="/deals" className="btn">{tr("Cancel", "إلغاء")}</Link>
           <button className="btn btn-primary" type="submit" disabled={saving}>
-            {saving ? tr("Creating...", "جاري الإنشاء...") : tr("Create deal", "إنشاء الصفقة")}
+            {saving ? tr("Creating...", "جاري الإنشاء...") : tr("Create card", "إنشاء البطاقة")}
           </button>
         </div>
       </form>
