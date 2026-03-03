@@ -26,7 +26,7 @@ export function AppShell({ children }: React.PropsWithChildren) {
 
   return (
     <div className="flex min-h-screen bg-bg text-fg">
-      <SidebarNav />
+      <SidebarNav className="transition-all duration-200" />
       <div
         className={cn(
           "fixed inset-0 z-30 bg-black/35 transition-opacity md:hidden",

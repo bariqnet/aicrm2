@@ -14,6 +14,8 @@ import {
   Home,
   KanbanSquare,
   LineChart,
+  PanelLeftClose,
+  PanelLeftOpen,
   PhoneCall,
   UserRound,
   Users,
@@ -23,6 +25,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { useI18n } from "@/hooks/useI18n";
 import { SignOutButton } from "@/components/SignOutButton";
 import { cn } from "@/lib/utils";
+import { useUIStore } from "@/store/ui-store";
 
 type NavItem = {
   href: Route;
@@ -36,7 +39,7 @@ type SidebarNavProps = {
   onNavigate?: () => void;
 };
 
-function SidebarLinks({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarLinks({ onNavigate, collapsed = false }: { onNavigate?: () => void; collapsed?: boolean }) {
   const path = usePathname();
   const { t } = useI18n();
   const navSections: Array<{ label: string; items: NavItem[] }> = [
@@ -73,9 +76,11 @@ function SidebarLinks({ onNavigate }: { onNavigate?: () => void }) {
     <nav className="space-y-4 overflow-y-auto pr-1">
       {navSections.map((section) => (
         <div key={section.label}>
-          <p className="mb-1 px-2 text-[11px] font-medium uppercase tracking-[0.12em] text-mutedfg">
-            {section.label}
-          </p>
+          {!collapsed ? (
+            <p className="mb-1 px-2 text-[11px] font-medium uppercase tracking-[0.12em] text-mutedfg">
+              {section.label}
+            </p>
+          ) : null}
           <div className="space-y-0.5">
             {section.items.map((item) => {
               const Icon = item.icon;
@@ -87,15 +92,17 @@ function SidebarLinks({ onNavigate }: { onNavigate?: () => void }) {
                   key={item.href}
                   href={item.href}
                   onClick={onNavigate}
+                  title={collapsed ? item.label : undefined}
                   className={cn(
-                    "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition",
+                    "group flex rounded-md text-sm transition",
+                    collapsed ? "items-center justify-center px-0 py-2" : "items-center gap-2 px-2 py-1.5",
                     isActive
                       ? "bg-muted font-medium text-fg"
                       : "text-mutedfg hover:bg-muted/70 hover:text-fg"
                   )}
                 >
                   <Icon size={15} className={cn(isActive ? "text-fg" : "text-mutedfg group-hover:text-fg")} />
-                  {item.label}
+                  <span className={cn(collapsed ? "sr-only" : "")}>{item.label}</span>
                 </Link>
               );
             })}
@@ -108,37 +115,56 @@ function SidebarLinks({ onNavigate }: { onNavigate?: () => void }) {
 
 export function SidebarNav({ mobile = false, className, onNavigate }: SidebarNavProps) {
   const { t } = useI18n();
+  const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
+  const toggleSidebar = useUIStore((state) => state.toggleSidebar);
+  const collapsed = !mobile && sidebarCollapsed;
 
   return (
     <aside
       className={cn(
         mobile
           ? "flex h-full w-72 shrink-0 flex-col border-r border-border bg-surface px-3 py-4"
-          : "hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-surface px-3 py-4 md:flex",
+          : "hidden h-screen shrink-0 flex-col border-r border-border bg-surface py-4 md:flex",
+        !mobile ? (collapsed ? "w-20 px-2" : "w-64 px-3") : "",
         className
       )}
     >
-      <div className="mb-5 px-2">
-        <Link href="/dashboard" onClick={onNavigate} className="inline-flex">
-          <Image
-            src="/fav.png"
-            alt="Que logo"
-            width={100}
-            height={32}
-            className="h-auto w-[100px]"
-            priority
-          />
-        </Link>
+      <div className={cn("mb-5 flex items-center", collapsed ? "justify-center px-1" : "justify-between px-2")}>
+        {!collapsed ? (
+          <Link href="/dashboard" onClick={onNavigate} className="inline-flex">
+            <Image
+              src="/fav.png"
+              alt="Que logo"
+              width={100}
+              height={32}
+              className="h-auto w-[100px]"
+              priority
+            />
+          </Link>
+        ) : null}
+        {!mobile ? (
+          <button
+            type="button"
+            className="btn h-8 w-8 px-0"
+            onClick={toggleSidebar}
+            aria-label={collapsed ? t("topbar.openNav") : t("topbar.closeNav")}
+            title={collapsed ? t("topbar.openNav") : t("topbar.closeNav")}
+          >
+            {collapsed ? <PanelLeftOpen size={14} /> : <PanelLeftClose size={14} />}
+          </button>
+        ) : null}
       </div>
 
-      <button className="btn mb-5 w-full justify-start text-xs text-mutedfg">{t("sidebar.defaultWorkspace")}</button>
+      {!collapsed ? (
+        <button className="btn mb-5 w-full justify-start text-xs text-mutedfg">{t("sidebar.defaultWorkspace")}</button>
+      ) : null}
 
-      <SidebarLinks onNavigate={onNavigate} />
+      <SidebarLinks onNavigate={onNavigate} collapsed={collapsed} />
 
-      <div className="mt-auto space-y-3 border-t border-border pt-3">
-        <LanguageToggle />
-        <div className="text-xs text-mutedfg">alex@workspace.io</div>
-        {mobile ? <SignOutButton className="btn w-full justify-center" /> : null}
+      <div className={cn("mt-auto border-t border-border pt-3", collapsed ? "space-y-2" : "space-y-3")}>
+        {!collapsed ? <LanguageToggle /> : null}
+        {!collapsed ? <div className="text-xs text-mutedfg">alex@workspace.io</div> : null}
+        {!collapsed ? <SignOutButton className="btn w-full justify-center" /> : null}
       </div>
     </aside>
   );

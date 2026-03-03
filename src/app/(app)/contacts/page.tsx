@@ -1,13 +1,22 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { Contact } from "@/lib/crm-types";
-import { serverApiRequest, type ServerListResponse } from "@/lib/server-crm";
+import { serverApiRequest, SessionInvalidError, type ServerListResponse } from "@/lib/server-crm";
 import { getServerLanguage, pickByLanguage } from "@/lib/server-language";
 
 export default async function ContactsPage() {
   const language = await getServerLanguage();
   const tr = (english: string, arabic: string) => pickByLanguage(language, english, arabic);
 
-  const payload = await serverApiRequest<ServerListResponse<Contact>>("/contacts");
+  let payload: ServerListResponse<Contact>;
+  try {
+    payload = await serverApiRequest<ServerListResponse<Contact>>("/contacts");
+  } catch (error) {
+    if (error instanceof SessionInvalidError) {
+      redirect("/auth/sign-in?next=/contacts");
+    }
+    throw error;
+  }
   const contacts = payload.rows ?? [];
 
   return (

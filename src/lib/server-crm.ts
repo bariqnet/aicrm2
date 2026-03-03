@@ -1,4 +1,4 @@
-import { getSessionData } from "@/lib/auth";
+import { clearSessionData, getSessionData } from "@/lib/auth";
 import { ApiRequestError, apiRequest, type ApiQuery } from "@/lib/crm-api";
 
 export type ServerListResponse<T> = {
@@ -49,6 +49,7 @@ export async function serverApiRequest<T>(path: string, options: ServerApiOption
     });
   } catch (error) {
     if (isAuthError(error)) {
+      await clearSessionData();
       throw new SessionInvalidError(error instanceof Error ? error.message : "Unauthorized");
     }
     throw error;

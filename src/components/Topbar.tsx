@@ -4,12 +4,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { Bell, Menu, Moon, Plus, Search, Sun } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
-import { LanguageToggle } from "@/components/LanguageToggle";
-import { SignOutButton } from "@/components/SignOutButton";
 import { useUIStore } from "@/store/ui-store";
 
 export function Topbar() {
-  const { setCommandOpen, dark, toggleTheme, mobileNavOpen, setMobileNavOpen } = useUIStore();
+  const {
+    setCommandOpen,
+    dark,
+    toggleTheme,
+    mobileNavOpen,
+    setMobileNavOpen
+  } = useUIStore();
   const { t } = useI18n();
 
   return (
@@ -60,13 +64,9 @@ export function Topbar() {
           <button className="btn w-9 px-0" aria-label={t("topbar.notifications")}>
             <Bell size={14} />
           </button>
-          <LanguageToggle className="hidden lg:inline-flex" />
           <button className="btn w-9 px-0" onClick={toggleTheme} aria-label={t("topbar.themeToggle")}>
             {dark ? <Sun size={14} /> : <Moon size={14} />}
           </button>
-          <div className="hidden md:block">
-            <SignOutButton className="btn" />
-          </div>
         </div>
       </div>
     </header>
