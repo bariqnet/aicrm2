@@ -61,10 +61,10 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
   return (
     <main className="app-page">
       <header className="space-y-2">
-        <Link href="/deals" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to pipeline", "← العودة إلى البايبلاين")}</Link>
+        <Link href="/deals" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to pipeline", "← العودة إلى خط المبيعات")}</Link>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="page-title">{tr("Pipeline card profile", "ملف بطاقة البايبلاين")}</h1>
+            <h1 className="page-title">{tr("Pipeline card profile", "تفاصيل بطاقة خط المبيعات")}</h1>
             <p className="page-subtitle">{tr("Opportunity context, next actions, and timeline activity.", "سياق الفرصة والإجراءات التالية والنشاط الزمني.")}</p>
           </div>
           <Link href={`/deals/${id}/edit`} className="btn btn-primary">{tr("Edit card", "تعديل البطاقة")}</Link>

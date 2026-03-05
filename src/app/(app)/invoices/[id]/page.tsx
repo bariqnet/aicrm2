@@ -49,7 +49,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     invoice = await serverApiRequestOrNull<Invoice>(`/invoices/${id}`);
   } catch (error) {
     if (error instanceof SessionInvalidError) {
-      redirect(`/auth/sign-in?next=/invoices/${id}`);
+      redirect(`/auth/sign-in?expired=1&next=/invoices/${id}`);
     }
     throw error;
   }
@@ -78,7 +78,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     ]);
   } catch (error) {
     if (error instanceof SessionInvalidError) {
-      redirect(`/auth/sign-in?next=/invoices/${id}`);
+      redirect(`/auth/sign-in?expired=1&next=/invoices/${id}`);
     }
     throw error;
   }

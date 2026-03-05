@@ -167,7 +167,7 @@ export default function EditDealPage() {
     <main className="app-page">
       <header>
         <Link href={`/deals/${dealId}`} className="text-sm text-mutedfg hover:text-fg">{tr("← Back to card", "← العودة إلى البطاقة")}</Link>
-        <h1 className="page-title mt-2">{tr("Edit pipeline card", "تعديل بطاقة البايبلاين")}</h1>
+        <h1 className="page-title mt-2">{tr("Edit pipeline card", "تعديل بطاقة في خط المبيعات")}</h1>
         <p className="page-subtitle">{tr("Update card details, stage, and ownership links.", "تحديث تفاصيل البطاقة والمرحلة وروابط المسؤولية.")}</p>
       </header>
 

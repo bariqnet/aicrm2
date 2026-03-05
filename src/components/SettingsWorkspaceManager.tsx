@@ -299,7 +299,7 @@ export function SettingsWorkspaceManager({ workspaceId }: SettingsWorkspaceManag
       await loadSettings();
       await showSuccessAlert(
         tr("Stage added", "تمت إضافة المرحلة"),
-        tr("Pipeline stage was created.", "تم إنشاء مرحلة البايبلاين.")
+        tr("Pipeline stage was created.", "تم إنشاء مرحلة في خط المبيعات.")
       );
     } catch (actionError) {
       const message = actionError instanceof Error ? actionError.message : tr("Could not create stage.", "تعذر إنشاء المرحلة.");
@@ -353,7 +353,7 @@ export function SettingsWorkspaceManager({ workspaceId }: SettingsWorkspaceManag
     if (stages.length <= 1) {
       await showErrorAlert(
         tr("Cannot remove stage", "لا يمكن حذف المرحلة"),
-        tr("At least one stage must remain in the pipeline.", "يجب أن تبقى مرحلة واحدة على الأقل في البايبلاين.")
+        tr("At least one stage must remain in the pipeline.", "يجب أن تبقى مرحلة واحدة على الأقل في خط المبيعات.")
       );
       return;
     }
@@ -496,11 +496,11 @@ export function SettingsWorkspaceManager({ workspaceId }: SettingsWorkspaceManag
       <section className="grid gap-4 xl:grid-cols-2">
         <article className="panel p-4">
           <div className="mb-3">
-            <h2 className="text-sm font-semibold">{tr("Pipeline stages", "مراحل البايبلاين")}</h2>
+            <h2 className="text-sm font-semibold">{tr("Pipeline stages", "مراحل خط المبيعات")}</h2>
             <p className="mt-1 text-sm text-mutedfg">
               {tr(
                 "Rename, reorder, and add stages used by your Trello-style pipeline.",
-                "أعد تسمية وترتيب وإضافة المراحل المستخدمة في بايبلاين Trello."
+                "أعد تسمية المراحل وترتيبها وإضافتها في خط المبيعات بأسلوب Trello."
               )}
             </p>
           </div>

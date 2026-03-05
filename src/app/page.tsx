@@ -111,10 +111,10 @@ export default async function HomePage() {
       icon: Layers3
     },
     {
-      title: tr("Refine without rebuilds", "طوّر النظام بدون إعادة بناء"),
+      title: tr("Refine without rebuilds", "طوّر النظام بدون إعادة بنائه من الصفر"),
       description: tr(
         "Update fields, stage rules, and process steps without migrations or engineering bottlenecks.",
-        "عدّل الحقول وقواعد المراحل وخطوات العملية بدون ترحيلات معقدة أو تعطيل للفريق التقني."
+        "عدّل الحقول وقواعد المراحل وخطوات العمل بدون ترحيلات معقدة أو اختناقات هندسية."
       ),
       icon: Workflow
     },
@@ -122,7 +122,7 @@ export default async function HomePage() {
       title: tr("Execute in one place", "نفّذ كل شيء من مكان واحد"),
       description: tr(
         "Handle tasks, visits, reminders, and invoice handoffs in the same workspace as pipeline data.",
-        "أدر المهام والزيارات والتذكيرات وتسليم الفواتير داخل نفس مساحة العمل المرتبطة بخط المبيعات."
+        "أدر المهام والزيارات والتذكيرات وتسليم الفواتير من نفس مساحة العمل المرتبطة بخط المبيعات."
       ),
       icon: CalendarClock
     },
@@ -130,7 +130,7 @@ export default async function HomePage() {
       title: tr("Measure what matters", "تابع المؤشرات المهمة"),
       description: tr(
         "Track stage velocity, team execution, and relationship health with real-time reporting.",
-        "راقب سرعة التقدم في المراحل وأداء الفريق وصحة العلاقات عبر تقارير فورية."
+        "تابع سرعة الانتقال بين المراحل وأداء الفريق وصحة العلاقات عبر تقارير لحظية."
       ),
       icon: BarChart3
     }
@@ -141,7 +141,7 @@ export default async function HomePage() {
       title: tr("AI relationship intelligence", "ذكاء علاقات مدعوم بالذكاء الاصطناعي"),
       description: tr(
         "Generate account summaries, next actions, and follow-up signals from notes and activity.",
-        "أنشئ ملخصات الحسابات والخطوات التالية وإشارات المتابعة تلقائيًا من الملاحظات والنشاط."
+        "أنشئ ملخصات للحسابات وخطوات تالية وإشارات متابعة تلقائيًا من الملاحظات والنشاط."
       ),
       icon: BrainCircuit
     },
@@ -154,7 +154,7 @@ export default async function HomePage() {
       icon: Building2
     },
     {
-      title: tr("Fast operations layer", "طبقة عمليات سريعة"),
+      title: tr("Fast operations layer", "تشغيل عمليات سريع"),
       description: tr(
         "Keep execution moving with reminders, notifications, and calendar visibility across teams.",
         "حافظ على سرعة التنفيذ عبر التذكيرات والإشعارات ورؤية التقويم على مستوى الفريق."
@@ -165,7 +165,7 @@ export default async function HomePage() {
 
   const teamworkCards: FeatureCard[] = [
     {
-      title: tr("Multi-workspace ready", "جاهز لعدة مساحات عمل"),
+      title: tr("Multi-workspace ready", "جاهز لإدارة عدة مساحات عمل"),
       description: tr(
         "Switch between workspaces, invite members, and adjust role access in minutes.",
         "انتقل بين مساحات العمل وادعُ الأعضاء وعدّل الصلاحيات خلال دقائق."
@@ -176,15 +176,15 @@ export default async function HomePage() {
       title: tr("Global language support", "دعم لغوي متكامل"),
       description: tr(
         "Use English and Arabic with built-in LTR and RTL direction support.",
-        "استخدم الإنجليزية والعربية مع دعم كامل لاتجاهي LTR وRTL."
+        "استخدم العربية والإنجليزية مع دعم كامل لاتجاهَي الكتابة يمين-إلى-يسار ويسار-إلى-يمين."
       ),
       icon: Globe2
     },
     {
-      title: tr("Security by default", "الأمان بشكل افتراضي"),
+      title: tr("Security by default", "الأمان مدمج افتراضيًا"),
       description: tr(
         "Use session-based auth, API validation, and role-scoped access across core CRM entities.",
-        "استفد من مصادقة الجلسات والتحقق من API وصلاحيات الأدوار على كل كيانات CRM الأساسية."
+        "اعتمد على مصادقة الجلسات والتحقق من واجهات API وصلاحيات الأدوار عبر كيانات CRM الأساسية."
       ),
       icon: LockKeyhole
     }
@@ -197,7 +197,7 @@ export default async function HomePage() {
       frequency: tr("per seat / month", "لكل مستخدم / شهريًا"),
       description: tr(
         "For individuals and small teams validating their first repeatable CRM workflow.",
-        "للأفراد والفرق الصغيرة التي تبني أول سير عمل CRM قابل للتكرار."
+        "للأفراد والفرق الصغيرة التي تبني أول سير عمل CRM ثابت وقابل للتكرار."
       ),
       ctaLabel: tr("Start trial", "ابدأ التجربة"),
       ctaHref: "/auth/sign-up",
@@ -220,10 +220,10 @@ export default async function HomePage() {
       ctaHref: "/auth/sign-up",
       featured: true,
       bullets: [
-        tr("Unlimited seats", "مستخدمون غير محدودين"),
+        tr("Unlimited seats", "عدد مستخدمين غير محدود"),
         tr("Custom pipeline stages", "مراحل مخصصة لخط المبيعات"),
         tr("Invoices and notifications", "فواتير وإشعارات"),
-        tr("Priority support", "دعم أولوية")
+        tr("Priority support", "دعم بأولوية")
       ]
     },
     {
@@ -232,7 +232,7 @@ export default async function HomePage() {
       frequency: tr("per seat / month", "لكل مستخدم / شهريًا"),
       description: tr(
         "For multi-team revenue orgs that need automation and AI-driven context.",
-        "للمؤسسات متعددة الفرق التي تحتاج الأتمتة وسياقًا مدعومًا بالذكاء الاصطناعي."
+        "للمؤسسات متعددة الفرق التي تحتاج إلى أتمتة وسياق مدعوم بالذكاء الاصطناعي."
       ),
       ctaLabel: tr("Start pro trial", "ابدأ تجربة برو"),
       ctaHref: "/auth/sign-up",
@@ -249,7 +249,7 @@ export default async function HomePage() {
       frequency: tr("annual contract", "عقد سنوي"),
       description: tr(
         "For high-compliance teams that need migration support and dedicated enablement.",
-        "للفرق ذات المتطلبات العالية التي تحتاج دعم ترحيل وتمكين مخصص."
+        "للفرق ذات المتطلبات العالية التي تحتاج إلى دعم ترحيل وتمكين مخصص."
       ),
       ctaLabel: tr("Talk to sales", "تواصل مع المبيعات"),
       ctaHref: "/auth/sign-in",
@@ -259,6 +259,77 @@ export default async function HomePage() {
         tr("Dedicated success manager", "مدير نجاح مخصص"),
         tr("Rollout and training plan", "خطة إطلاق وتدريب")
       ]
+    }
+  ];
+
+  const heroSignals = [
+    tr("Live routing", "توجيه مباشر"),
+    tr("AI summaries", "ملخصات ذكية"),
+    tr("Invoice sync", "مزامنة الفواتير")
+  ];
+
+  const heroPipelineStages: Array<{
+    title: string;
+    detail: string;
+    value: string;
+    progress: string;
+    icon: LucideIcon;
+    iconClass: string;
+    barClass: string;
+  }> = [
+    {
+      title: tr("Capture demand", "التقاط الفرص"),
+      detail: tr("Inbound forms, referrals, and source context", "النماذج الواردة والإحالات وسياق المصدر"),
+      value: "124",
+      progress: "78%",
+      icon: Sparkles,
+      iconClass: "border-sky-200/80 bg-sky-500/12 text-sky-700",
+      barClass: "bg-sky-500"
+    },
+    {
+      title: tr("Qualify accounts", "تأهيل الحسابات"),
+      detail: tr("Owners, notes, priority, and relationship signals", "المسؤولون والملاحظات والأولوية وإشارات العلاقة"),
+      value: "37",
+      progress: "61%",
+      icon: Building2,
+      iconClass: "border-emerald-200/80 bg-emerald-500/12 text-emerald-700",
+      barClass: "bg-emerald-500"
+    },
+    {
+      title: tr("Run execution", "إدارة التنفيذ"),
+      detail: tr("Tasks, visits, reminders, and next actions", "المهام والزيارات والتذكيرات والخطوات التالية"),
+      value: "18",
+      progress: "84%",
+      icon: Workflow,
+      iconClass: "border-amber-200/80 bg-amber-500/14 text-amber-700",
+      barClass: "bg-amber-500"
+    },
+    {
+      title: tr("Close and invoice", "الإغلاق والفوترة"),
+      detail: tr("Handoff, billing, and follow-through in one stream", "التسليم والفوترة والمتابعة في مسار واحد"),
+      value: "$42k",
+      progress: "72%",
+      icon: BarChart3,
+      iconClass: "border-black/10 bg-black/6 text-black/72",
+      barClass: "bg-[#111319]"
+    }
+  ];
+
+  const heroMetrics = [
+    {
+      value: "3.8x",
+      label: tr("Pipeline coverage", "تغطية خط المبيعات"),
+      note: tr("vs. monthly target", "مقابل الهدف الشهري")
+    },
+    {
+      value: "18m",
+      label: tr("Avg. owner response", "متوسط استجابة المسؤول"),
+      note: tr("from lead to first action", "من الفرصة إلى أول إجراء")
+    },
+    {
+      value: "91%",
+      label: tr("Follow-through rate", "نسبة الالتزام بالتنفيذ"),
+      note: tr("tasks and reminders completed", "المهام والتذكيرات المنجزة")
     }
   ];
 
@@ -273,6 +344,10 @@ export default async function HomePage() {
       ].join(" ")}
     >
       <div className="landing-ambient-glow pointer-events-none absolute inset-x-0 top-[-12rem] h-[34rem] bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.14),rgba(245,246,248,0)_68%)]" />
+      <div
+        className="landing-glow-pulse pointer-events-none absolute right-[-10rem] top-[10rem] h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(circle,_rgba(251,191,36,0.16),rgba(245,246,248,0)_70%)] blur-3xl"
+        style={{ animationDelay: "1.2s" }}
+      />
 
       <header className="sticky top-0 z-30 border-b border-black/7 bg-[#f5f6f8]/85 backdrop-blur-lg">
         <div className="mx-auto flex h-24 w-full max-w-7xl items-center justify-between gap-3 px-5 sm:px-8">
@@ -296,11 +371,6 @@ export default async function HomePage() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <LanguageToggle mode="compact" className="rounded-xl border-black/12 bg-white p-0.5 shadow-sm sm:hidden" />
-            <LanguageToggle
-              mode="full"
-              className="hidden sm:inline-flex rounded-2xl border-black/12 bg-white/95 p-1 shadow-[0_8px_20px_rgba(15,18,24,0.08)] backdrop-blur"
-            />
             <Link
               href="/auth/sign-in"
               className="hidden h-10 items-center rounded-full px-4 text-sm font-medium text-black/70 transition hover:bg-black/5 hover:text-black sm:inline-flex"
@@ -323,53 +393,150 @@ export default async function HomePage() {
           isArabic ? "pb-20 pt-12 lg:pb-28 lg:pt-24" : "pb-16 pt-10 lg:pb-24 lg:pt-20"
         ].join(" ")}
       >
-        <div className={["landing-fade-up", isArabic ? "max-w-4xl space-y-9 lg:pt-2" : "max-w-3xl space-y-7"].join(" ")}>
-          <p className={heroTagClass}>
-            <Sparkles size={14} className="text-blue-700" />
-            {tr("The AI-native CRM for modern GTM teams", "منصة CRM ذكية لفرق المبيعات الحديثة")}
-          </p>
-
-          <div className={isArabic ? "space-y-6" : "space-y-5"}>
-            <h1 className={`${headingClass} ${heroHeadingTypographyClass} ${heroHeadingSizeClass} font-semibold`}>
-              {tr("Run your full relationship workflow in one CRM.", "أدر دورة علاقات العملاء بالكامل من نظام CRM واحد.")}
-            </h1>
-            <p className={heroBodyClass}>
-              {tr(
-                "Que combines contact intelligence, deal execution, team operations, and invoicing in one workspace. Move from first touch to closed revenue without context switching.",
-                "يوحّد Que بيانات جهات الاتصال وتنفيذ الصفقات وعمليات الفريق والفوترة داخل مساحة عمل واحدة. انتقل من أول تواصل إلى إغلاق الإيراد بدون تشتت."
-              )}
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.02fr)_minmax(360px,0.98fr)] lg:items-center lg:gap-12">
+          <div className={["landing-fade-up", isArabic ? "max-w-4xl space-y-9 lg:pt-2" : "max-w-3xl space-y-7"].join(" ")}>
+            <p className={heroTagClass}>
+              <Sparkles size={14} className="text-blue-700" />
+              {tr("The AI-native CRM for modern GTM teams", "نظام CRM ذكي لفرق الإيرادات الحديثة")}
             </p>
+
+            <div className={isArabic ? "space-y-6" : "space-y-5"}>
+              <h1 className={`${headingClass} ${heroHeadingTypographyClass} ${heroHeadingSizeClass} font-semibold`}>
+                {tr("Run your full relationship workflow in one CRM.", "أدِر دورة علاقاتك مع العملاء بالكامل من نظام CRM واحد.")}
+              </h1>
+              <p className={heroBodyClass}>
+                {tr(
+                  "Que combines contact intelligence, deal execution, team operations, and invoicing in one workspace. Move from first touch to closed revenue without context switching.",
+                  "يجمع Que ذكاء جهات الاتصال وتنفيذ الصفقات وعمليات الفريق والفوترة في مساحة عمل واحدة. انتقل من أول تواصل إلى إغلاق الصفقة بدون فقدان السياق."
+                )}
+              </p>
+            </div>
+
+            <div className={["flex flex-wrap gap-3", isArabic ? "items-stretch" : "items-center"].join(" ")}>
+              <Link
+                href="/auth/sign-up"
+                className="landing-cta landing-cta-pulse inline-flex h-12 items-center gap-2 rounded-full bg-[#111319] px-6 text-sm font-semibold text-white transition hover:bg-[#1a1d25]"
+              >
+                {tr("Start for free", "ابدأ مجانًا")}
+                {isArabic ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
+              </Link>
+              <Link
+                href="/auth/sign-in"
+                className="landing-cta inline-flex h-12 items-center rounded-full border border-black/14 bg-white px-6 text-sm font-semibold text-black transition hover:border-black/25"
+              >
+                {tr("Book a demo", "احجز عرضًا توضيحيًا")}
+              </Link>
+            </div>
+
+            <div className={["flex flex-wrap gap-3 text-black/62", isArabic ? "text-sm" : "items-center text-xs"].join(" ")}>
+              <span className={["inline-flex items-center rounded-full border border-black/10 bg-white", isArabic ? "gap-2 px-4 py-2" : "gap-1 px-3 py-1"].join(" ")}>
+                <Check size={13} />
+                {tr("Unlimited contacts", "جهات اتصال غير محدودة")}
+              </span>
+              <span className={["inline-flex items-center rounded-full border border-black/10 bg-white", isArabic ? "gap-2 px-4 py-2" : "gap-1 px-3 py-1"].join(" ")}>
+                <Check size={13} />
+                {tr("English + Arabic", "الإنجليزية + العربية")}
+              </span>
+              <span className={["inline-flex items-center rounded-full border border-black/10 bg-white", isArabic ? "gap-2 px-4 py-2" : "gap-1 px-3 py-1"].join(" ")}>
+                <Check size={13} />
+                {tr("API-ready", "جاهز للتكامل عبر API")}
+              </span>
+            </div>
+
           </div>
 
-          <div className={["flex flex-wrap gap-3", isArabic ? "items-stretch" : "items-center"].join(" ")}>
-            <Link
-              href="/auth/sign-up"
-              className="landing-cta landing-cta-pulse inline-flex h-12 items-center gap-2 rounded-full bg-[#111319] px-6 text-sm font-semibold text-white transition hover:bg-[#1a1d25]"
-            >
-              {tr("Start for free", "ابدأ مجانًا")}
-              {isArabic ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
-            </Link>
-            <Link
-              href="/auth/sign-in"
-              className="landing-cta inline-flex h-12 items-center rounded-full border border-black/14 bg-white px-6 text-sm font-semibold text-black transition hover:border-black/25"
-            >
-              {tr("Book a demo", "احجز عرضًا مباشرًا")}
-            </Link>
-          </div>
+          <div className="landing-fade-up landing-fade-up-delay-2 relative mx-auto w-full max-w-[38rem]">
+            <div className="landing-glow-pulse pointer-events-none absolute -left-6 top-14 h-28 w-28 rounded-full bg-sky-400/14 blur-3xl" />
+            <div className="landing-glow-pulse pointer-events-none absolute -bottom-8 right-4 h-36 w-36 rounded-full bg-emerald-400/12 blur-3xl" style={{ animationDelay: "1.8s" }} />
 
-          <div className={["flex flex-wrap gap-3 text-black/62", isArabic ? "text-sm" : "items-center text-xs"].join(" ")}>
-            <span className={["inline-flex items-center rounded-full border border-black/10 bg-white", isArabic ? "gap-2 px-4 py-2" : "gap-1 px-3 py-1"].join(" ")}>
-              <Check size={13} />
-              {tr("Unlimited contacts", "جهات اتصال غير محدودة")}
-            </span>
-            <span className={["inline-flex items-center rounded-full border border-black/10 bg-white", isArabic ? "gap-2 px-4 py-2" : "gap-1 px-3 py-1"].join(" ")}>
-              <Check size={13} />
-              {tr("English + Arabic", "الإنجليزية + العربية")}
-            </span>
-            <span className={["inline-flex items-center rounded-full border border-black/10 bg-white", isArabic ? "gap-2 px-4 py-2" : "gap-1 px-3 py-1"].join(" ")}>
-              <Check size={13} />
-              {tr("API-ready", "جاهز للتكامل البرمجي (API)")}
-            </span>
+            <div className="landing-diagram-shell relative overflow-hidden rounded-[2rem] border border-black/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(248,250,252,0.88))] p-4 shadow-[0_28px_90px_rgba(15,18,24,0.12)] sm:p-6">
+              <div className="landing-grid-flow absolute inset-0 opacity-70" />
+              <div className="pointer-events-none absolute inset-x-10 top-0 h-24 rounded-full bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.14),rgba(255,255,255,0)_72%)] blur-2xl" />
+
+              <div className="relative">
+                <div className={["flex gap-4", isArabic ? "flex-col items-start sm:flex-row-reverse sm:items-center sm:justify-between" : "flex-col items-start sm:flex-row sm:items-center sm:justify-between"].join(" ")}>
+                  <div>
+                    <p className={sectionLabelClass}>{tr("Revenue map", "خريطة الإيرادات")}</p>
+                    <h2 className={["mt-2 text-2xl font-semibold text-[#111319]", isArabic ? "leading-10" : "tracking-tight"].join(" ")}>
+                      {tr("A live system, not just a database.", "نظام حي، وليس مجرد قاعدة بيانات.")}
+                    </h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {heroSignals.map((signal, index) => (
+                      <span
+                        key={signal}
+                        className="landing-fade-up rounded-full border border-black/10 bg-white/88 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/58 shadow-sm"
+                        style={{ animationDelay: `${0.12 * (index + 1)}s` }}
+                      >
+                        {signal}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-6 space-y-3">
+                  {heroPipelineStages.map(({ title, detail, value, progress, icon: Icon, iconClass, barClass }, index) => (
+                    <article
+                      key={title}
+                      className="landing-card landing-fade-up relative overflow-hidden rounded-[1.45rem] border border-black/10 bg-white/88 p-4 shadow-[0_16px_32px_rgba(15,18,24,0.08)] backdrop-blur-sm"
+                      style={{ animationDelay: `${0.12 * (index + 1)}s` }}
+                    >
+                      <div className="relative flex items-start gap-4">
+                        <span className={["inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border", iconClass].join(" ")}>
+                          <Icon size={18} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className={["flex items-start gap-3", isArabic ? "flex-row-reverse justify-between" : "justify-between"].join(" ")}>
+                            <div>
+                              <p className="text-sm font-semibold text-[#111319]">{title}</p>
+                              <p className={isArabic ? "mt-1 text-xs leading-6 text-black/52" : "mt-1 text-xs text-black/52"}>{detail}</p>
+                            </div>
+                            <span className="rounded-full border border-black/10 bg-[#f8fafc] px-3 py-1 text-xs font-semibold text-black/66">
+                              {value}
+                            </span>
+                          </div>
+                          <div className="landing-scan relative mt-3 h-2 overflow-hidden rounded-full bg-black/6">
+                            <div className={["h-full rounded-full", barClass].join(" ")} style={{ width: progress }} />
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  {heroMetrics.map((metric, index) => (
+                    <article
+                      key={`${metric.label}-diagram`}
+                      className={[
+                        "landing-metric-drift rounded-[1.25rem] border border-black/10 bg-[#111319] px-4 py-3 text-white shadow-[0_16px_34px_rgba(15,18,24,0.16)]",
+                        index === 1 ? "landing-metric-drift-delay-1" : "",
+                        index === 2 ? "landing-metric-drift-delay-2" : ""
+                      ].join(" ")}
+                    >
+                      <p className="text-xl font-semibold tracking-tight">{metric.value}</p>
+                      <p className={isArabic ? "mt-1 text-sm text-white/82" : "mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-white/72"}>
+                        {metric.label}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="landing-metric-drift absolute -left-8 top-20 hidden w-48 rounded-[1.35rem] border border-black/10 bg-white px-4 py-3 shadow-[0_16px_34px_rgba(15,18,24,0.12)] xl:block">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-black/48">{tr("AI next action", "الإجراء التالي")}</p>
+              <p className={isArabic ? "mt-2 text-sm leading-7 text-black/72" : "mt-2 text-sm text-black/72"}>
+                {tr("Call procurement and send the quote draft.", "اتصل بالمشتريات وأرسل مسودة عرض السعر.")}
+              </p>
+            </div>
+
+            <div className="landing-metric-drift landing-metric-drift-delay-2 absolute -right-6 bottom-16 hidden w-52 rounded-[1.35rem] border border-black/10 bg-[#111319] px-4 py-3 text-white shadow-[0_16px_34px_rgba(15,18,24,0.18)] xl:block">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/58">{tr("Finance handoff", "تحويل للفوترة")}</p>
+              <p className={isArabic ? "mt-2 text-sm leading-7 text-white/82" : "mt-2 text-sm text-white/82"}>
+                {tr("3 deals are ready for invoice creation.", "3 صفقات جاهزة الآن لإنشاء الفواتير.")}
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -377,7 +544,7 @@ export default async function HomePage() {
       <section className={["mx-auto w-full max-w-7xl px-5 sm:px-8", isArabic ? "py-14 lg:py-24" : "py-12 lg:py-20"].join(" ")}>
         <div className={["landing-fade-up rounded-[1.8rem] border border-black/10 bg-white px-5 sm:px-8", isArabic ? "py-8" : "py-6"].join(" ")}>
           <p className={sectionLabelClass}>
-            {tr("Built for high-tempo revenue and operations teams", "مصمم لفرق الإيرادات والعمليات سريعة الإيقاع")}
+            {tr("Built for high-tempo revenue and operations teams", "مصمم لفرق الإيرادات والعمليات سريعة الوتيرة")}
           </p>
           <div className={["mt-4 grid gap-3 font-semibold text-black/70 sm:grid-cols-2 lg:grid-cols-5", isArabic ? "text-[0.98rem] leading-7" : "text-sm"].join(" ")}>
             {teamUseCards.map(({ title, icon: Icon }, index) => (
@@ -404,7 +571,7 @@ export default async function HomePage() {
           <h2 className={`${headingClass} ${sectionHeadingTypographyClass} ${sectionHeadingSizeClass} font-semibold`}>
             {tr(
               "Every workflow is configurable, so your CRM grows with your process.",
-              "كل سير عمل قابل للتخصيص، لذلك ينمو النظام مع طريقة عمل فريقك."
+              "كل سير عمل قابل للتخصيص، لذلك يتطور النظام مع طريقة عمل فريقك."
             )}
           </h2>
         </div>
@@ -441,13 +608,13 @@ export default async function HomePage() {
             <h2 className={`${headingClass} ${sectionHeadingTypographyClass} ${sectionHeadingSizeClass} font-semibold`}>
               {tr(
                 "Real-time relationships need real-time data and action.",
-                "العلاقات الفعالة تحتاج بيانات وإجراءات لحظية."
+                "العلاقات القوية تحتاج إلى بيانات لحظية وإجراءات سريعة."
               )}
             </h2>
             <p className={sectionBodyOnDarkClass}>
               {tr(
                 "From lead discovery to invoice follow-through, Que keeps context synchronized so teams move faster without dropping details.",
-                "من اكتشاف الفرصة حتى متابعة الفاتورة، يحافظ Que على ترابط البيانات حتى يعمل فريقك بسرعة ووضوح."
+                "من اكتشاف الفرصة إلى متابعة الفاتورة، يحافظ Que على ترابط البيانات ليعمل فريقك بسرعة ووضوح."
               )}
             </p>
           </div>
@@ -473,10 +640,10 @@ export default async function HomePage() {
       <section id="teamwork" className={["mx-auto w-full max-w-7xl px-5 sm:px-8", isArabic ? "py-14 lg:py-24" : "py-12 lg:py-20"].join(" ")}>
         <div className={["landing-fade-up", isArabic ? "mb-10 max-w-4xl" : "mb-7 max-w-3xl"].join(" ")}>
           <p className={sectionLabelClass}>
-            {tr("Designed for multiplayer execution", "مصمم للتنفيذ الجماعي")}
+            {tr("Designed for multiplayer execution", "مصمم للتنفيذ الجماعي بين الفرق")}
           </p>
           <h2 className={`${headingClass} ${sectionHeadingTypographyClass} ${sectionHeadingSizeClass} font-semibold`}>
-            {tr("One workspace for sellers, operators, and leadership.", "مساحة عمل واحدة للمبيعات والعمليات والإدارة.")}
+            {tr("One workspace for sellers, operators, and leadership.", "مساحة عمل واحدة لفرق المبيعات والعمليات والإدارة.")}
           </h2>
         </div>
 
@@ -504,13 +671,13 @@ export default async function HomePage() {
         <div className={["landing-fade-up", isArabic ? "mb-10 max-w-4xl" : "mb-8 max-w-3xl"].join(" ")}>
           <p className={sectionLabelClass}>{tr("Pricing tiers", "شرائح الأسعار")}</p>
           <h2 className={`${headingClass} ${sectionHeadingTypographyClass} ${sectionHeadingSizeClass} font-semibold`}>
-            {tr("Start at $10. Expand as your revenue motion scales.", "ابدأ من 10$. وتوسع مع نمو عمليات الإيرادات لديك.")}
+            {tr("Start at $10. Expand as your revenue motion scales.", "ابدأ من 10 دولارات، وتوسّع مع نمو عمليات الإيرادات لديك.")}
           </h2>
           <p className={sectionBodyClass}>
-            {tr(
-              "Every plan includes unlimited contacts and companies, English and Arabic support, and API access.",
-              "كل خطة تشمل جهات اتصال وشركات غير محدودة، ودعم العربية والإنجليزية، وإمكانية التكامل عبر API."
-            )}
+              {tr(
+                "Every plan includes unlimited contacts and companies, English and Arabic support, and API access.",
+                "كل خطة تشمل جهات اتصال وشركات غير محدودة، ودعم العربية والإنجليزية، وإمكانية الربط عبر API."
+              )}
           </p>
           <div className={["mt-4 inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-1.5 font-semibold text-black/65", isArabic ? "text-sm" : "text-xs"].join(" ")}>
             {tr("Billed monthly", "يتم الدفع شهريًا")}
@@ -591,7 +758,7 @@ export default async function HomePage() {
         >
           <Image src="/fav.png" alt="Que CRM" width={1076} height={400} className="h-12 w-auto opacity-95" />
           <h2 className={`${headingClass} ${sectionHeadingTypographyClass} ${sectionHeadingSizeClass} max-w-2xl font-semibold`}>
-            {tr("Move faster with a CRM your team actually wants to use.", "تحرك بسرعة أكبر مع نظام CRM يرغب فريقك فعليًا في استخدامه.")}
+            {tr("Move faster with a CRM your team actually wants to use.", "أنجز بسرعة أكبر مع نظام CRM يحب فريقك العمل عليه.")}
           </h2>
           <p className={`${sectionBodyOnDarkClass} max-w-2xl`}>
             {tr(
@@ -625,7 +792,7 @@ export default async function HomePage() {
             <p className={["mt-3 max-w-sm text-black/60", isArabic ? "text-[0.98rem] leading-8" : "text-sm leading-6"].join(" ")}>
               {tr(
                 "AI-driven CRM for teams running contacts, pipeline, operations, and invoicing in one workspace.",
-                "نظام CRM مدعوم بالذكاء الاصطناعي لإدارة جهات الاتصال وخط المبيعات والعمليات والفواتير داخل مساحة عمل واحدة."
+                "نظام CRM مدعوم بالذكاء الاصطناعي لفرق تدير جهات الاتصال وخط المبيعات والعمليات والفوترة من مساحة عمل واحدة."
               )}
             </p>
           </div>
@@ -689,8 +856,22 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <div className={["mx-auto mt-8 w-full max-w-7xl border-t border-black/8 pt-4 text-black/52", isArabic ? "text-[0.97rem] leading-7" : "text-sm"].join(" ")}>
-          © {new Date().getFullYear()} Que CRM. {tr("All rights reserved.", "جميع الحقوق محفوظة.")}
+        <div
+          className={[
+            "mx-auto mt-8 flex w-full max-w-7xl flex-col gap-3 border-t border-black/8 pt-4",
+            isArabic ? "text-[0.97rem] leading-7 sm:flex-row-reverse sm:items-center sm:justify-between" : "text-sm sm:flex-row sm:items-center sm:justify-between"
+          ].join(" ")}
+        >
+          <p className="text-black/52">
+            © {new Date().getFullYear()} Que CRM. {tr("All rights reserved.", "جميع الحقوق محفوظة.")}
+          </p>
+          <div className="flex items-center justify-end gap-2">
+            <LanguageToggle mode="compact" className="rounded-xl border-black/12 bg-white p-0.5 shadow-sm sm:hidden" />
+            <LanguageToggle
+              mode="full"
+              className="hidden sm:inline-flex rounded-2xl border-black/12 bg-white/95 p-1 shadow-[0_8px_20px_rgba(15,18,24,0.08)] backdrop-blur"
+            />
+          </div>
         </div>
       </footer>
     </main>

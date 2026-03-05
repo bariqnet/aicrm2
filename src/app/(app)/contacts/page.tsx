@@ -13,7 +13,7 @@ export default async function ContactsPage() {
     payload = await serverApiRequest<ServerListResponse<Contact>>("/contacts");
   } catch (error) {
     if (error instanceof SessionInvalidError) {
-      redirect("/auth/sign-in?next=/contacts");
+      redirect("/auth/sign-in?expired=1&next=/contacts");
     }
     throw error;
   }

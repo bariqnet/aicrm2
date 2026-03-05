@@ -30,7 +30,7 @@ export default async function ProfilePage() {
 
   for (const result of [meResult, membershipsResult, workspacesResult]) {
     if (result.status === "rejected" && result.reason instanceof SessionInvalidError) {
-      redirect("/auth/sign-in?next=/profile");
+      redirect("/auth/sign-in?expired=1&next=/profile");
     }
   }
 

@@ -13,7 +13,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
     await serverApiRequest<{ user?: { id?: string } }>("/auth/me");
   } catch (error) {
     if (error instanceof SessionInvalidError) {
-      redirect("/auth/sign-in");
+      redirect("/auth/sign-in?expired=1");
     }
     throw error;
   }

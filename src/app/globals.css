@@ -240,6 +240,51 @@ html[lang="ar"] .page-subtitle {
   }
 }
 
+@keyframes landing-grid-pan {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: 72px 72px, 72px 72px;
+  }
+}
+
+@keyframes landing-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes landing-metric-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+@keyframes landing-scan {
+  0% {
+    opacity: 0;
+    transform: translateX(-120%);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(140%);
+  }
+}
+
 @layer components {
   .landing-fade-up {
     animation: landing-fade-up 0.75s cubic-bezier(0.21, 0.74, 0.2, 1) both;
@@ -265,6 +310,45 @@ html[lang="ar"] .page-subtitle {
     animation: landing-ambient-drift 10s ease-in-out infinite;
     transform-origin: top center;
     will-change: transform, opacity;
+  }
+
+  .landing-grid-flow {
+    background-image:
+      linear-gradient(to right, rgba(15, 18, 24, 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 18, 24, 0.06) 1px, transparent 1px);
+    background-size: 34px 34px;
+    animation: landing-grid-pan 18s linear infinite;
+  }
+
+  .landing-glow-pulse {
+    animation: landing-glow-pulse 7.4s ease-in-out infinite;
+    will-change: transform, opacity;
+  }
+
+  .landing-metric-drift {
+    animation: landing-metric-drift 6.2s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .landing-metric-drift-delay-1 {
+    animation-delay: 0.85s;
+  }
+
+  .landing-metric-drift-delay-2 {
+    animation-delay: 1.7s;
+  }
+
+  .landing-scan::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-120%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.78), transparent);
+    animation: landing-scan 3.5s ease-in-out infinite;
+  }
+
+  .landing-diagram-shell {
+    backdrop-filter: blur(16px);
   }
 
   .landing-card {
@@ -300,7 +384,10 @@ html[lang="ar"] .page-subtitle {
   .landing-fade-up,
   .landing-float,
   .landing-ambient-glow,
-  .landing-cta-pulse {
+  .landing-cta-pulse,
+  .landing-grid-flow,
+  .landing-glow-pulse,
+  .landing-metric-drift {
     animation: none !important;
   }
 
@@ -314,6 +401,10 @@ html[lang="ar"] .page-subtitle {
   .landing-cta:hover,
   .landing-cta:focus-visible {
     transform: none !important;
+  }
+
+  .landing-scan::after {
+    animation: none !important;
   }
 }
 

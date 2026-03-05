@@ -49,7 +49,7 @@ export default async function InvoicesPage() {
     ]);
   } catch (error) {
     if (error instanceof SessionInvalidError) {
-      redirect("/auth/sign-in?next=/invoices");
+      redirect("/auth/sign-in?expired=1&next=/invoices");
     }
     throw error;
   }

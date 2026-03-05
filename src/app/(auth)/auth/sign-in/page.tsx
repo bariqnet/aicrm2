@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, type FormEvent, useState } from "react";
+import { Suspense, type FormEvent, useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { apiRequest } from "@/lib/crm-api";
@@ -37,6 +37,7 @@ function SignInPageContent() {
   const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
   const isArabic = language === "ar";
   const searchParams = useSearchParams();
+  const isExpiredSession = searchParams.get("expired") === "1";
   const fieldClass =
     "h-12 w-full rounded-2xl border border-black/12 bg-[#f8f9fb] px-4 text-sm text-[#0f1218] outline-none transition focus:border-black/25 focus:bg-white focus:shadow-[0_0_0_4px_rgba(17,19,25,0.08)]";
 
@@ -45,6 +46,17 @@ function SignInPageContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isExpiredSession) return;
+
+    void fetch("/api/session", {
+      method: "DELETE",
+      keepalive: true
+    }).catch(() => {
+      // Clearing the cookie is best effort. Sign-in should remain available either way.
+    });
+  }, [isExpiredSession]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -118,6 +130,12 @@ function SignInPageContent() {
           {tr("Use your username and password to access Que.", "استخدم اسم المستخدم وكلمة المرور للوصول إلى كيو.")}
         </p>
       </div>
+
+      {isExpiredSession ? (
+        <p className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800">
+          {tr("Your session expired. Sign in again to continue.", "انتهت جلستك. سجّل الدخول مرة أخرى للمتابعة.")}
+        </p>
+      ) : null}
 
       {searchParams.get("next") ? (
         <p className="mb-4 rounded-2xl border border-black/10 bg-[#f8f9fb] px-4 py-2.5 text-sm text-black/58">

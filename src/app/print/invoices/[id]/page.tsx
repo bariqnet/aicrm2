@@ -59,7 +59,7 @@ export default async function InvoicePrintPage({
     invoice = await serverApiRequestOrNull<Invoice>(`/invoices/${id}`);
   } catch (error) {
     if (error instanceof SessionInvalidError) {
-      redirect(`/auth/sign-in?next=${encodeURIComponent(signInNext)}`);
+      redirect(`/auth/sign-in?expired=1&next=${encodeURIComponent(signInNext)}`);
     }
     throw error;
   }
@@ -84,7 +84,7 @@ export default async function InvoicePrintPage({
     ]);
   } catch (error) {
     if (error instanceof SessionInvalidError) {
-      redirect(`/auth/sign-in?next=${encodeURIComponent(signInNext)}`);
+      redirect(`/auth/sign-in?expired=1&next=${encodeURIComponent(signInNext)}`);
     }
     throw error;
   }

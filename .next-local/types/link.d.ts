@@ -29,88 +29,88 @@ declare namespace __next_route_internal_types__ {
     S extends `${string}${SearchOrHash}` ? never : S
 
   type StaticRoutes = 
-    | `/api/ai/relationship-intelligence`
+    | `/api/activities`
     | `/api/auth/me`
-    | `/api/auth/refresh`
+    | `/api/ai/relationship-intelligence`
     | `/api/auth/sign-out`
     | `/api/auth/sign-up`
-    | `/api/companies`
     | `/api/auth/sign-in`
+    | `/api/auth/refresh`
     | `/api/contacts/bulk-delete`
-    | `/api/contacts/import`
     | `/api/contacts`
-    | `/api/contacts/export`
     | `/api/deals`
-    | `/api/activities`
+    | `/api/contacts/export`
     | `/api/invites/accept`
-    | `/api/memberships`
+    | `/api/contacts/import`
     | `/api/invoices`
-    | `/api/invites`
-    | `/api/notifications/mark-all-read`
-    | `/api/notifications`
+    | `/api/memberships`
+    | `/api/notes`
+    | `/api/companies`
     | `/api/onboarding/invites`
     | `/api/onboarding/workspace`
-    | `/api/notes`
     | `/api/onboarding/stages`
+    | `/api/notifications`
+    | `/api/session`
     | `/api/stages/reorder`
     | `/api/reminders`
-    | `/api/stages`
-    | `/api/tasks`
+    | `/api/invites`
     | `/api/users`
     | `/api/workspaces/switch`
-    | `/api/visits`
-    | `/api/session`
     | `/api/workspaces`
+    | `/api/tasks`
+    | `/api/notifications/mark-all-read`
+    | `/api/stages`
+    | `/api/visits`
     | `/`
     | `/support`
-    | `/terms`
     | `/privacy`
+    | `/terms`
     | `/callops`
-    | `/calendar`
     | `/companies/new`
-    | `/contacts`
-    | `/dashboard`
-    | `/contacts/new`
+    | `/calendar`
     | `/companies`
-    | `/deals`
-    | `/invoices/new`
-    | `/invoices`
+    | `/contacts/new`
+    | `/contacts`
     | `/deals/new`
-    | `/settings`
-    | `/contacts/import`
+    | `/deals`
+    | `/invoices`
+    | `/profile`
     | `/reports`
+    | `/tasks/new`
+    | `/contacts/import`
+    | `/tasks`
+    | `/dashboard`
     | `/visits`
     | `/auth`
-    | `/profile`
-    | `/tasks`
     | `/auth/sign-in`
-    | `/tasks/new`
     | `/auth/sign-up`
     | `/onboarding`
+    | `/settings`
+    | `/invoices/new`
   type DynamicRoutes<T extends string = string> = 
     | `/api/companies/${SafeSlug<T>}`
-    | `/api/contacts/${SafeSlug<T>}`
     | `/api/deals/${SafeSlug<T>}`
     | `/api/invites/${SafeSlug<T>}`
     | `/api/invoices/${SafeSlug<T>}`
+    | `/api/memberships/${SafeSlug<T>}`
     | `/api/notes/${SafeSlug<T>}`
     | `/api/notifications/${SafeSlug<T>}`
-    | `/api/memberships/${SafeSlug<T>}`
+    | `/api/contacts/${SafeSlug<T>}`
     | `/api/reminders/${SafeSlug<T>}`
-    | `/api/stages/${SafeSlug<T>}`
     | `/api/tasks/${SafeSlug<T>}`
     | `/api/visits/${SafeSlug<T>}`
+    | `/api/stages/${SafeSlug<T>}`
     | `/print/invoices/${SafeSlug<T>}`
-    | `/companies/${SafeSlug<T>}`
-    | `/contacts/${SafeSlug<T>}/edit`
     | `/companies/${SafeSlug<T>}/edit`
     | `/contacts/${SafeSlug<T>}`
+    | `/companies/${SafeSlug<T>}`
     | `/deals/${SafeSlug<T>}/edit`
-    | `/deals/${SafeSlug<T>}`
-    | `/invoices/${SafeSlug<T>}`
     | `/invoices/${SafeSlug<T>}/edit`
-    | `/tasks/${SafeSlug<T>}`
+    | `/invoices/${SafeSlug<T>}`
+    | `/deals/${SafeSlug<T>}`
     | `/auth/invite/${SafeSlug<T>}`
+    | `/tasks/${SafeSlug<T>}`
+    | `/contacts/${SafeSlug<T>}/edit`
 
   type RouteImpl<T> = 
     | StaticRoutes

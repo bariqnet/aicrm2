@@ -2,6 +2,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Cairo, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { DocumentLanguageSync } from "@/components/DocumentLanguageSync";
+import { MixpanelProvider } from "@/components/MixpanelProvider";
+import { getSessionData } from "@/lib/auth";
 import { getServerLanguage } from "@/lib/server-language";
 
 const bodyFont = IBM_Plex_Sans({
@@ -35,12 +37,25 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const language = await getServerLanguage();
+  const session = await getSessionData();
   const direction = language === "ar" ? "rtl" : "ltr";
+  const mixpanelToken = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN;
+  const mixpanelApiHost = process.env.NEXT_PUBLIC_MIXPANEL_API_HOST;
+  const mixpanelDebug = process.env.NEXT_PUBLIC_MIXPANEL_DEBUG === "true";
 
   return (
     <html lang={language} dir={direction}>
       <body className={`${bodyFont.variable} ${monoFont.variable} ${arabicFont.variable}`}>
         <DocumentLanguageSync />
+        {mixpanelToken ? (
+          <MixpanelProvider
+            apiHost={mixpanelApiHost}
+            debug={mixpanelDebug}
+            token={mixpanelToken}
+            user={session.user ?? null}
+            workspaceId={session.workspaceId}
+          />
+        ) : null}
         {children}
       </body>
     </html>

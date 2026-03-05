@@ -92,7 +92,7 @@ export default function NewDealPage() {
     if (!stageId) {
       await showErrorAlert(
         tr("Missing stage", "المرحلة مفقودة"),
-        tr("Select a stage before creating the pipeline card.", "اختر مرحلة قبل إنشاء بطاقة البايبلاين.")
+        tr("Select a stage before creating the pipeline card.", "اختر مرحلة قبل إنشاء بطاقة جديدة في خط المبيعات.")
       );
       return;
     }
@@ -121,18 +121,18 @@ export default function NewDealPage() {
 
       if (!response.ok) {
         await showErrorAlert(
-          tr("Unable to create pipeline card", "تعذر إنشاء بطاقة البايبلاين"),
+          tr("Unable to create pipeline card", "تعذر إنشاء بطاقة جديدة في خط المبيعات"),
           await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
         );
         return;
       }
 
-      await showSuccessAlert(tr("Pipeline card created", "تم إنشاء بطاقة البايبلاين"));
+      await showSuccessAlert(tr("Pipeline card created", "تم إنشاء بطاقة جديدة في خط المبيعات"));
       router.push("/deals");
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : tr("Unable to create pipeline card", "تعذر إنشاء بطاقة البايبلاين");
-      await showErrorAlert(tr("Unable to create pipeline card", "تعذر إنشاء بطاقة البايبلاين"), message);
+      const message = error instanceof Error ? error.message : tr("Unable to create pipeline card", "تعذر إنشاء بطاقة جديدة في خط المبيعات");
+      await showErrorAlert(tr("Unable to create pipeline card", "تعذر إنشاء بطاقة جديدة في خط المبيعات"), message);
     } finally {
       setSaving(false);
     }
@@ -141,8 +141,8 @@ export default function NewDealPage() {
   return (
     <main className="app-page">
       <header>
-        <Link href="/deals" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to pipeline", "← العودة إلى البايبلاين")}</Link>
-        <h1 className="page-title mt-2">{tr("New pipeline card", "بطاقة بايبلاين جديدة")}</h1>
+        <Link href="/deals" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to pipeline", "← العودة إلى خط المبيعات")}</Link>
+        <h1 className="page-title mt-2">{tr("New pipeline card", "بطاقة جديدة في خط المبيعات")}</h1>
         <p className="page-subtitle">{tr("Create a new card and assign it to the right stage.", "أنشئ بطاقة جديدة وعيّنها للمرحلة المناسبة.")}</p>
       </header>
 

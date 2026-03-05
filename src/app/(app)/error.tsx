@@ -18,9 +18,23 @@ export default function AppError({ error, reset }: AppErrorProps) {
 
   useEffect(() => {
     if (!sessionError) return;
-    const currentPath = window.location.pathname + window.location.search;
-    const next = encodeURIComponent(currentPath || "/dashboard");
-    window.location.replace(`/auth/sign-in?next=${next}`);
+    const redirectToSignIn = async () => {
+      const currentPath = window.location.pathname + window.location.search;
+      const next = encodeURIComponent(currentPath || "/dashboard");
+
+      try {
+        await fetch("/api/session", {
+          method: "DELETE",
+          keepalive: true
+        });
+      } catch {
+        // Best effort. Redirecting is the primary recovery path.
+      } finally {
+        window.location.replace(`/auth/sign-in?expired=1&next=${next}`);
+      }
+    };
+
+    void redirectToSignIn();
   }, [sessionError]);
 
   if (sessionError) {

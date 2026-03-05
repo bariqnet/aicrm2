@@ -845,7 +845,7 @@ export default function OnboardingPage() {
             <span>{tr("AI-driven CRM", "CRM مدعوم بالذكاء الاصطناعي")}</span>
           </div>
           <Link href={"/" as Route} className="font-semibold text-black transition hover:text-black/70">
-            {tr("Back to home", "العودة للرئيسية")}
+            {tr("Back to home", "العودة إلى الصفحة الرئيسية")}
           </Link>
         </div>
       </footer>

@@ -1,0 +1,124 @@
+0 verbose cli /usr/local/bin/node /usr/local/bin/npm
+1 info using npm@11.6.2
+2 info using node@v22.19.0
+3 silly config load:file:/usr/local/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/bariq/bitbucket/butayta/seeassest/aicrm2/.npmrc
+5 silly config load:file:/Users/bariq/.npmrc
+6 silly config load:file:/usr/local/etc/npmrc
+7 verbose title npm install mixpanel-browser
+8 verbose argv "install" "mixpanel-browser" "--cache" ".npm-cache"
+9 verbose logfile logs-max:10 dir:/Users/bariq/bitbucket/butayta/seeassest/aicrm2/.npm-cache/_logs/2026-03-05T19_58_58_622Z-
+10 verbose logfile /Users/bariq/bitbucket/butayta/seeassest/aicrm2/.npm-cache/_logs/2026-03-05T19_58_58_622Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+13 silly idealTree buildDeps
+14 silly fetch manifest mixpanel-browser@*
+15 silly packumentCache full:https://registry.npmjs.org/mixpanel-browser cache-miss
+16 http fetch GET 200 https://registry.npmjs.org/mixpanel-browser 241ms (cache miss)
+17 silly packumentCache full:https://registry.npmjs.org/mixpanel-browser set size:undefined disposed:false
+18 silly placeDep ROOT mixpanel-browser@2.75.0 OK for: lightfield-simple-crm@0.1.0 want: *
+19 silly fetch manifest @mixpanel/rrweb@2.0.0-alpha.18.3
+20 silly packumentCache full:https://registry.npmjs.org/@mixpanel%2frrweb cache-miss
+21 silly fetch manifest @mixpanel/rrweb-plugin-console-record@2.0.0-alpha.18.3
+22 silly packumentCache full:https://registry.npmjs.org/@mixpanel%2frrweb-plugin-console-record cache-miss
+23 silly fetch manifest json-logic-js@2.0.5
+24 silly packumentCache full:https://registry.npmjs.org/json-logic-js cache-miss
+25 http fetch GET 200 https://registry.npmjs.org/npm 375ms
+26 http fetch GET 200 https://registry.npmjs.org/json-logic-js 424ms (cache miss)
+27 silly packumentCache full:https://registry.npmjs.org/json-logic-js set size:undefined disposed:false
+28 http fetch GET 200 https://registry.npmjs.org/@mixpanel%2frrweb 569ms (cache miss)
+29 silly packumentCache full:https://registry.npmjs.org/@mixpanel%2frrweb set size:undefined disposed:false
+30 http fetch GET 200 https://registry.npmjs.org/@mixpanel%2frrweb-plugin-console-record 1089ms (cache miss)
+31 silly packumentCache full:https://registry.npmjs.org/@mixpanel%2frrweb-plugin-console-record set size:undefined disposed:false
+32 silly fetch manifest @mixpanel/rrweb-utils@^2.0.0-alpha.18
+33 silly packumentCache full:https://registry.npmjs.org/@mixpanel%2frrweb-utils cache-miss
+34 http fetch GET 200 https://registry.npmjs.org/@mixpanel%2frrweb-utils 992ms (cache miss)
+35 silly packumentCache full:https://registry.npmjs.org/@mixpanel%2frrweb-utils set size:undefined disposed:false
+36 silly placeDep ROOT @mixpanel/rrweb@2.0.0-alpha.18.3 OK for: mixpanel-browser@2.75.0 want: 2.0.0-alpha.18.3
+37 silly placeDep ROOT @mixpanel/rrweb-plugin-console-record@2.0.0-alpha.18.3 OK for: mixpanel-browser@2.75.0 want: 2.0.0-alpha.18.3
+38 silly placeDep ROOT @mixpanel/rrweb-utils@2.0.0-alpha.18.3 OK for: @mixpanel/rrweb-plugin-console-record@2.0.0-alpha.18.3 want: ^2.0.0-alpha.18
+39 silly placeDep ROOT json-logic-js@2.0.5 OK for: mixpanel-browser@2.75.0 want: 2.0.5
+40 silly fetch manifest @mixpanel/rrweb-types@^2.0.0-alpha.18
+41 silly packumentCache full:https://registry.npmjs.org/@mixpanel%2frrweb-types cache-miss
+42 silly fetch manifest @types/css-font-loading-module@0.0.7
+43 silly packumentCache full:https://registry.npmjs.org/@types%2fcss-font-loading-module cache-miss
+44 silly fetch manifest @xstate/fsm@^1.4.0
+45 silly packumentCache full:https://registry.npmjs.org/@xstate%2ffsm cache-miss
+46 silly fetch manifest base64-arraybuffer@^1.0.1
+47 silly packumentCache full:https://registry.npmjs.org/base64-arraybuffer cache-miss
+48 silly fetch manifest mitt@^3.0.0
+49 silly packumentCache full:https://registry.npmjs.org/mitt cache-miss
+50 silly fetch manifest @mixpanel/rrdom@^2.0.0-alpha.18
+51 silly packumentCache full:https://registry.npmjs.org/@mixpanel%2frrdom cache-miss
+52 silly fetch manifest @mixpanel/rrweb-snapshot@^2.0.0-alpha.18
+53 silly packumentCache full:https://registry.npmjs.org/@mixpanel%2frrweb-snapshot cache-miss
+54 http fetch GET 200 https://registry.npmjs.org/base64-arraybuffer 72ms (cache miss)
+55 silly packumentCache full:https://registry.npmjs.org/base64-arraybuffer set size:undefined disposed:false
+56 http fetch GET 200 https://registry.npmjs.org/mitt 219ms (cache miss)
+57 silly packumentCache full:https://registry.npmjs.org/mitt set size:undefined disposed:false
+58 http fetch GET 200 https://registry.npmjs.org/@types%2fcss-font-loading-module 512ms (cache miss)
+59 silly packumentCache full:https://registry.npmjs.org/@types%2fcss-font-loading-module set size:undefined disposed:false
+60 http fetch GET 200 https://registry.npmjs.org/@mixpanel%2frrweb-snapshot 779ms (cache miss)
+61 silly packumentCache full:https://registry.npmjs.org/@mixpanel%2frrweb-snapshot set size:undefined disposed:false
+62 http fetch GET 200 https://registry.npmjs.org/@mixpanel%2frrdom 781ms (cache miss)
+63 silly packumentCache full:https://registry.npmjs.org/@mixpanel%2frrdom set size:undefined disposed:false
+64 http fetch GET 200 https://registry.npmjs.org/@xstate%2ffsm 926ms (cache miss)
+65 silly packumentCache full:https://registry.npmjs.org/@xstate%2ffsm set size:undefined disposed:false
+66 http fetch GET 200 https://registry.npmjs.org/@mixpanel%2frrweb-types 1042ms (cache miss)
+67 silly packumentCache full:https://registry.npmjs.org/@mixpanel%2frrweb-types set size:undefined disposed:false
+68 silly placeDep ROOT @mixpanel/rrdom@2.0.0-alpha.18.3 OK for: @mixpanel/rrweb@2.0.0-alpha.18.3 want: ^2.0.0-alpha.18
+69 silly placeDep ROOT @mixpanel/rrweb-snapshot@2.0.0-alpha.18.3 OK for: @mixpanel/rrweb@2.0.0-alpha.18.3 want: ^2.0.0-alpha.18
+70 silly placeDep ROOT @mixpanel/rrweb-types@2.0.0-alpha.18.3 OK for: @mixpanel/rrweb@2.0.0-alpha.18.3 want: ^2.0.0-alpha.18
+71 silly placeDep ROOT @types/css-font-loading-module@0.0.7 OK for: @mixpanel/rrweb@2.0.0-alpha.18.3 want: 0.0.7
+72 silly placeDep ROOT @xstate/fsm@1.6.5 OK for: @mixpanel/rrweb@2.0.0-alpha.18.3 want: ^1.4.0
+73 silly placeDep ROOT base64-arraybuffer@1.0.2 OK for: @mixpanel/rrweb@2.0.0-alpha.18.3 want: ^1.0.1
+74 silly placeDep ROOT mitt@3.0.1 OK for: @mixpanel/rrweb@2.0.0-alpha.18.3 want: ^3.0.0
+75 silly reify moves {}
+76 verbose stack Error: EACCES: permission denied, mkdir '/Users/bariq/bitbucket/butayta/seeassest/aicrm2/node_modules/fsevents'
+76 verbose stack     at async mkdir (node:internal/fs/promises:860:10)
+76 verbose stack     at async /usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:576:20
+76 verbose stack     at async Promise.allSettled (index 0)
+76 verbose stack     at async [reifyPackages] (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:313:11)
+76 verbose stack     at async Arborist.reify (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:125:5)
+76 verbose stack     at async Install.exec (/usr/local/lib/node_modules/npm/lib/commands/install.js:150:5)
+76 verbose stack     at async Npm.exec (/usr/local/lib/node_modules/npm/lib/npm.js:208:9)
+76 verbose stack     at async module.exports (/usr/local/lib/node_modules/npm/lib/cli/entry.js:67:5)
+77 error code EACCES
+78 error syscall mkdir
+79 error path /Users/bariq/bitbucket/butayta/seeassest/aicrm2/node_modules/fsevents
+80 error errno -13
+81 error Error: EACCES: permission denied, mkdir '/Users/bariq/bitbucket/butayta/seeassest/aicrm2/node_modules/fsevents'
+81 error     at async mkdir (node:internal/fs/promises:860:10)
+81 error     at async /usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:576:20
+81 error     at async Promise.allSettled (index 0)
+81 error     at async [reifyPackages] (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:313:11)
+81 error     at async Arborist.reify (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:125:5)
+81 error     at async Install.exec (/usr/local/lib/node_modules/npm/lib/commands/install.js:150:5)
+81 error     at async Npm.exec (/usr/local/lib/node_modules/npm/lib/npm.js:208:9)
+81 error     at async module.exports (/usr/local/lib/node_modules/npm/lib/cli/entry.js:67:5) {
+81 error   errno: -13,
+81 error   code: 'EACCES',
+81 error   syscall: 'mkdir',
+81 error   path: '/Users/bariq/bitbucket/butayta/seeassest/aicrm2/node_modules/fsevents'
+81 error }
+82 error
+82 error The operation was rejected by your operating system.
+82 error It is likely you do not have the permissions to access this file as the current user
+82 error
+82 error If you believe this might be a permissions issue, please double-check the
+82 error permissions of the file and its containing directories, or try running
+82 error the command again as root/Administrator.
+83 silly unfinished npm timer reify 1772740738750
+84 silly unfinished npm timer reify:createSparse 1772740742224
+85 verbose cwd /Users/bariq/bitbucket/butayta/seeassest/aicrm2
+86 verbose os Darwin 25.0.0
+87 verbose node v22.19.0
+88 verbose npm  v11.6.2
+89 notice
+89 notice New minor version of npm available! 11.6.2 -> 11.11.0
+89 notice Changelog: https://github.com/npm/cli/releases/tag/v11.11.0
+89 notice To update run: npm install -g npm@11.11.0
+89 notice  { force: true, [Symbol(proc-log.meta)]: true }
+90 verbose exit -13
+91 verbose code -13
+92 error A complete log of this run can be found in: /Users/bariq/bitbucket/butayta/seeassest/aicrm2/.npm-cache/_logs/2026-03-05T19_58_58_622Z-debug-0.log

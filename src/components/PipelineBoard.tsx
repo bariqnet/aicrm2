@@ -307,11 +307,11 @@ export function PipelineBoard({
     <>
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="page-title">{tr("Pipeline", "البايبلاين")}</h1>
+          <h1 className="page-title">{tr("Pipeline", "خط المبيعات")}</h1>
           <p className="page-subtitle">
             {tr(
               "Trello-style board. Drag cards between stages to update pipeline.",
-              "لوحة بأسلوب Trello. اسحب البطاقات بين المراحل لتحديث البايبلاين."
+              "لوحة بأسلوب Trello. اسحب البطاقات بين المراحل لتحديث خط المبيعات."
             )}
           </p>
         </div>
@@ -324,7 +324,7 @@ export function PipelineBoard({
             {tr("Manage stages", "إدارة المراحل")}
           </Link>
           <Link href="/deals/new" className="btn btn-primary">
-            {tr("New pipeline card", "بطاقة بايبلاين جديدة")}
+            {tr("New pipeline card", "بطاقة جديدة في خط المبيعات")}
           </Link>
         </div>
       </header>
@@ -339,7 +339,7 @@ export function PipelineBoard({
           <p className="mt-2 text-2xl font-semibold">{openCards.length}</p>
         </article>
         <article className="panel p-4">
-          <p className="muted-label">{tr("Pipeline value", "قيمة البايبلاين")}</p>
+          <p className="muted-label">{tr("Pipeline value", "قيمة خط المبيعات")}</p>
           <p className="mt-2 text-2xl font-semibold">{formatMoney(totalValue, "USD", locale)}</p>
         </article>
       </section>
@@ -351,7 +351,7 @@ export function PipelineBoard({
           <div className="mx-auto flex h-full w-full max-w-[2200px] flex-col">
             <div className="mb-3 flex items-center justify-between gap-2">
               <h2 className="text-sm font-semibold text-fg">
-                {tr("Pipeline full screen view", "عرض البايبلاين بملء الشاشة")}
+                {tr("Pipeline full screen view", "عرض خط المبيعات بملء الشاشة")}
               </h2>
               <button className="btn" type="button" onClick={() => setBoardFullscreen(false)}>
                 <Minimize2 size={14} />
