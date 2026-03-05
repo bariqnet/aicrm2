@@ -59,8 +59,15 @@ function SignUpPageContent() {
     setError(null);
 
     const cleanUsername = username.trim();
-    const cleanName = fullName.trim() || cleanUsername;
+    const cleanName = fullName.trim();
     const cleanEmail = email.trim();
+
+    if (cleanName.length === 0) {
+      const message = tr("Full name is required.", "الاسم الكامل مطلوب.");
+      setError(message);
+      await showErrorAlert(t("signup.invalidDataTitle"), message);
+      return;
+    }
 
     if (cleanUsername.length < 3) {
       const message = tr("Username must be at least 3 characters.", "يجب أن يكون اسم المستخدم 3 أحرف على الأقل.");
@@ -76,7 +83,7 @@ function SignUpPageContent() {
       return;
     }
 
-    const validated = signUpSchema.safeParse({ name: cleanName, email: cleanEmail, password });
+    const validated = signUpSchema.safeParse({ name: cleanName, username: cleanUsername, email: cleanEmail, password });
     if (!validated.success) {
       const issue = validated.error.issues[0];
       const message = issue ? `${issue.path}: ${issue.message}` : t("signup.invalidInput");
@@ -92,7 +99,6 @@ function SignUpPageContent() {
         method: "POST",
         body: {
           ...validated.data,
-          username: cleanUsername,
           ...(inviteTokenParam ? { inviteToken: inviteTokenParam } : {})
         }
       });
@@ -105,7 +111,7 @@ function SignUpPageContent() {
       if (!sessionPayload) {
         const loginPayload = await apiRequest<unknown>("/auth/login", {
           method: "POST",
-          body: { email: validated.data.email, username: cleanUsername, password: validated.data.password }
+          body: { email: validated.data.email, username: validated.data.username, password: validated.data.password }
         });
         sessionPayload = normalizeSessionPayload(loginPayload, {
           email: validated.data.email,
@@ -137,7 +143,7 @@ function SignUpPageContent() {
           {tr("Create account", "إنشاء حساب")}
         </p>
         <h1 className="mt-2 text-4xl font-semibold tracking-tight text-[#0f1218]">
-          {tr("Start with your username and password", "ابدأ باسم المستخدم وكلمة المرور")}
+          {tr("Start with full name, username, email, and password", "ابدأ بالاسم الكامل واسم المستخدم والبريد الإلكتروني وكلمة المرور")}
         </h1>
         <p className="mt-1 text-sm text-black/60">
           {tr("Create your Que access and continue to onboarding.", "أنشئ حسابك في كيو ثم أكمل خطوات الإعداد.")}
@@ -152,7 +158,7 @@ function SignUpPageContent() {
 
       <form className="space-y-4" onSubmit={onSubmit}>
         <label className="block space-y-1.5">
-          <span className="text-sm font-medium text-[#0f1218]">{tr("Username", "اسم المستخدم")}</span>
+          <span className="text-sm font-medium text-[#0f1218]">{tr("Username (required)", "اسم المستخدم (مطلوب)")}</span>
           <input
             className={fieldClass}
             value={username}
@@ -165,7 +171,7 @@ function SignUpPageContent() {
         </label>
 
         <label className="block space-y-1.5">
-          <span className="text-sm font-medium text-[#0f1218]">{tr("Full name (optional)", "الاسم الكامل (اختياري)")}</span>
+          <span className="text-sm font-medium text-[#0f1218]">{t("signup.fullName")}</span>
           <input
             className={fieldClass}
             value={fullName}
@@ -173,6 +179,7 @@ function SignUpPageContent() {
             type="text"
             placeholder={t("signup.fullNamePlaceholder")}
             autoComplete="name"
+            required
           />
         </label>
 
