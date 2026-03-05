@@ -30,19 +30,36 @@ export function LanguageToggle({ className, mode = "compact" }: LanguageTogglePr
 
   return (
     <div
-      className={cn("inline-flex items-center rounded-md border border-border bg-surface p-0.5", className)}
+      className={cn(
+        isFullMode
+          ? "inline-flex items-center gap-1 rounded-xl border border-border/80 bg-surface p-1"
+          : "inline-flex items-center rounded-md border border-border bg-surface p-0.5",
+        className
+      )}
       role="group"
       aria-label={t("language.switch")}
     >
-      <span className={cn("text-mutedfg", isFullMode ? "px-2.5" : "px-2")} aria-hidden>
+      <span
+        className={cn(
+          isFullMode
+            ? "inline-flex h-7 w-7 items-center justify-center rounded-lg bg-black/[0.04] text-black/65"
+            : "px-2 text-mutedfg"
+        )}
+        aria-hidden
+      >
         <Languages size={14} />
       </span>
       <button
         type="button"
         className={cn(
-          "rounded-md py-1 text-xs font-medium transition",
-          isFullMode ? "px-3" : "px-2",
-          language === "en" ? "bg-muted text-fg" : "text-mutedfg hover:text-fg"
+          isFullMode ? "h-7 rounded-lg px-3 text-xs font-semibold transition-all" : "rounded-md px-2 py-1 text-xs font-medium transition",
+          language === "en"
+            ? isFullMode
+              ? "bg-[#111319] text-white shadow-[0_1px_3px_rgba(17,19,25,0.25)]"
+              : "bg-muted text-fg"
+            : isFullMode
+              ? "text-black/62 hover:bg-black/[0.05] hover:text-black"
+              : "text-mutedfg hover:text-fg"
         )}
         aria-label={t("language.english")}
         onClick={() => changeLanguage("en")}
@@ -52,9 +69,14 @@ export function LanguageToggle({ className, mode = "compact" }: LanguageTogglePr
       <button
         type="button"
         className={cn(
-          "rounded-md py-1 text-xs font-medium transition",
-          isFullMode ? "px-3" : "px-2",
-          language === "ar" ? "bg-muted text-fg" : "text-mutedfg hover:text-fg"
+          isFullMode ? "h-7 rounded-lg px-3 text-xs font-semibold transition-all" : "rounded-md px-2 py-1 text-xs font-medium transition",
+          language === "ar"
+            ? isFullMode
+              ? "bg-[#111319] text-white shadow-[0_1px_3px_rgba(17,19,25,0.25)]"
+              : "bg-muted text-fg"
+            : isFullMode
+              ? "text-black/62 hover:bg-black/[0.05] hover:text-black"
+              : "text-mutedfg hover:text-fg"
         )}
         aria-label={t("language.arabic")}
         onClick={() => changeLanguage("ar")}

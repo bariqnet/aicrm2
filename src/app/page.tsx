@@ -275,7 +275,7 @@ export default async function HomePage() {
       <div className="landing-ambient-glow pointer-events-none absolute inset-x-0 top-[-12rem] h-[34rem] bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.14),rgba(245,246,248,0)_68%)]" />
 
       <header className="sticky top-0 z-30 border-b border-black/7 bg-[#f5f6f8]/85 backdrop-blur-lg">
-        <div className="mx-auto flex h-24 w-full max-w-7xl items-center justify-between px-5 sm:px-8">
+        <div className="mx-auto flex h-24 w-full max-w-7xl items-center justify-between gap-3 px-5 sm:px-8">
           <Link href={"/" as Route} className="inline-flex items-center">
             <Image src="/fav.png" alt="Que CRM" width={1076} height={400} priority className="h-12 w-auto sm:h-14" />
           </Link>
@@ -296,7 +296,11 @@ export default async function HomePage() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <LanguageToggle mode="full" className="rounded-full border-black/12 bg-white p-1 shadow-sm" />
+            <LanguageToggle mode="compact" className="rounded-xl border-black/12 bg-white p-0.5 shadow-sm sm:hidden" />
+            <LanguageToggle
+              mode="full"
+              className="hidden sm:inline-flex rounded-2xl border-black/12 bg-white/95 p-1 shadow-[0_8px_20px_rgba(15,18,24,0.08)] backdrop-blur"
+            />
             <Link
               href="/auth/sign-in"
               className="hidden h-10 items-center rounded-full px-4 text-sm font-medium text-black/70 transition hover:bg-black/5 hover:text-black sm:inline-flex"
@@ -667,19 +671,19 @@ export default async function HomePage() {
             <p className="text-sm font-semibold text-black">{tr("Legal", "قانوني")}</p>
             <ul className={["mt-3 text-black/62", isArabic ? "space-y-2.5 text-[0.98rem] leading-7" : "space-y-2 text-sm"].join(" ")}>
               <li>
-                <a href="#" className="transition hover:text-black">
+                <Link href={"/terms" as Route} className="transition hover:text-black">
                   {tr("Terms", "الشروط")}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="transition hover:text-black">
+                <Link href={"/privacy" as Route} className="transition hover:text-black">
                   {tr("Privacy", "الخصوصية")}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="transition hover:text-black">
+                <Link href={"/support" as Route} className="transition hover:text-black">
                   {tr("Support", "الدعم")}
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

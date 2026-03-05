@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { useI18n } from "@/hooks/useI18n";
@@ -23,13 +24,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <span>{tr("AI-driven CRM", "CRM مدعوم بالذكاء الاصطناعي")}</span>
           </div>
           <nav className="flex items-center gap-6">
-            <Link href="#" className="transition hover:text-black">
+            <Link href={"/terms" as Route} className="transition hover:text-black">
               {tr("Terms", "الشروط")}
             </Link>
-            <Link href="#" className="transition hover:text-black">
+            <Link href={"/privacy" as Route} className="transition hover:text-black">
               {tr("Privacy", "الخصوصية")}
             </Link>
-            <Link href="#" className="transition hover:text-black">
+            <Link href={"/support" as Route} className="transition hover:text-black">
               {tr("Support", "الدعم")}
             </Link>
           </nav>
