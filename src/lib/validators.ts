@@ -134,19 +134,18 @@ function ensureEnum<T extends string>(
   return value as T;
 }
 
-export const signUpSchema = makeSchema<{ name: string; username: string; email: string; password: string }>((input) => {
+export const signUpSchema = makeSchema<{ name: string; email: string; password: string }>((input) => {
   const issues: ValidationIssue[] = [];
   const body = asObject(input);
   if (!body) return { issues: [{ path: "body", message: "Must be an object" }] };
 
   const name = readRequiredString(body, "name", issues);
-  const username = readRequiredString(body, "username", issues, { minLength: 3 });
   const email = readRequiredString(body, "email", issues);
   const password = readRequiredString(body, "password", issues, { minLength: 8 });
 
   if (email && !isEmail(email)) issues.push({ path: "email", message: "Invalid email address" });
 
-  return { data: { name, username, email, password }, issues };
+  return { data: { name, email, password }, issues };
 });
 
 export const signInSchema = makeSchema<{ email: string; password: string }>((input) => {
