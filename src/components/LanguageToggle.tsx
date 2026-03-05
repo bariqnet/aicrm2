@@ -8,11 +8,15 @@ import { cn } from "@/lib/utils";
 
 type LanguageToggleProps = {
   className?: string;
+  mode?: "compact" | "full";
 };
 
-export function LanguageToggle({ className }: LanguageToggleProps) {
+export function LanguageToggle({ className, mode = "compact" }: LanguageToggleProps) {
   const router = useRouter();
   const { language, setLanguage, t } = useI18n();
+  const isFullMode = mode === "full";
+  const englishLabel = isFullMode ? t("language.english") : "EN";
+  const arabicLabel = isFullMode ? t("language.arabic") : "AR";
 
   function changeLanguage(nextLanguage: AppLanguage) {
     if (nextLanguage === language) return;
@@ -30,28 +34,32 @@ export function LanguageToggle({ className }: LanguageToggleProps) {
       role="group"
       aria-label={t("language.switch")}
     >
-      <span className="px-2 text-mutedfg" aria-hidden>
+      <span className={cn("text-mutedfg", isFullMode ? "px-2.5" : "px-2")} aria-hidden>
         <Languages size={14} />
       </span>
       <button
         type="button"
         className={cn(
-          "rounded-md px-2 py-1 text-xs font-medium transition",
+          "rounded-md py-1 text-xs font-medium transition",
+          isFullMode ? "px-3" : "px-2",
           language === "en" ? "bg-muted text-fg" : "text-mutedfg hover:text-fg"
         )}
+        aria-label={t("language.english")}
         onClick={() => changeLanguage("en")}
       >
-        EN
+        {englishLabel}
       </button>
       <button
         type="button"
         className={cn(
-          "rounded-md px-2 py-1 text-xs font-medium transition",
+          "rounded-md py-1 text-xs font-medium transition",
+          isFullMode ? "px-3" : "px-2",
           language === "ar" ? "bg-muted text-fg" : "text-mutedfg hover:text-fg"
         )}
+        aria-label={t("language.arabic")}
         onClick={() => changeLanguage("ar")}
       >
-        AR
+        {arabicLabel}
       </button>
     </div>
   );

@@ -218,6 +218,28 @@ html[lang="ar"] .page-subtitle {
   }
 }
 
+@keyframes landing-ambient-drift {
+  0%,
+  100% {
+    opacity: 0.88;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate3d(0, 16px, 0) scale(1.08);
+  }
+}
+
+@keyframes landing-cta-pulse {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.015);
+  }
+}
+
 @layer components {
   .landing-fade-up {
     animation: landing-fade-up 0.75s cubic-bezier(0.21, 0.74, 0.2, 1) both;
@@ -227,8 +249,46 @@ html[lang="ar"] .page-subtitle {
     animation-delay: 0.15s;
   }
 
+  .landing-fade-up-delay-2 {
+    animation-delay: 0.3s;
+  }
+
+  .landing-fade-up-delay-3 {
+    animation-delay: 0.45s;
+  }
+
   .landing-float {
     animation: landing-float 7s ease-in-out infinite;
+  }
+
+  .landing-ambient-glow {
+    animation: landing-ambient-drift 10s ease-in-out infinite;
+    transform-origin: top center;
+    will-change: transform, opacity;
+  }
+
+  .landing-card {
+    transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease, border-color 260ms ease;
+    will-change: transform;
+  }
+
+  .landing-card:hover,
+  .landing-card:focus-within {
+    transform: translateY(-5px);
+  }
+
+  .landing-cta {
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease, background-color 220ms ease;
+    will-change: transform;
+  }
+
+  .landing-cta:hover,
+  .landing-cta:focus-visible {
+    transform: translateY(-2px);
+  }
+
+  .landing-cta-pulse {
+    animation: landing-cta-pulse 2.8s ease-in-out infinite;
   }
 }
 
@@ -238,8 +298,22 @@ html[lang="ar"] .page-subtitle {
   }
 
   .landing-fade-up,
-  .landing-float {
+  .landing-float,
+  .landing-ambient-glow,
+  .landing-cta-pulse {
     animation: none !important;
+  }
+
+  .landing-card,
+  .landing-cta {
+    transition: none !important;
+  }
+
+  .landing-card:hover,
+  .landing-card:focus-within,
+  .landing-cta:hover,
+  .landing-cta:focus-visible {
+    transform: none !important;
   }
 }
 

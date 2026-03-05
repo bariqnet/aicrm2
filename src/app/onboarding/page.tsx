@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -469,7 +470,7 @@ export default function OnboardingPage() {
 
       <header className="relative border-b border-black/7 bg-[#f5f6f8]/85 backdrop-blur-lg">
         <div className="mx-auto flex h-24 w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
-          <Link href="/" className="inline-flex items-center">
+          <Link href={"/" as Route} className="inline-flex items-center">
             <Image src="/fav.png" alt="Que CRM" width={1076} height={400} className="h-12 w-auto sm:h-14" priority />
           </Link>
 
@@ -843,7 +844,7 @@ export default function OnboardingPage() {
             <Image src="/fav.png" alt="Que logo" width={1076} height={400} className="h-6 w-auto opacity-90" />
             <span>{tr("AI-driven CRM", "CRM مدعوم بالذكاء الاصطناعي")}</span>
           </div>
-          <Link href="/" className="font-semibold text-black transition hover:text-black/70">
+          <Link href={"/" as Route} className="font-semibold text-black transition hover:text-black/70">
             {tr("Back to home", "العودة للرئيسية")}
           </Link>
         </div>

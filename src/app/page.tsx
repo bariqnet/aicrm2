@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import type { LucideIcon } from "lucide-react";
 import {
   ArrowLeft,
@@ -91,6 +92,14 @@ export default async function HomePage() {
   const heroTagClass = isArabic
     ? "inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-medium text-black/75"
     : "inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-semibold text-black/70";
+
+  const teamUseCards: Array<{ title: string; icon: LucideIcon }> = [
+    { title: tr("Sales Ops", "عمليات المبيعات"), icon: BarChart3 },
+    { title: tr("B2B Services", "خدمات الأعمال"), icon: Building2 },
+    { title: tr("Field Teams", "الفرق الميدانية"), icon: Users2 },
+    { title: tr("Revenue Leaders", "قادة الإيرادات"), icon: Workflow },
+    { title: tr("Partnership Teams", "فرق الشراكات"), icon: Globe2 }
+  ];
 
   const buildCards: FeatureCard[] = [
     {
@@ -263,11 +272,11 @@ export default async function HomePage() {
         "relative overflow-x-clip bg-[#f5f6f8] text-[#0f1218]"
       ].join(" ")}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-[-12rem] h-[34rem] bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.14),rgba(245,246,248,0)_68%)]" />
+      <div className="landing-ambient-glow pointer-events-none absolute inset-x-0 top-[-12rem] h-[34rem] bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.14),rgba(245,246,248,0)_68%)]" />
 
       <header className="sticky top-0 z-30 border-b border-black/7 bg-[#f5f6f8]/85 backdrop-blur-lg">
         <div className="mx-auto flex h-24 w-full max-w-7xl items-center justify-between px-5 sm:px-8">
-          <Link href="/" className="inline-flex items-center">
+          <Link href={"/" as Route} className="inline-flex items-center">
             <Image src="/fav.png" alt="Que CRM" width={1076} height={400} priority className="h-12 w-auto sm:h-14" />
           </Link>
 
@@ -287,7 +296,7 @@ export default async function HomePage() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <LanguageToggle />
+            <LanguageToggle mode="full" className="rounded-full border-black/12 bg-white p-1 shadow-sm" />
             <Link
               href="/auth/sign-in"
               className="hidden h-10 items-center rounded-full px-4 text-sm font-medium text-black/70 transition hover:bg-black/5 hover:text-black sm:inline-flex"
@@ -296,7 +305,7 @@ export default async function HomePage() {
             </Link>
             <Link
               href="/auth/sign-up"
-              className="inline-flex h-10 items-center rounded-full bg-[#111319] px-5 text-sm font-semibold text-white transition hover:bg-[#1a1d25]"
+              className="landing-cta inline-flex h-10 items-center rounded-full bg-[#111319] px-5 text-sm font-semibold text-white transition hover:bg-[#1a1d25]"
             >
               {tr("Start for free", "ابدأ مجانًا")}
             </Link>
@@ -306,11 +315,11 @@ export default async function HomePage() {
 
       <section
         className={[
-          "mx-auto grid w-full max-w-7xl px-5 sm:px-8 lg:grid-cols-[1.28fr_0.72fr]",
-          isArabic ? "gap-14 pb-20 pt-12 lg:gap-16 lg:pb-28 lg:pt-24" : "gap-12 pb-16 pt-10 lg:gap-14 lg:pb-24 lg:pt-20"
+          "mx-auto w-full max-w-7xl px-5 sm:px-8",
+          isArabic ? "pb-20 pt-12 lg:pb-28 lg:pt-24" : "pb-16 pt-10 lg:pb-24 lg:pt-20"
         ].join(" ")}
       >
-        <div className={["landing-fade-up", isArabic ? "space-y-9 lg:pt-2" : "space-y-7"].join(" ")}>
+        <div className={["landing-fade-up", isArabic ? "max-w-4xl space-y-9 lg:pt-2" : "max-w-3xl space-y-7"].join(" ")}>
           <p className={heroTagClass}>
             <Sparkles size={14} className="text-blue-700" />
             {tr("The AI-native CRM for modern GTM teams", "منصة CRM ذكية لفرق المبيعات الحديثة")}
@@ -331,14 +340,14 @@ export default async function HomePage() {
           <div className={["flex flex-wrap gap-3", isArabic ? "items-stretch" : "items-center"].join(" ")}>
             <Link
               href="/auth/sign-up"
-              className="inline-flex h-12 items-center gap-2 rounded-full bg-[#111319] px-6 text-sm font-semibold text-white transition hover:bg-[#1a1d25]"
+              className="landing-cta landing-cta-pulse inline-flex h-12 items-center gap-2 rounded-full bg-[#111319] px-6 text-sm font-semibold text-white transition hover:bg-[#1a1d25]"
             >
               {tr("Start for free", "ابدأ مجانًا")}
               {isArabic ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
             </Link>
             <Link
               href="/auth/sign-in"
-              className="inline-flex h-12 items-center rounded-full border border-black/14 bg-white px-6 text-sm font-semibold text-black transition hover:border-black/25"
+              className="landing-cta inline-flex h-12 items-center rounded-full border border-black/14 bg-white px-6 text-sm font-semibold text-black transition hover:border-black/25"
             >
               {tr("Book a demo", "احجز عرضًا مباشرًا")}
             </Link>
@@ -359,35 +368,26 @@ export default async function HomePage() {
             </span>
           </div>
         </div>
-
-        <div className="landing-fade-up landing-fade-up-delay-1 relative flex items-start justify-center lg:justify-end">
-          <div className="absolute -left-8 top-10 h-40 w-40 rounded-full bg-blue-400/20 blur-[78px]" />
-          <div className={["landing-float w-full", isArabic ? "max-w-[360px] sm:max-w-[430px]" : "max-w-[380px] sm:max-w-[480px]"].join(" ")}>
-            <div className="overflow-hidden rounded-[1.8rem] border border-black/10 bg-white shadow-[0_24px_62px_rgba(16,18,23,0.16)]">
-              <Image
-                src="/hero-system.png"
-                alt={tr("Que CRM workspace preview", "معاينة مساحة عمل Que")}
-                width={1280}
-                height={620}
-                priority
-                className={["h-auto w-full origin-top", isArabic ? "scale-[1.08]" : "scale-[1.18]"].join(" ")}
-              />
-            </div>
-          </div>
-        </div>
       </section>
 
-      <section className="mx-auto w-full max-w-7xl px-5 pb-12 sm:px-8 lg:pb-20">
+      <section className={["mx-auto w-full max-w-7xl px-5 sm:px-8", isArabic ? "py-14 lg:py-24" : "py-12 lg:py-20"].join(" ")}>
         <div className={["landing-fade-up rounded-[1.8rem] border border-black/10 bg-white px-5 sm:px-8", isArabic ? "py-8" : "py-6"].join(" ")}>
           <p className={sectionLabelClass}>
             {tr("Built for high-tempo revenue and operations teams", "مصمم لفرق الإيرادات والعمليات سريعة الإيقاع")}
           </p>
           <div className={["mt-4 grid gap-3 font-semibold text-black/70 sm:grid-cols-2 lg:grid-cols-5", isArabic ? "text-[0.98rem] leading-7" : "text-sm"].join(" ")}>
-            <div className="rounded-xl border border-black/10 bg-[#fafafa] px-4 py-3">{tr("Sales Ops", "عمليات المبيعات")}</div>
-            <div className="rounded-xl border border-black/10 bg-[#fafafa] px-4 py-3">{tr("B2B Services", "خدمات الأعمال")}</div>
-            <div className="rounded-xl border border-black/10 bg-[#fafafa] px-4 py-3">{tr("Field Teams", "الفرق الميدانية")}</div>
-            <div className="rounded-xl border border-black/10 bg-[#fafafa] px-4 py-3">{tr("Revenue Leaders", "قادة الإيرادات")}</div>
-            <div className="rounded-xl border border-black/10 bg-[#fafafa] px-4 py-3">{tr("Partnership Teams", "فرق الشراكات")}</div>
+            {teamUseCards.map(({ title, icon: Icon }, index) => (
+              <article
+                key={title}
+                className="landing-card landing-fade-up rounded-xl border border-black/10 bg-[#fafafa] px-4 py-3"
+                style={{ animationDelay: `${0.06 * (index + 1)}s` }}
+              >
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-black/12 bg-white text-black/72">
+                  <Icon size={15} />
+                </span>
+                <p className="mt-2">{title}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
@@ -406,13 +406,14 @@ export default async function HomePage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {buildCards.map(({ icon: Icon, title, description }) => (
+          {buildCards.map(({ icon: Icon, title, description }, index) => (
             <article
               key={title}
               className={[
-                "landing-fade-up rounded-[1.5rem] border border-black/10 bg-white shadow-[0_14px_34px_rgba(16,18,23,0.05)]",
+                "landing-card landing-fade-up rounded-[1.5rem] border border-black/10 bg-white shadow-[0_14px_34px_rgba(16,18,23,0.05)]",
                 isArabic ? "p-7" : "p-6"
               ].join(" ")}
+              style={{ animationDelay: `${0.08 * (index + 1)}s` }}
             >
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-black/12 bg-[#f8f9fb]">
                 <Icon size={18} />
@@ -424,7 +425,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="platform" className="mx-auto w-full max-w-7xl px-5 pb-12 sm:px-8 lg:pb-20">
+      <section id="platform" className={["mx-auto w-full max-w-7xl px-5 sm:px-8", isArabic ? "py-14 lg:py-24" : "py-12 lg:py-20"].join(" ")}>
         <div
           className={[
             "landing-fade-up rounded-[2.1rem] border border-black/10 bg-[#0f1218] text-white",
@@ -448,8 +449,12 @@ export default async function HomePage() {
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {platformCards.map(({ icon: Icon, title, description }) => (
-              <article key={title} className="rounded-3xl border border-white/15 bg-white/[0.04] p-5">
+            {platformCards.map(({ icon: Icon, title, description }, index) => (
+              <article
+                key={title}
+                className="landing-card landing-fade-up rounded-3xl border border-white/15 bg-white/[0.04] p-5"
+                style={{ animationDelay: `${0.08 * (index + 1)}s` }}
+              >
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 bg-white/10">
                   <Icon size={18} />
                 </span>
@@ -461,7 +466,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="teamwork" className={["mx-auto w-full max-w-7xl px-5 sm:px-8", isArabic ? "pb-16 lg:pb-24" : "pb-12 lg:pb-20"].join(" ")}>
+      <section id="teamwork" className={["mx-auto w-full max-w-7xl px-5 sm:px-8", isArabic ? "py-14 lg:py-24" : "py-12 lg:py-20"].join(" ")}>
         <div className={["landing-fade-up", isArabic ? "mb-10 max-w-4xl" : "mb-7 max-w-3xl"].join(" ")}>
           <p className={sectionLabelClass}>
             {tr("Designed for multiplayer execution", "مصمم للتنفيذ الجماعي")}
@@ -472,13 +477,14 @@ export default async function HomePage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          {teamworkCards.map(({ icon: Icon, title, description }) => (
+          {teamworkCards.map(({ icon: Icon, title, description }, index) => (
             <article
               key={title}
               className={[
-                "landing-fade-up rounded-[1.6rem] border border-black/10 bg-white shadow-[0_14px_34px_rgba(16,18,23,0.05)]",
+                "landing-card landing-fade-up rounded-[1.6rem] border border-black/10 bg-white shadow-[0_14px_34px_rgba(16,18,23,0.05)]",
                 isArabic ? "p-7" : "p-6"
               ].join(" ")}
+              style={{ animationDelay: `${0.08 * (index + 1)}s` }}
             >
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-black/12 bg-[#f8f9fb]">
                 <Icon size={18} />
@@ -508,16 +514,17 @@ export default async function HomePage() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-4">
-          {pricingTiers.map((tier) => (
+          {pricingTiers.map((tier, index) => (
             <article
               key={tier.name}
               className={[
-                "landing-fade-up rounded-[1.6rem] border",
+                "landing-card landing-fade-up rounded-[1.6rem] border",
                 isArabic ? "p-7" : "p-6",
                 tier.featured
                   ? "border-black bg-[#111319] text-white shadow-[0_26px_58px_rgba(16,18,23,0.26)]"
                   : "border-black/10 bg-white text-black"
               ].join(" ")}
+              style={{ animationDelay: `${0.08 * (index + 1)}s` }}
             >
               <p className={[tier.featured ? "text-white/72" : "text-black/55", isArabic ? "text-base" : ""].join(" ")}>
                 {tier.name}
@@ -571,7 +578,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className={["mx-auto w-full max-w-7xl px-5 sm:px-8", isArabic ? "pb-20 lg:pb-28" : "pb-16 lg:pb-24"].join(" ")}>
+      <section className={["mx-auto w-full max-w-7xl px-5 sm:px-8", isArabic ? "pt-14 pb-20 lg:pt-24 lg:pb-28" : "pt-12 pb-16 lg:pt-20 lg:pb-24"].join(" ")}>
         <div
           className={[
             "landing-fade-up rounded-[2.1rem] border border-black/14 bg-[#111319] text-white",
@@ -592,14 +599,14 @@ export default async function HomePage() {
           <div className="mt-7 flex flex-wrap gap-3">
             <Link
               href="/auth/sign-up"
-              className="inline-flex h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-[#111319] transition hover:bg-white/92"
+              className="landing-cta inline-flex h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-[#111319] transition hover:bg-white/92"
             >
               {tr("Create workspace", "أنشئ مساحة عمل")}
               {isArabic ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
             </Link>
             <Link
               href="/auth/sign-in"
-              className="inline-flex h-12 items-center rounded-full border border-white/25 px-6 text-sm font-semibold text-white transition hover:bg-white/10"
+              className="landing-cta inline-flex h-12 items-center rounded-full border border-white/25 px-6 text-sm font-semibold text-white transition hover:bg-white/10"
             >
               {tr("Sign in", "تسجيل الدخول")}
             </Link>
