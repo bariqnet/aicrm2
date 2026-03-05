@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -8,6 +9,7 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUp,
+  Check,
   LoaderCircle,
   Plus,
   Trash2
@@ -446,22 +448,32 @@ export default function OnboardingPage() {
     3: false
   };
 
-  return (
-    <div className="flex min-h-screen flex-col bg-surface2">
-      <header className="px-4 py-4 sm:px-6">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4">
-          <div className="min-w-[120px]">
-            <Image
-              src="/fav.png"
-              alt="Que logo"
-              width={26}
-              height={26}
-              className="h-6 w-6 rounded-md border border-border bg-surface p-0.5"
-              priority
-            />
-          </div>
+  const stepNames: Record<OnboardingStep, string> = {
+    1: tr("Workspace setup", "إعداد مساحة العمل"),
+    2: tr("Pipeline setup", "إعداد خط المبيعات"),
+    3: tr("Team invites", "دعوات الفريق")
+  };
 
-          <div className="flex items-center gap-2">
+  const stepHints: Record<OnboardingStep, string> = {
+    1: t("onboarding.step.workspace.hint"),
+    2: t("onboarding.step.pipeline.hint"),
+    3: t("onboarding.step.team.hint")
+  };
+
+  const fieldClass =
+    "h-12 w-full rounded-2xl border border-black/12 bg-[#f8f9fb] px-4 text-sm text-[#0f1218] outline-none transition focus:border-black/25 focus:bg-white focus:shadow-[0_0_0_4px_rgba(17,19,25,0.08)]";
+
+  return (
+    <div className="relative flex min-h-screen flex-col overflow-x-clip bg-[#f5f6f8] text-[#0f1218]">
+      <div className="pointer-events-none absolute inset-x-0 top-[-12rem] h-[34rem] bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.14),rgba(245,246,248,0)_68%)]" />
+
+      <header className="relative border-b border-black/7 bg-[#f5f6f8]/85 backdrop-blur-lg">
+        <div className="mx-auto flex h-24 w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
+          <Link href="/" className="inline-flex items-center">
+            <Image src="/fav.png" alt="Que CRM" width={1076} height={400} className="h-12 w-auto sm:h-14" priority />
+          </Link>
+
+          <div className="hidden items-center gap-2 md:flex">
             {stepDots.map((step) => {
               const active = currentStep === step;
               const done = doneSteps[step];
@@ -470,25 +482,31 @@ export default function OnboardingPage() {
                   key={step}
                   type="button"
                   className={[
-                    "h-2 w-2 rounded-full transition",
-                    active ? "bg-accent" : done ? "bg-fg/55" : "bg-border",
+                    "inline-flex h-8 min-w-8 items-center justify-center rounded-full border px-2 text-xs font-semibold transition",
+                    active
+                      ? "border-[#111319] bg-[#111319] text-white"
+                      : done
+                        ? "border-black/20 bg-black/5 text-black"
+                        : "border-black/15 bg-white text-black/55",
                     step < currentStep ? "cursor-pointer" : "cursor-default"
                   ].join(" ")}
                   aria-label={t("onboarding.stepLabel", { number: step })}
                   onClick={() => {
                     if (step < currentStep) setCurrentStep(step);
                   }}
-                />
+                >
+                  {done && !active ? <Check size={13} /> : step}
+                </button>
               );
             })}
           </div>
 
-          <div className="flex min-w-[120px] items-center justify-end gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <LanguageToggle />
-            {userProfile.email ? <p className="hidden text-sm text-mutedfg lg:block">{userProfile.email}</p> : null}
+            {userProfile.email ? <p className="hidden text-sm text-black/58 xl:block">{userProfile.email}</p> : null}
             <button
               type="button"
-              className="text-sm font-medium text-fg transition hover:text-mutedfg"
+              className="inline-flex h-10 items-center rounded-full border border-black/12 bg-white px-4 text-sm font-semibold text-black transition hover:border-black/28 disabled:cursor-not-allowed disabled:opacity-60"
               onClick={signOut}
               disabled={signingOut}
             >
@@ -498,21 +516,30 @@ export default function OnboardingPage() {
         </div>
       </header>
 
-      <main className="flex flex-1 items-center px-4 pb-10 sm:px-6">
-        <section className="mx-auto w-full max-w-[620px]">
-          {currentStep === 1 ? (
-            <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
-                {tr("Create your workspace", "أنشئ مساحة العمل")}
+      <main className="relative mx-auto flex w-full max-w-7xl flex-1 px-5 pb-12 pt-8 sm:px-8 lg:pb-20 lg:pt-12">
+        <div className="grid w-full gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <section className="rounded-[2rem] border border-black/10 bg-white p-6 shadow-[0_20px_52px_rgba(16,18,23,0.14)] sm:p-8">
+            <div className="mb-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-black/55">
+                {tr("Step", "الخطوة")} {currentStep} {tr("of", "من")} 3
+              </p>
+              <h1 className="mt-2 text-4xl font-semibold tracking-tight text-[#0f1218]">
+                {currentStep === 1
+                  ? tr("Create your workspace", "أنشئ مساحة العمل")
+                  : currentStep === 2
+                    ? tr("Set your pipeline", "اضبط خط المبيعات")
+                    : tr("Invite your team", "ادعُ فريقك")}
               </h1>
-              <p className="mt-2 text-lg text-mutedfg">{t("onboarding.step.workspace.hint")}</p>
+              <p className="mt-1 text-sm text-black/60">{stepHints[currentStep]}</p>
+            </div>
 
-              <div className="mt-8 space-y-4">
+            {currentStep === 1 ? (
+              <div className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="space-y-1.5 text-sm">
-                    <span className="text-mutedfg">{t("onboarding.workspace.name")}</span>
+                    <span className="text-black/62">{t("onboarding.workspace.name")}</span>
                     <input
-                      className="input h-12 w-full rounded-xl border-border bg-surface px-4"
+                      className={fieldClass}
                       value={workspaceName}
                       onChange={(event) => setWorkspaceName(event.target.value)}
                       placeholder={t("onboarding.workspace.namePlaceholder")}
@@ -520,9 +547,9 @@ export default function OnboardingPage() {
                     />
                   </label>
                   <label className="space-y-1.5 text-sm">
-                    <span className="text-mutedfg">{t("onboarding.workspace.slug")}</span>
+                    <span className="text-black/62">{t("onboarding.workspace.slug")}</span>
                     <input
-                      className="input h-12 w-full rounded-xl border-border bg-surface px-4"
+                      className={fieldClass}
                       value={workspaceSlug}
                       onChange={(event) => {
                         setSlugTouched(true);
@@ -535,9 +562,9 @@ export default function OnboardingPage() {
                 </div>
 
                 <label className="space-y-1.5 text-sm">
-                  <span className="text-mutedfg">{t("onboarding.workspace.crmTemplate")}</span>
+                  <span className="text-black/62">{t("onboarding.workspace.crmTemplate")}</span>
                   <select
-                    className="input h-12 w-full rounded-xl border-border bg-surface px-4"
+                    className={fieldClass}
                     value={crmTypeId}
                     onChange={(event) => setCrmTypeId(event.target.value as CrmTypeId)}
                   >
@@ -549,13 +576,13 @@ export default function OnboardingPage() {
                   </select>
                 </label>
 
-                <div className="rounded-xl border border-border bg-surface px-4 py-3 text-sm text-mutedfg">
+                <div className="rounded-2xl border border-black/10 bg-[#f8f9fb] px-4 py-3 text-sm text-black/62">
                   <p className="mb-1 text-xs uppercase tracking-[0.1em]">{t("onboarding.workspace.suggestedTemplate")}</p>
                   <p>{getCrmTypeConfig(crmTypeId).stageTemplates.map((stage) => stage.name).join(" → ")}</p>
                 </div>
 
                 <button
-                  className="btn btn-primary h-12 w-full rounded-xl text-base"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#111319] px-5 text-sm font-semibold text-white transition hover:bg-[#1a1d25] disabled:cursor-not-allowed disabled:opacity-65"
                   type="button"
                   onClick={configureWorkspace}
                   disabled={busyStep === 1}
@@ -573,189 +600,252 @@ export default function OnboardingPage() {
                   )}
                 </button>
               </div>
-            </div>
-          ) : null}
+            ) : null}
 
-          {currentStep === 2 ? (
-            <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
-                {tr("Set your pipeline", "اضبط خط المبيعات")}
-              </h1>
-              <p className="mt-2 text-lg text-mutedfg">{t("onboarding.step.pipeline.hint")}</p>
-
-              <div className="mt-8 space-y-2">
-                {stageDrafts.map((stage, index) => (
-                  <div key={stage.id} className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2">
-                    <span className="w-7 text-center text-sm text-mutedfg">{index + 1}</span>
-                    <input
-                      className="input h-10 min-w-[180px] flex-1 rounded-lg border-border bg-surface2 px-3"
-                      value={stage.name}
-                      onChange={(event) => updateStageName(stage.id, event.target.value)}
-                      placeholder={t("onboarding.pipeline.stagePlaceholder")}
-                    />
-                    <button
-                      className="btn h-9 w-9 rounded-lg px-0"
-                      onClick={() => moveStage(stage.id, "up")}
-                      type="button"
-                      aria-label={t("onboarding.pipeline.moveUp")}
-                    >
-                      <ArrowUp size={14} />
-                    </button>
-                    <button
-                      className="btn h-9 w-9 rounded-lg px-0"
-                      onClick={() => moveStage(stage.id, "down")}
-                      type="button"
-                      aria-label={t("onboarding.pipeline.moveDown")}
-                    >
-                      <ArrowDown size={14} />
-                    </button>
-                    <button
-                      className="btn h-9 w-9 rounded-lg px-0"
-                      onClick={() => removeStage(stage.id)}
-                      type="button"
-                      aria-label={t("onboarding.pipeline.removeStage")}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button className="btn rounded-xl" type="button" onClick={addStage}>
-                  <Plus size={14} />
-                  {t("onboarding.pipeline.addStage")}
-                </button>
-                <button className="btn rounded-xl" type="button" onClick={resetStageTemplate}>
-                  {t("onboarding.pipeline.resetTemplate")}
-                </button>
-              </div>
-
-              <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                <button className="btn h-12 rounded-xl" type="button" onClick={() => setCurrentStep(1)}>
-                  {t("onboarding.back")}
-                </button>
-                <button
-                  className="btn btn-primary h-12 rounded-xl text-base"
-                  type="button"
-                  onClick={configureStages}
-                  disabled={busyStep === 2}
-                >
-                  {busyStep === 2 ? (
-                    <>
-                      <LoaderCircle size={16} className="animate-spin" />
-                      {t("onboarding.saving")}
-                    </>
-                  ) : (
-                    <>
-                      {t("onboarding.saveContinue")}
-                      {isArabic ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          ) : null}
-
-          {currentStep === 3 ? (
-            <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
-                {tr("Invite your team", "ادعُ فريقك")}
-              </h1>
-              <p className="mt-2 text-lg text-mutedfg">{t("onboarding.step.team.hint")}</p>
-
-              <div className="mt-8 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
-                <input
-                  className="input h-12 w-full rounded-xl border-border bg-surface px-4"
-                  value={inviteEmail}
-                  onChange={(event) => setInviteEmail(event.target.value)}
-                  placeholder={t("onboarding.team.emailPlaceholder")}
-                  type="email"
-                />
-                <select
-                  className="input h-12 w-full rounded-xl border-border bg-surface px-4 sm:w-36"
-                  value={inviteRole}
-                  onChange={(event) => setInviteRole(event.target.value as MembershipRole)}
-                >
-                  {ROLE_OPTIONS.map((role) => (
-                    <option key={role} value={role}>
-                      {roleLabels[role] ?? role}
-                    </option>
-                  ))}
-                </select>
-                <button type="button" className="btn h-12 rounded-xl" onClick={addInvite}>
-                  <Plus size={14} />
-                  {t("onboarding.team.add")}
-                </button>
-              </div>
-
-              <div className="mt-4 space-y-2">
-                {invites.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-border bg-surface px-3 py-3 text-sm text-mutedfg">
-                    {t("onboarding.team.noInvites")}
-                  </p>
-                ) : (
-                  invites.map((invite) => (
-                    <div key={invite.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-surface px-3 py-2.5 text-sm">
-                      <p className="font-medium text-fg">{invite.email}</p>
-                      <div className="flex items-center gap-2">
-                        <span className="rounded-md border border-border px-2 py-0.5 text-xs text-mutedfg">
-                          {roleLabels[invite.role] ?? invite.role}
-                        </span>
-                        <button
-                          className="btn h-8 w-8 rounded-lg px-0"
-                          type="button"
-                          aria-label={t("onboarding.team.removeInvite", { email: invite.email })}
-                          onClick={() => setInvites((previous) => previous.filter((item) => item.id !== invite.id))}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
+            {currentStep === 2 ? (
+              <div>
+                <div className="space-y-2">
+                  {stageDrafts.map((stage, index) => (
+                    <div key={stage.id} className="flex flex-wrap items-center gap-2 rounded-2xl border border-black/10 bg-[#f8f9fb] px-3 py-2.5">
+                      <span className="w-7 text-center text-sm text-black/55">{index + 1}</span>
+                      <input
+                        className="h-11 min-w-[180px] flex-1 rounded-xl border border-black/12 bg-white px-3 text-sm text-[#0f1218] outline-none transition focus:border-black/25 focus:shadow-[0_0_0_4px_rgba(17,19,25,0.08)]"
+                        value={stage.name}
+                        onChange={(event) => updateStageName(stage.id, event.target.value)}
+                        placeholder={t("onboarding.pipeline.stagePlaceholder")}
+                      />
+                      <button
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-black/12 bg-white text-black/70 transition hover:border-black/25 hover:text-black"
+                        onClick={() => moveStage(stage.id, "up")}
+                        type="button"
+                        aria-label={t("onboarding.pipeline.moveUp")}
+                      >
+                        <ArrowUp size={14} />
+                      </button>
+                      <button
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-black/12 bg-white text-black/70 transition hover:border-black/25 hover:text-black"
+                        onClick={() => moveStage(stage.id, "down")}
+                        type="button"
+                        aria-label={t("onboarding.pipeline.moveDown")}
+                      >
+                        <ArrowDown size={14} />
+                      </button>
+                      <button
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-black/12 bg-white text-black/70 transition hover:border-black/25 hover:text-black"
+                        onClick={() => removeStage(stage.id)}
+                        type="button"
+                        aria-label={t("onboarding.pipeline.removeStage")}
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
-                  ))
-                )}
-              </div>
+                  ))}
+                </div>
 
-              <div className="mt-5 grid gap-2 sm:grid-cols-3">
-                <button className="btn h-12 rounded-xl" type="button" onClick={() => setCurrentStep(2)}>
-                  {t("onboarding.back")}
-                </button>
-                <button
-                  className="btn h-12 rounded-xl"
-                  type="button"
-                  onClick={() => finishOnboarding(false)}
-                  disabled={busyStep === 3}
-                >
-                  {t("onboarding.skipNow")}
-                </button>
-                <button
-                  className="btn btn-primary h-12 rounded-xl text-base"
-                  type="button"
-                  onClick={() => finishOnboarding(true)}
-                  disabled={busyStep === 3}
-                >
-                  {busyStep === 3 ? (
-                    <>
-                      <LoaderCircle size={16} className="animate-spin" />
-                      {t("onboarding.finishing")}
-                    </>
-                  ) : (
-                    t("onboarding.finish")
-                  )}
-                </button>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    className="inline-flex h-11 items-center gap-2 rounded-full border border-black/14 bg-white px-4 text-sm font-semibold text-black transition hover:border-black/30"
+                    type="button"
+                    onClick={addStage}
+                  >
+                    <Plus size={14} />
+                    {t("onboarding.pipeline.addStage")}
+                  </button>
+                  <button
+                    className="inline-flex h-11 items-center gap-2 rounded-full border border-black/14 bg-white px-4 text-sm font-semibold text-black transition hover:border-black/30"
+                    type="button"
+                    onClick={resetStageTemplate}
+                  >
+                    {t("onboarding.pipeline.resetTemplate")}
+                  </button>
+                </div>
+
+                <div className="mt-6 grid gap-2 sm:grid-cols-2">
+                  <button
+                    className="inline-flex h-12 items-center justify-center rounded-full border border-black/14 bg-white px-5 text-sm font-semibold text-black transition hover:border-black/30"
+                    type="button"
+                    onClick={() => setCurrentStep(1)}
+                  >
+                    {t("onboarding.back")}
+                  </button>
+                  <button
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#111319] px-5 text-sm font-semibold text-white transition hover:bg-[#1a1d25] disabled:cursor-not-allowed disabled:opacity-65"
+                    type="button"
+                    onClick={configureStages}
+                    disabled={busyStep === 2}
+                  >
+                    {busyStep === 2 ? (
+                      <>
+                        <LoaderCircle size={16} className="animate-spin" />
+                        {t("onboarding.saving")}
+                      </>
+                    ) : (
+                      <>
+                        {t("onboarding.saveContinue")}
+                        {isArabic ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
+            ) : null}
+
+            {currentStep === 3 ? (
+              <div>
+                <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+                  <input
+                    className={fieldClass}
+                    value={inviteEmail}
+                    onChange={(event) => setInviteEmail(event.target.value)}
+                    placeholder={t("onboarding.team.emailPlaceholder")}
+                    type="email"
+                  />
+                  <select
+                    className={`${fieldClass} sm:w-36`}
+                    value={inviteRole}
+                    onChange={(event) => setInviteRole(event.target.value as MembershipRole)}
+                  >
+                    {ROLE_OPTIONS.map((role) => (
+                      <option key={role} value={role}>
+                        {roleLabels[role] ?? role}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-black/14 bg-white px-4 text-sm font-semibold text-black transition hover:border-black/30"
+                    onClick={addInvite}
+                  >
+                    <Plus size={14} />
+                    {t("onboarding.team.add")}
+                  </button>
+                </div>
+
+                <div className="mt-4 space-y-2">
+                  {invites.length === 0 ? (
+                    <p className="rounded-2xl border border-dashed border-black/18 bg-[#f8f9fb] px-4 py-3 text-sm text-black/58">
+                      {t("onboarding.team.noInvites")}
+                    </p>
+                  ) : (
+                    invites.map((invite) => (
+                      <div key={invite.id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-black/10 bg-[#f8f9fb] px-4 py-3 text-sm">
+                        <p className="font-medium text-[#0f1218]">{invite.email}</p>
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full border border-black/14 bg-white px-3 py-1 text-xs text-black/58">
+                            {roleLabels[invite.role] ?? invite.role}
+                          </span>
+                          <button
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-black/12 bg-white text-black/70 transition hover:border-black/25 hover:text-black"
+                            type="button"
+                            aria-label={t("onboarding.team.removeInvite", { email: invite.email })}
+                            onClick={() => setInvites((previous) => previous.filter((item) => item.id !== invite.id))}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="mt-6 grid gap-2 sm:grid-cols-3">
+                  <button
+                    className="inline-flex h-12 items-center justify-center rounded-full border border-black/14 bg-white px-5 text-sm font-semibold text-black transition hover:border-black/30"
+                    type="button"
+                    onClick={() => setCurrentStep(2)}
+                  >
+                    {t("onboarding.back")}
+                  </button>
+                  <button
+                    className="inline-flex h-12 items-center justify-center rounded-full border border-black/14 bg-white px-5 text-sm font-semibold text-black transition hover:border-black/30 disabled:cursor-not-allowed disabled:opacity-65"
+                    type="button"
+                    onClick={() => finishOnboarding(false)}
+                    disabled={busyStep === 3}
+                  >
+                    {t("onboarding.skipNow")}
+                  </button>
+                  <button
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#111319] px-5 text-sm font-semibold text-white transition hover:bg-[#1a1d25] disabled:cursor-not-allowed disabled:opacity-65"
+                    type="button"
+                    onClick={() => finishOnboarding(true)}
+                    disabled={busyStep === 3}
+                  >
+                    {busyStep === 3 ? (
+                      <>
+                        <LoaderCircle size={16} className="animate-spin" />
+                        {t("onboarding.finishing")}
+                      </>
+                    ) : (
+                      t("onboarding.finish")
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </section>
+
+          <aside className="rounded-[1.8rem] border border-black/10 bg-[#0f1218] p-6 text-white shadow-[0_24px_56px_rgba(16,18,23,0.25)]">
+            <p className="text-xs uppercase tracking-[0.12em] text-white/62">
+              {tr("Onboarding progress", "تقدم الإعداد")}
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight">{stepNames[currentStep]}</h2>
+            <p className="mt-2 text-sm text-white/72">{stepHints[currentStep]}</p>
+
+            <div className="mt-6 space-y-2">
+              {stepDots.map((step) => {
+                const active = currentStep === step;
+                const done = doneSteps[step];
+                return (
+                  <div
+                    key={step}
+                    className={[
+                      "rounded-2xl border p-3",
+                      active
+                        ? "border-white/24 bg-white/10"
+                        : done
+                          ? "border-white/18 bg-white/[0.06]"
+                          : "border-white/12 bg-white/[0.03]"
+                    ].join(" ")}
+                  >
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold">{stepNames[step]}</p>
+                      <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full border border-white/22 px-2 text-[11px]">
+                        {done ? <Check size={12} /> : step}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-white/66">{stepHints[step]}</p>
+                  </div>
+                );
+              })}
             </div>
-          ) : null}
-        </section>
+
+            <div className="mt-6 rounded-2xl border border-white/16 bg-white/[0.05] p-4 text-sm">
+              <p className="text-white/66">{tr("Selected template", "النموذج المختار")}</p>
+              <p className="mt-1 font-semibold">{getCrmTypeConfig(crmTypeId).label}</p>
+              {workspaceName.trim().length > 0 ? (
+                <p className="mt-3 text-white/66">
+                  {tr("Workspace", "مساحة العمل")}:{" "}
+                  <span className="font-semibold text-white">{workspaceName.trim()}</span>
+                </p>
+              ) : null}
+              <p className="mt-3 text-white/66">
+                {tr("Pending invites", "الدعوات المعلقة")}:{" "}
+                <span className="font-semibold text-white">{invites.length}</span>
+              </p>
+            </div>
+          </aside>
+        </div>
       </main>
 
-      <footer className="border-t border-zinc-800 bg-zinc-900 px-4 py-4 sm:px-6">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4">
-          <div className="flex items-center gap-3 text-zinc-100">
-            <Image src="/fav.png" alt="Que logo" width={34} height={34} className="h-8 w-8 rounded-md" />
-            <span className="text-2xl font-semibold tracking-tight">Que</span>
+      <footer className="relative border-t border-black/7 px-5 py-5 sm:px-8">
+        <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 text-sm text-black/58">
+          <div className="flex items-center gap-3">
+            <Image src="/fav.png" alt="Que logo" width={1076} height={400} className="h-6 w-auto opacity-90" />
+            <span>{tr("AI-driven CRM", "CRM مدعوم بالذكاء الاصطناعي")}</span>
           </div>
-          <p className="text-sm text-zinc-300">{tr("AI-driven CRM", "CRM مدعوم بالذكاء الاصطناعي")}</p>
+          <Link href="/" className="font-semibold text-black transition hover:text-black/70">
+            {tr("Back to home", "العودة للرئيسية")}
+          </Link>
         </div>
       </footer>
     </div>

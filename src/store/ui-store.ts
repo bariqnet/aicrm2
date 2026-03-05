@@ -24,6 +24,15 @@ type UIState = {
 
 type PersistedUIState = Pick<UIState, "dark" | "sidebarCollapsed" | "language">;
 
+function getInitialLanguage(): AppLanguage {
+  if (typeof document === "undefined") return "en";
+
+  const cookieMatch = document.cookie.match(/(?:^|;\s*)que_lang=(ar|en)(?:;|$)/);
+  if (cookieMatch?.[1] === "ar") return "ar";
+
+  return document.documentElement.lang === "ar" ? "ar" : "en";
+}
+
 export const useUIStore = create<UIState>()(
   persist(
     (set) => ({
@@ -32,7 +41,7 @@ export const useUIStore = create<UIState>()(
       dark: false,
       mobileNavOpen: false,
       sidebarCollapsed: false,
-      language: "en",
+      language: getInitialLanguage(),
       setCommandOpen: (commandOpen) => set({ commandOpen }),
       setMobileNavOpen: (mobileNavOpen) => set({ mobileNavOpen }),
       openDrawer: (drawer) => set({ drawer }),
@@ -43,6 +52,14 @@ export const useUIStore = create<UIState>()(
     {
       name: "que-ui",
       storage: createJSONStorage(() => localStorage),
+      merge: (persistedState, currentState) => {
+        const persisted = (persistedState as Partial<PersistedUIState> | null) ?? {};
+        return {
+          ...currentState,
+          ...persisted,
+          language: getInitialLanguage()
+        };
+      },
       partialize: (state): PersistedUIState => ({
         dark: state.dark,
         sidebarCollapsed: state.sidebarCollapsed,

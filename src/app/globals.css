@@ -56,6 +56,38 @@ h6 {
   letter-spacing: -0.01em;
 }
 
+html[lang="ar"] body {
+  font-family: var(--font-arabic), var(--font-body), "Cairo", sans-serif;
+  line-height: 1.72;
+}
+
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] h3,
+html[lang="ar"] h4,
+html[lang="ar"] h5,
+html[lang="ar"] h6 {
+  letter-spacing: 0;
+  line-height: 1.38;
+}
+
+html[lang="ar"] p,
+html[lang="ar"] li,
+html[lang="ar"] label,
+html[lang="ar"] td,
+html[lang="ar"] th {
+  line-height: 1.82;
+}
+
+html[lang="ar"] .uppercase {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+html[lang="ar"] .page-subtitle {
+  line-height: 1.8;
+}
+
 @layer components {
   .app-page {
     @apply mx-auto w-full max-w-6xl space-y-6;
@@ -165,9 +197,49 @@ h6 {
   }
 }
 
+@keyframes landing-fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@layer components {
+  .landing-fade-up {
+    animation: landing-fade-up 0.75s cubic-bezier(0.21, 0.74, 0.2, 1) both;
+  }
+
+  .landing-fade-up-delay-1 {
+    animation-delay: 0.15s;
+  }
+
+  .landing-float {
+    animation: landing-float 7s ease-in-out infinite;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .skeleton-shimmer::after {
     animation: none;
+  }
+
+  .landing-fade-up,
+  .landing-float {
+    animation: none !important;
   }
 }
 
