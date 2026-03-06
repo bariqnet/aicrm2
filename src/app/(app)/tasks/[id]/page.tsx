@@ -3,9 +3,16 @@ import type { Route } from "next";
 import { notFound } from "next/navigation";
 import { AddNoteForm } from "@/components/AddNoteForm";
 import { TaskStatusControl } from "@/components/TaskStatusControl";
+import { DetailHero } from "@/components/detail/DetailHero";
+import { DetailListCard } from "@/components/detail/DetailListCard";
 import type { Activity, Company, Contact, Deal, Note, Task } from "@/lib/crm-types";
 import { getDateLocale, getServerLanguage, pickByLanguage } from "@/lib/server-language";
-import { serverApiRequest, serverApiRequestOrNull, type ServerListResponse } from "@/lib/server-crm";
+import {
+  serverApiRequest,
+  serverApiRequestOrNull,
+  type ServerListResponse,
+} from "@/lib/server-crm";
+import { getDirectionalArrowSymbol } from "@/lib/ui-direction";
 
 function fmtDateTime(value: string | null | undefined, locale: string): string {
   if (!value) return "-";
@@ -14,11 +21,17 @@ function fmtDateTime(value: string | null | undefined, locale: string): string {
   return parsed.toLocaleString(locale);
 }
 
-function taskStatusLabel(status: Task["status"], tr: (english: string, arabic: string) => string): string {
+function taskStatusLabel(
+  status: Task["status"],
+  tr: (english: string, arabic: string) => string,
+): string {
   return status === "DONE" ? tr("Done", "مكتملة") : tr("Open", "مفتوحة");
 }
 
-function relatedTypeLabel(type: Task["relatedType"], tr: (english: string, arabic: string) => string): string {
+function relatedTypeLabel(
+  type: Task["relatedType"],
+  tr: (english: string, arabic: string) => string,
+): string {
   if (type === "contact") return tr("Contact", "جهة اتصال");
   if (type === "company") return tr("Company", "شركة");
   if (type === "deal") return tr("Deal", "صفقة");
@@ -26,8 +39,8 @@ function relatedTypeLabel(type: Task["relatedType"], tr: (english: string, arabi
 }
 
 type RelatedEntitySummary = {
-  label: string;
   href: string;
+  label: string;
 };
 
 async function loadRelatedEntity(task: Task): Promise<RelatedEntitySummary | null> {
@@ -36,7 +49,7 @@ async function loadRelatedEntity(task: Task): Promise<RelatedEntitySummary | nul
     if (!contact) return null;
     return {
       label: `${contact.firstName} ${contact.lastName}`.trim(),
-      href: `/contacts/${contact.id}`
+      href: `/contacts/${contact.id}`,
     };
   }
 
@@ -68,12 +81,12 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
   const [notesPayload, activityPayload, relatedEntity] = await Promise.all([
     serverApiRequest<ServerListResponse<Note>>("/notes", {
-      query: { relatedType: "task", relatedId: id }
+      query: { relatedType: "task", relatedId: id },
     }),
     serverApiRequest<ServerListResponse<Activity>>("/activities", {
-      query: { entityType: "task", entityId: id }
+      query: { entityType: "task", entityId: id },
     }),
-    loadRelatedEntity(task)
+    loadRelatedEntity(task),
   ]);
 
   const notes = (notesPayload.rows ?? [])
@@ -85,48 +98,70 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <main className="app-page">
-      <header className="space-y-2">
-        <Link href="/tasks" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to tasks", "← العودة إلى المهام")}</Link>
-        <h1 className="page-title">{tr("Task detail", "تفاصيل المهمة")}</h1>
-        <p className="page-subtitle">{tr("Context and updates related to this task item.", "السياق والتحديثات المرتبطة بهذه المهمة.")}</p>
-      </header>
-
-      <section className="panel p-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-lg font-semibold">{task.title}</p>
-            <p className="mt-1 text-sm text-mutedfg">{tr("Status", "الحالة")}: {taskStatusLabel(task.status, tr)}</p>
-          </div>
-          <TaskStatusControl taskId={task.id} status={task.status} />
-        </div>
-        <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-          <p>{tr("Due", "الاستحقاق")}: <span className="text-mutedfg">{fmtDateTime(task.dueAt, locale)}</span></p>
-          <p>{tr("Related type", "نوع الارتباط")}: <span className="text-mutedfg">{relatedTypeLabel(task.relatedType, tr)}</span></p>
-          <p>
-            {tr("Related record", "السجل المرتبط")}: {" "}
-            {relatedEntity ? (
-              <Link href={relatedEntity.href as Route} className="text-accent hover:underline">{relatedEntity.label}</Link>
+      <DetailHero
+        backHref="/tasks"
+        backLabel={`${getDirectionalArrowSymbol(language, "back")} ${tr("Back to tasks", "العودة إلى المهام")}`}
+        category={tr("Task detail", "تفاصيل المهمة")}
+        title={task.title}
+        description={tr(
+          "Execution context, related record, and update history for this task item.",
+          "سياق التنفيذ والسجل المرتبط وسجل التحديثات لهذه المهمة.",
+        )}
+        actions={<TaskStatusControl taskId={task.id} status={task.status} />}
+        metrics={[
+          { label: tr("Status", "الحالة"), value: taskStatusLabel(task.status, tr) },
+          { label: tr("Notes", "الملاحظات"), value: notes.length },
+          { label: tr("Activity", "النشاط"), value: activity.length },
+          { label: tr("Relation", "الارتباط"), value: relatedTypeLabel(task.relatedType, tr) },
+        ]}
+        fields={[
+          { label: tr("Due", "الاستحقاق"), value: fmtDateTime(task.dueAt, locale) },
+          {
+            label: tr("Related type", "نوع الارتباط"),
+            value: relatedTypeLabel(task.relatedType, tr),
+          },
+          {
+            label: tr("Related record", "السجل المرتبط"),
+            value: relatedEntity ? (
+              <Link href={relatedEntity.href as Route} className="text-accent hover:underline">
+                {relatedEntity.label}
+              </Link>
             ) : (
               <span className="font-mono text-xs text-mutedfg">{task.relatedId}</span>
-            )}
-          </p>
-          <p>{tr("Task ID", "معرّف المهمة")}: <span className="font-mono text-xs text-mutedfg">{task.id}</span></p>
-        </div>
-      </section>
+            ),
+          },
+          { label: tr("Task reference", "مرجع المهمة"), value: task.id },
+        ]}
+      />
 
       <section className="grid gap-3 md:grid-cols-2">
         <article className="panel p-4">
-          <h2 className="text-sm font-semibold">{tr("Notes", "ملاحظات")}</h2>
+          <div>
+            <h2 className="text-sm font-semibold">{tr("Notes", "ملاحظات")}</h2>
+            <p className="mt-1 text-sm text-mutedfg">
+              {tr(
+                "Capture updates, blockers, and context for this task.",
+                "سجّل التحديثات والعوائق والسياق لهذه المهمة.",
+              )}
+            </p>
+          </div>
+
           <div className="mt-3">
             <AddNoteForm relatedType="task" relatedId={id} />
           </div>
+
           {notes.length === 0 ? (
-            <p className="mt-2 text-sm text-mutedfg">{tr("No notes yet.", "لا توجد ملاحظات بعد.")}</p>
+            <p className="mt-3 rounded-2xl border border-dashed border-border bg-surface2/70 px-4 py-4 text-sm text-mutedfg">
+              {tr("No notes yet.", "لا توجد ملاحظات بعد.")}
+            </p>
           ) : (
             <ul className="mt-3 space-y-2">
               {notes.map((note) => (
-                <li key={note.id} className="rounded-md border border-border bg-surface2 px-3 py-2 text-sm">
-                  <p>{note.body}</p>
+                <li
+                  key={note.id}
+                  className="rounded-2xl border border-border bg-surface2/70 px-4 py-3"
+                >
+                  <p className="text-sm">{note.body}</p>
                   <p className="mt-1 text-xs text-mutedfg">{fmtDateTime(note.createdAt, locale)}</p>
                 </li>
               ))}
@@ -134,21 +169,27 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
           )}
         </article>
 
-        <article className="panel p-4">
-          <h2 className="text-sm font-semibold">{tr("Recent activity", "النشاط الأخير")}</h2>
-          {activity.length === 0 ? (
-            <p className="mt-2 text-sm text-mutedfg">{tr("No activity yet.", "لا يوجد نشاط بعد.")}</p>
-          ) : (
-            <ul className="mt-2 space-y-2">
-              {activity.slice(0, 8).map((entry) => (
-                <li key={entry.id} className="rounded-md border border-border bg-surface2 px-3 py-2 text-sm">
-                  <p className="font-medium">{entry.type}</p>
-                  <p className="text-xs text-mutedfg">{fmtDateTime(entry.createdAt, locale)}</p>
-                </li>
-              ))}
-            </ul>
+        <DetailListCard
+          title={tr("Recent activity", "النشاط الأخير")}
+          description={tr(
+            "Latest system events related to this task.",
+            "أحدث أحداث النظام المرتبطة بهذه المهمة.",
           )}
-        </article>
+          emptyText={tr("No activity yet.", "لا يوجد نشاط بعد.")}
+          hasItems={activity.length > 0}
+        >
+          <ul className="space-y-2">
+            {activity.slice(0, 8).map((entry) => (
+              <li
+                key={entry.id}
+                className="rounded-2xl border border-border bg-surface2/70 px-4 py-3"
+              >
+                <p className="font-medium">{entry.type}</p>
+                <p className="mt-1 text-xs text-mutedfg">{fmtDateTime(entry.createdAt, locale)}</p>
+              </li>
+            ))}
+          </ul>
+        </DetailListCard>
       </section>
     </main>
   );

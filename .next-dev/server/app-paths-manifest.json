@@ -1,0 +1,15 @@
+{
+  "/api/auth/sign-in/route": "app/api/auth/sign-in/route.js",
+  "/api/session/route": "app/api/session/route.js",
+  "/print/invoices/[id]/page": "app/print/invoices/[id]/page.js",
+  "/(app)/companies/[id]/page": "app/(app)/companies/[id]/page.js",
+  "/(app)/invoices/[id]/page": "app/(app)/invoices/[id]/page.js",
+  "/(app)/tasks/[id]/page": "app/(app)/tasks/[id]/page.js",
+  "/(app)/companies/[id]/edit/page": "app/(app)/companies/[id]/edit/page.js",
+  "/(app)/contacts/[id]/page": "app/(app)/contacts/[id]/page.js",
+  "/(app)/deals/[id]/page": "app/(app)/deals/[id]/page.js",
+  "/(app)/dashboard/page": "app/(app)/dashboard/page.js",
+  "/(app)/deals/[id]/edit/page": "app/(app)/deals/[id]/edit/page.js",
+  "/(app)/contacts/[id]/edit/page": "app/(app)/contacts/[id]/edit/page.js",
+  "/(app)/invoices/[id]/edit/page": "app/(app)/invoices/[id]/edit/page.js"
+}

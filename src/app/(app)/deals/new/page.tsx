@@ -5,11 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import type { Company, Contact, Stage } from "@/lib/crm-types";
-import {
-  getResponseError,
-  showErrorAlert,
-  showSuccessAlert
-} from "@/lib/sweet-alert";
+import { getDirectionalArrowSymbol } from "@/lib/ui-direction";
+import { getResponseError, showErrorAlert, showSuccessAlert } from "@/lib/sweet-alert";
 
 function toIsoDateTime(value: string): string | undefined {
   if (!value) return undefined;
@@ -46,13 +43,13 @@ export default function NewDealPage() {
         const [stagesResult, companiesResult, contactsResult] = await Promise.allSettled([
           fetch("/api/stages"),
           fetch("/api/companies"),
-          fetch("/api/contacts")
+          fetch("/api/contacts"),
         ]);
 
         if (cancelled) return;
 
         if (stagesResult.status === "fulfilled" && stagesResult.value.ok) {
-          const payload = await stagesResult.value.json() as { rows?: Stage[] };
+          const payload = (await stagesResult.value.json()) as { rows?: Stage[] };
           const rows = payload.rows ?? [];
           setStages(rows);
           setStageId((current) => {
@@ -64,11 +61,11 @@ export default function NewDealPage() {
           });
         }
         if (companiesResult.status === "fulfilled" && companiesResult.value.ok) {
-          const payload = await companiesResult.value.json() as { rows?: Company[] };
+          const payload = (await companiesResult.value.json()) as { rows?: Company[] };
           setCompanies(payload.rows ?? []);
         }
         if (contactsResult.status === "fulfilled" && contactsResult.value.ok) {
-          const payload = await contactsResult.value.json() as { rows?: Contact[] };
+          const payload = (await contactsResult.value.json()) as { rows?: Contact[] };
           setContacts(payload.rows ?? []);
         }
       } finally {
@@ -92,14 +89,23 @@ export default function NewDealPage() {
     if (!stageId) {
       await showErrorAlert(
         tr("Missing stage", "المرحلة مفقودة"),
-        tr("Select a stage before creating the pipeline card.", "اختر مرحلة قبل إنشاء بطاقة جديدة في خط المبيعات.")
+        tr(
+          "Select a stage before creating the pipeline card.",
+          "اختر مرحلة قبل إنشاء بطاقة جديدة في خط المبيعات.",
+        ),
       );
       return;
     }
 
     const parsedAmount = Number(amount);
     if (!Number.isFinite(parsedAmount) || parsedAmount < 0) {
-      await showErrorAlert(tr("Invalid amount", "مبلغ غير صالح"), tr("Amount must be a valid non-negative number.", "يجب أن يكون المبلغ رقمًا صالحًا غير سالب."));
+      await showErrorAlert(
+        tr("Invalid amount", "مبلغ غير صالح"),
+        tr(
+          "Amount must be a valid non-negative number.",
+          "يجب أن يكون المبلغ رقمًا صالحًا غير سالب.",
+        ),
+      );
       return;
     }
 
@@ -115,14 +121,20 @@ export default function NewDealPage() {
           stageId,
           companyId: companyId || undefined,
           primaryContactId: primaryContactId || undefined,
-          expectedCloseDate: toIsoDateTime(expectedCloseDate)
-        })
+          expectedCloseDate: toIsoDateTime(expectedCloseDate),
+        }),
       });
 
       if (!response.ok) {
         await showErrorAlert(
           tr("Unable to create pipeline card", "تعذر إنشاء بطاقة جديدة في خط المبيعات"),
-          await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
+          await getResponseError(
+            response,
+            tr(
+              "Please check your input and try again.",
+              "يرجى التحقق من البيانات والمحاولة مرة أخرى.",
+            ),
+          ),
         );
         return;
       }
@@ -131,8 +143,14 @@ export default function NewDealPage() {
       router.push("/deals");
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : tr("Unable to create pipeline card", "تعذر إنشاء بطاقة جديدة في خط المبيعات");
-      await showErrorAlert(tr("Unable to create pipeline card", "تعذر إنشاء بطاقة جديدة في خط المبيعات"), message);
+      const message =
+        error instanceof Error
+          ? error.message
+          : tr("Unable to create pipeline card", "تعذر إنشاء بطاقة جديدة في خط المبيعات");
+      await showErrorAlert(
+        tr("Unable to create pipeline card", "تعذر إنشاء بطاقة جديدة في خط المبيعات"),
+        message,
+      );
     } finally {
       setSaving(false);
     }
@@ -141,24 +159,51 @@ export default function NewDealPage() {
   return (
     <main className="app-page">
       <header>
-        <Link href="/deals" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to pipeline", "← العودة إلى خط المبيعات")}</Link>
+        <Link href="/deals" className="text-sm text-mutedfg hover:text-fg">
+          {`${getDirectionalArrowSymbol(language, "back")} ${tr("Back to pipeline", "العودة إلى خط المبيعات")}`}
+        </Link>
         <h1 className="page-title mt-2">{tr("New pipeline card", "بطاقة جديدة في خط المبيعات")}</h1>
-        <p className="page-subtitle">{tr("Create a new card and assign it to the right stage.", "أنشئ بطاقة جديدة وعيّنها للمرحلة المناسبة.")}</p>
+        <p className="page-subtitle">
+          {tr(
+            "Create a new card and assign it to the right stage.",
+            "أنشئ بطاقة جديدة وعيّنها للمرحلة المناسبة.",
+          )}
+        </p>
       </header>
 
       <form className="panel max-w-3xl space-y-4 p-5" onSubmit={submit}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm sm:col-span-2">
             {tr("Card title", "عنوان البطاقة")}
-            <input className="input mt-1 w-full" placeholder={tr("Card title", "عنوان البطاقة")} value={title} onChange={(event) => setTitle(event.target.value)} required />
+            <input
+              className="input mt-1 w-full"
+              placeholder={tr("Card title", "عنوان البطاقة")}
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              required
+            />
           </label>
           <label className="text-sm">
             {tr("Amount", "المبلغ")}
-            <input className="input mt-1 w-full" placeholder={tr("Amount", "المبلغ")} value={amount} onChange={(event) => setAmount(event.target.value)} type="number" min="0" required />
+            <input
+              className="input mt-1 w-full"
+              placeholder={tr("Amount", "المبلغ")}
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+              type="number"
+              min="0"
+              required
+            />
           </label>
           <label className="text-sm">
             {tr("Currency", "العملة")}
-            <input className="input mt-1 w-full" placeholder="USD" value={currency} onChange={(event) => setCurrency(event.target.value)} required />
+            <input
+              className="input mt-1 w-full"
+              placeholder="USD"
+              value={currency}
+              onChange={(event) => setCurrency(event.target.value)}
+              required
+            />
           </label>
           <label className="text-sm">
             {tr("Stage", "المرحلة")}
@@ -169,9 +214,15 @@ export default function NewDealPage() {
               disabled={loadingOptions || stages.length === 0}
               required
             >
-              <option value="">{loadingOptions ? tr("Loading stages...", "جاري تحميل المراحل...") : tr("Select stage", "اختر مرحلة")}</option>
+              <option value="">
+                {loadingOptions
+                  ? tr("Loading stages...", "جاري تحميل المراحل...")
+                  : tr("Select stage", "اختر مرحلة")}
+              </option>
               {stages.map((stage) => (
-                <option key={stage.id} value={stage.id}>{stage.name}</option>
+                <option key={stage.id} value={stage.id}>
+                  {stage.name}
+                </option>
               ))}
             </select>
           </label>
@@ -186,16 +237,26 @@ export default function NewDealPage() {
           </label>
           <label className="text-sm">
             {tr("Company (optional)", "الشركة (اختياري)")}
-            <select className="input mt-1 w-full" value={companyId} onChange={(event) => setCompanyId(event.target.value)}>
+            <select
+              className="input mt-1 w-full"
+              value={companyId}
+              onChange={(event) => setCompanyId(event.target.value)}
+            >
               <option value="">{tr("No company", "بدون شركة")}</option>
               {companies.map((company) => (
-                <option key={company.id} value={company.id}>{company.name}</option>
+                <option key={company.id} value={company.id}>
+                  {company.name}
+                </option>
               ))}
             </select>
           </label>
           <label className="text-sm">
             {tr("Primary contact (optional)", "جهة الاتصال الأساسية (اختياري)")}
-            <select className="input mt-1 w-full" value={primaryContactId} onChange={(event) => setPrimaryContactId(event.target.value)}>
+            <select
+              className="input mt-1 w-full"
+              value={primaryContactId}
+              onChange={(event) => setPrimaryContactId(event.target.value)}
+            >
               <option value="">{tr("No primary contact", "بدون جهة اتصال أساسية")}</option>
               {contacts.map((contact) => (
                 <option key={contact.id} value={contact.id}>
@@ -207,7 +268,9 @@ export default function NewDealPage() {
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
-          <Link href="/deals" className="btn">{tr("Cancel", "إلغاء")}</Link>
+          <Link href="/deals" className="btn">
+            {tr("Cancel", "إلغاء")}
+          </Link>
           <button className="btn btn-primary" type="submit" disabled={saving}>
             {saving ? tr("Creating...", "جاري الإنشاء...") : tr("Create card", "إنشاء البطاقة")}
           </button>

@@ -5,11 +5,8 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import type { Company, Contact, Deal, Task } from "@/lib/crm-types";
-import {
-  getResponseError,
-  showErrorAlert,
-  showSuccessAlert
-} from "@/lib/sweet-alert";
+import { getDirectionalArrowSymbol } from "@/lib/ui-direction";
+import { getResponseError, showErrorAlert, showSuccessAlert } from "@/lib/sweet-alert";
 
 type RelatedType = "contact" | "company" | "deal" | "task";
 
@@ -41,29 +38,30 @@ export default function NewTaskPage() {
 
     async function loadOptions() {
       try {
-        const [contactsResult, companiesResult, dealsResult, tasksResult] = await Promise.allSettled([
-          fetch("/api/contacts"),
-          fetch("/api/companies"),
-          fetch("/api/deals"),
-          fetch("/api/tasks")
-        ]);
+        const [contactsResult, companiesResult, dealsResult, tasksResult] =
+          await Promise.allSettled([
+            fetch("/api/contacts"),
+            fetch("/api/companies"),
+            fetch("/api/deals"),
+            fetch("/api/tasks"),
+          ]);
 
         if (cancelled) return;
 
         if (contactsResult.status === "fulfilled" && contactsResult.value.ok) {
-          const payload = await contactsResult.value.json() as { rows?: Contact[] };
+          const payload = (await contactsResult.value.json()) as { rows?: Contact[] };
           setContacts(payload.rows ?? []);
         }
         if (companiesResult.status === "fulfilled" && companiesResult.value.ok) {
-          const payload = await companiesResult.value.json() as { rows?: Company[] };
+          const payload = (await companiesResult.value.json()) as { rows?: Company[] };
           setCompanies(payload.rows ?? []);
         }
         if (dealsResult.status === "fulfilled" && dealsResult.value.ok) {
-          const payload = await dealsResult.value.json() as { rows?: Deal[] };
+          const payload = (await dealsResult.value.json()) as { rows?: Deal[] };
           setDeals(payload.rows ?? []);
         }
         if (tasksResult.status === "fulfilled" && tasksResult.value.ok) {
-          const payload = await tasksResult.value.json() as { rows?: Task[] };
+          const payload = (await tasksResult.value.json()) as { rows?: Task[] };
           setTasks(payload.rows ?? []);
         }
       } finally {
@@ -84,7 +82,7 @@ export default function NewTaskPage() {
     if (relatedType === "contact") {
       return contacts.map((contact) => ({
         id: contact.id,
-        label: `${contact.firstName} ${contact.lastName}`.trim()
+        label: `${contact.firstName} ${contact.lastName}`.trim(),
       }));
     }
     if (relatedType === "company") {
@@ -102,7 +100,10 @@ export default function NewTaskPage() {
 
     const trimmedRelatedId = relatedId.trim();
     if (!trimmedRelatedId) {
-      await showErrorAlert(tr("Missing related ID", "المعرّف المرتبط مفقود"), tr("Select or enter the related record ID.", "اختر أو أدخل معرّف السجل المرتبط."));
+      await showErrorAlert(
+        tr("Missing related ID", "المعرّف المرتبط مفقود"),
+        tr("Select or enter the related record ID.", "اختر أو أدخل معرّف السجل المرتبط."),
+      );
       return;
     }
 
@@ -116,14 +117,20 @@ export default function NewTaskPage() {
           title: title.trim(),
           relatedType,
           relatedId: trimmedRelatedId,
-          dueAt: toIsoDateTime(dueAt)
-        })
+          dueAt: toIsoDateTime(dueAt),
+        }),
       });
 
       if (!response.ok) {
         await showErrorAlert(
           tr("Unable to create task", "تعذر إنشاء المهمة"),
-          await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
+          await getResponseError(
+            response,
+            tr(
+              "Please check your input and try again.",
+              "يرجى التحقق من البيانات والمحاولة مرة أخرى.",
+            ),
+          ),
         );
         return;
       }
@@ -131,7 +138,8 @@ export default function NewTaskPage() {
       router.push("/tasks");
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : tr("Unable to create task", "تعذر إنشاء المهمة");
+      const message =
+        error instanceof Error ? error.message : tr("Unable to create task", "تعذر إنشاء المهمة");
       await showErrorAlert(tr("Unable to create task", "تعذر إنشاء المهمة"), message);
     } finally {
       setSaving(false);
@@ -141,16 +149,29 @@ export default function NewTaskPage() {
   return (
     <main className="app-page">
       <header>
-        <Link href="/tasks" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to tasks", "← العودة إلى المهام")}</Link>
+        <Link href="/tasks" className="text-sm text-mutedfg hover:text-fg">
+          {`${getDirectionalArrowSymbol(language, "back")} ${tr("Back to tasks", "العودة إلى المهام")}`}
+        </Link>
         <h1 className="page-title mt-2">{tr("New task", "مهمة جديدة")}</h1>
-        <p className="page-subtitle">{tr("Create a follow-up tied to a record in the workspace.", "أنشئ متابعة مرتبطة بسجل داخل مساحة العمل.")}</p>
+        <p className="page-subtitle">
+          {tr(
+            "Create a follow-up tied to a record in the workspace.",
+            "أنشئ متابعة مرتبطة بسجل داخل مساحة العمل.",
+          )}
+        </p>
       </header>
 
       <form className="panel max-w-3xl space-y-4 p-5" onSubmit={submit}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm sm:col-span-2">
             {tr("Task title", "عنوان المهمة")}
-            <input className="input mt-1 w-full" placeholder={tr("Task title", "عنوان المهمة")} value={title} onChange={(event) => setTitle(event.target.value)} required />
+            <input
+              className="input mt-1 w-full"
+              placeholder={tr("Task title", "عنوان المهمة")}
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              required
+            />
           </label>
           <label className="text-sm">
             {tr("Related type", "نوع الارتباط")}
@@ -170,7 +191,12 @@ export default function NewTaskPage() {
           </label>
           <label className="text-sm">
             {tr("Due date (optional)", "تاريخ الاستحقاق (اختياري)")}
-            <input className="input mt-1 w-full" type="date" value={dueAt} onChange={(event) => setDueAt(event.target.value)} />
+            <input
+              className="input mt-1 w-full"
+              type="date"
+              value={dueAt}
+              onChange={(event) => setDueAt(event.target.value)}
+            />
           </label>
           <label className="text-sm sm:col-span-2">
             {tr("Related record", "السجل المرتبط")}
@@ -182,17 +208,23 @@ export default function NewTaskPage() {
               required
             >
               <option value="">
-                {loadingOptions ? tr("Loading records...", "جاري تحميل السجلات...") : `${tr("Select", "اختر")} ${relatedType}`}
+                {loadingOptions
+                  ? tr("Loading records...", "جاري تحميل السجلات...")
+                  : `${tr("Select", "اختر")} ${relatedType}`}
               </option>
               {relatedOptions.map((option) => (
-                <option key={option.id} value={option.id}>{option.label}</option>
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
               ))}
             </select>
           </label>
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
-          <Link href="/tasks" className="btn">{tr("Cancel", "إلغاء")}</Link>
+          <Link href="/tasks" className="btn">
+            {tr("Cancel", "إلغاء")}
+          </Link>
           <button className="btn btn-primary" type="submit" disabled={saving}>
             {saving ? tr("Creating...", "جاري الإنشاء...") : tr("Create task", "إنشاء مهمة")}
           </button>

@@ -4,11 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
-import {
-  getResponseError,
-  showErrorAlert,
-  showSuccessAlert
-} from "@/lib/sweet-alert";
+import { getDirectionalArrowSymbol } from "@/lib/ui-direction";
+import { getResponseError, showErrorAlert, showSuccessAlert } from "@/lib/sweet-alert";
 
 export default function NewCompanyPage() {
   const { language } = useI18n();
@@ -26,13 +23,19 @@ export default function NewCompanyPage() {
     const response = await fetch("/api/companies", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, domain, industry, size })
+      body: JSON.stringify({ name, domain, industry, size }),
     });
 
     if (!response.ok) {
       await showErrorAlert(
         tr("Unable to create company", "تعذر إنشاء الشركة"),
-        await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
+        await getResponseError(
+          response,
+          tr(
+            "Please check your input and try again.",
+            "يرجى التحقق من البيانات والمحاولة مرة أخرى.",
+          ),
+        ),
       );
       return;
     }
@@ -44,34 +47,66 @@ export default function NewCompanyPage() {
   return (
     <main className="app-page">
       <header>
-        <Link href="/companies" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to companies", "← العودة إلى الشركات")}</Link>
+        <Link href="/companies" className="text-sm text-mutedfg hover:text-fg">
+          {`${getDirectionalArrowSymbol(language, "back")} ${tr("Back to companies", "العودة إلى الشركات")}`}
+        </Link>
         <h1 className="page-title mt-2">{tr("New company", "شركة جديدة")}</h1>
-        <p className="page-subtitle">{tr("Create an account record with core company context.", "أنشئ سجل حساب مع سياق الشركة الأساسي.")}</p>
+        <p className="page-subtitle">
+          {tr(
+            "Create an account record with core company context.",
+            "أنشئ سجل حساب مع سياق الشركة الأساسي.",
+          )}
+        </p>
       </header>
 
       <form className="panel max-w-2xl space-y-4 p-5" onSubmit={submit}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm">
             {tr("Company name", "اسم الشركة")}
-            <input className="input mt-1 w-full" placeholder="Acme Inc." value={name} onChange={(event) => setName(event.target.value)} required />
+            <input
+              className="input mt-1 w-full"
+              placeholder="Acme Inc."
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+            />
           </label>
           <label className="text-sm">
             {tr("Domain", "النطاق")}
-            <input className="input mt-1 w-full" placeholder="acme.com" value={domain} onChange={(event) => setDomain(event.target.value)} />
+            <input
+              className="input mt-1 w-full"
+              placeholder="acme.com"
+              value={domain}
+              onChange={(event) => setDomain(event.target.value)}
+            />
           </label>
           <label className="text-sm">
             {tr("Industry", "القطاع")}
-            <input className="input mt-1 w-full" placeholder={tr("Software", "برمجيات")} value={industry} onChange={(event) => setIndustry(event.target.value)} />
+            <input
+              className="input mt-1 w-full"
+              placeholder={tr("Software", "برمجيات")}
+              value={industry}
+              onChange={(event) => setIndustry(event.target.value)}
+            />
           </label>
           <label className="text-sm">
             {tr("Size", "الحجم")}
-            <input className="input mt-1 w-full" placeholder="51-200" value={size} onChange={(event) => setSize(event.target.value)} />
+            <input
+              className="input mt-1 w-full"
+              placeholder="51-200"
+              value={size}
+              onChange={(event) => setSize(event.target.value)}
+            />
           </label>
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
-          <Link href="/companies" className="btn">{tr("Cancel", "إلغاء")}</Link>
-          <button className="btn btn-primary" type="submit">{tr("Create company", "إنشاء الشركة")}</button>
+          <Link href="/companies" className="btn">
+            {tr("Cancel", "إلغاء")}
+          </Link>
+          <button className="btn btn-primary" type="submit">
+            {tr("Create company", "إنشاء الشركة")}
+          </button>
         </div>
       </form>
     </main>

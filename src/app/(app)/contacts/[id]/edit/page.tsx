@@ -5,11 +5,8 @@ import { type FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useI18n } from "@/hooks/useI18n";
 import type { Company } from "@/lib/crm-types";
-import {
-  getResponseError,
-  showErrorAlert,
-  showSuccessAlert
-} from "@/lib/sweet-alert";
+import { getDirectionalArrowSymbol } from "@/lib/ui-direction";
+import { getResponseError, showErrorAlert, showSuccessAlert } from "@/lib/sweet-alert";
 
 type ContactPayload = {
   id: string;
@@ -46,7 +43,7 @@ export default function EditContactPage() {
     async function loadData() {
       const [contactResult, companiesResult] = await Promise.allSettled([
         fetch(`/api/contacts/${contactId}`),
-        fetch("/api/companies")
+        fetch("/api/companies"),
       ]);
 
       if (cancelled) return;
@@ -54,7 +51,10 @@ export default function EditContactPage() {
       if (contactResult.status !== "fulfilled" || !contactResult.value.ok) {
         const message =
           contactResult.status === "fulfilled"
-            ? await getResponseError(contactResult.value, tr("Unable to load contact", "تعذر تحميل جهة الاتصال"))
+            ? await getResponseError(
+                contactResult.value,
+                tr("Unable to load contact", "تعذر تحميل جهة الاتصال"),
+              )
             : tr("Unable to load contact", "تعذر تحميل جهة الاتصال");
         throw new Error(message);
       }
@@ -71,7 +71,7 @@ export default function EditContactPage() {
       setTags(contactPayload.tags ?? []);
 
       if (companiesResult.status === "fulfilled" && companiesResult.value.ok) {
-        const companiesPayload = await companiesResult.value.json() as { rows?: Company[] };
+        const companiesPayload = (await companiesResult.value.json()) as { rows?: Company[] };
         if (!cancelled) setCompanies(companiesPayload.rows ?? []);
       }
 
@@ -79,7 +79,10 @@ export default function EditContactPage() {
     }
 
     loadData().catch(async (error) => {
-      const message = error instanceof Error ? error.message : tr("Unable to load contact", "تعذر تحميل جهة الاتصال");
+      const message =
+        error instanceof Error
+          ? error.message
+          : tr("Unable to load contact", "تعذر تحميل جهة الاتصال");
       if (!cancelled) {
         await showErrorAlert(tr("Unable to load contact", "تعذر تحميل جهة الاتصال"), message);
         router.push("/contacts");
@@ -107,14 +110,20 @@ export default function EditContactPage() {
           email: email || undefined,
           phone: phone || undefined,
           companyId: companyId || undefined,
-          tags
-        })
+          tags,
+        }),
       });
 
       if (!response.ok) {
         await showErrorAlert(
           tr("Unable to update contact", "تعذر تحديث جهة الاتصال"),
-          await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
+          await getResponseError(
+            response,
+            tr(
+              "Please check your input and try again.",
+              "يرجى التحقق من البيانات والمحاولة مرة أخرى.",
+            ),
+          ),
         );
         return;
       }
@@ -122,7 +131,10 @@ export default function EditContactPage() {
       router.push(`/contacts/${contactId}`);
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : tr("Unable to update contact", "تعذر تحديث جهة الاتصال");
+      const message =
+        error instanceof Error
+          ? error.message
+          : tr("Unable to update contact", "تعذر تحديث جهة الاتصال");
       await showErrorAlert(tr("Unable to update contact", "تعذر تحديث جهة الاتصال"), message);
     } finally {
       setSaving(false);
@@ -132,32 +144,68 @@ export default function EditContactPage() {
   return (
     <main className="app-page">
       <header>
-        <Link href={`/contacts/${contactId}`} className="text-sm text-mutedfg hover:text-fg">{tr("← Back to contact", "← العودة إلى جهة الاتصال")}</Link>
+        <Link href={`/contacts/${contactId}`} className="text-sm text-mutedfg hover:text-fg">
+          {`${getDirectionalArrowSymbol(language, "back")} ${tr("Back to contact", "العودة إلى جهة الاتصال")}`}
+        </Link>
         <h1 className="page-title mt-2">{tr("Edit contact", "تعديل جهة الاتصال")}</h1>
-        <p className="page-subtitle">{tr("Update primary contact details.", "تحديث البيانات الأساسية لجهة الاتصال.")}</p>
+        <p className="page-subtitle">
+          {tr("Update primary contact details.", "تحديث البيانات الأساسية لجهة الاتصال.")}
+        </p>
       </header>
 
       <form className="panel max-w-3xl space-y-4 p-5" onSubmit={submit}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm">
             {tr("First name", "الاسم الأول")}
-            <input className="input mt-1 w-full" placeholder={tr("First name", "الاسم الأول")} value={firstName} onChange={(event) => setFirstName(event.target.value)} required disabled={loading} />
+            <input
+              className="input mt-1 w-full"
+              placeholder={tr("First name", "الاسم الأول")}
+              value={firstName}
+              onChange={(event) => setFirstName(event.target.value)}
+              required
+              disabled={loading}
+            />
           </label>
           <label className="text-sm">
             {tr("Last name", "الاسم الأخير")}
-            <input className="input mt-1 w-full" placeholder={tr("Last name", "الاسم الأخير")} value={lastName} onChange={(event) => setLastName(event.target.value)} required disabled={loading} />
+            <input
+              className="input mt-1 w-full"
+              placeholder={tr("Last name", "الاسم الأخير")}
+              value={lastName}
+              onChange={(event) => setLastName(event.target.value)}
+              required
+              disabled={loading}
+            />
           </label>
           <label className="text-sm">
             {tr("Job title", "المسمى الوظيفي")}
-            <input className="input mt-1 w-full" placeholder={tr("Job title", "المسمى الوظيفي")} value={jobTitle} onChange={(event) => setJobTitle(event.target.value)} disabled={loading} />
+            <input
+              className="input mt-1 w-full"
+              placeholder={tr("Job title", "المسمى الوظيفي")}
+              value={jobTitle}
+              onChange={(event) => setJobTitle(event.target.value)}
+              disabled={loading}
+            />
           </label>
           <label className="text-sm">
             {tr("Email", "البريد الإلكتروني")}
-            <input className="input mt-1 w-full" placeholder="name@company.com" value={email} onChange={(event) => setEmail(event.target.value)} disabled={loading} />
+            <input
+              className="input mt-1 w-full"
+              placeholder="name@company.com"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              disabled={loading}
+            />
           </label>
           <label className="text-sm">
             {tr("Phone", "الهاتف")}
-            <input className="input mt-1 w-full" placeholder={tr("Phone number", "رقم الهاتف")} value={phone} onChange={(event) => setPhone(event.target.value)} disabled={loading} />
+            <input
+              className="input mt-1 w-full"
+              placeholder={tr("Phone number", "رقم الهاتف")}
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              disabled={loading}
+            />
           </label>
           <label className="text-sm">
             {tr("Company", "الشركة")}
@@ -169,16 +217,24 @@ export default function EditContactPage() {
             >
               <option value="">{tr("No company", "بدون شركة")}</option>
               {companies.map((company) => (
-                <option key={company.id} value={company.id}>{company.name}</option>
+                <option key={company.id} value={company.id}>
+                  {company.name}
+                </option>
               ))}
             </select>
           </label>
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
-          <Link href={`/contacts/${contactId}`} className="btn">{tr("Cancel", "إلغاء")}</Link>
+          <Link href={`/contacts/${contactId}`} className="btn">
+            {tr("Cancel", "إلغاء")}
+          </Link>
           <button className="btn btn-primary" type="submit" disabled={loading || saving}>
-            {loading ? tr("Loading...", "جاري التحميل...") : saving ? tr("Saving...", "جاري الحفظ...") : tr("Save changes", "حفظ التغييرات")}
+            {loading
+              ? tr("Loading...", "جاري التحميل...")
+              : saving
+                ? tr("Saving...", "جاري الحفظ...")
+                : tr("Save changes", "حفظ التغييرات")}
           </button>
         </div>
       </form>

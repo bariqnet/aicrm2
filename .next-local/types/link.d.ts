@@ -31,86 +31,86 @@ declare namespace __next_route_internal_types__ {
   type StaticRoutes = 
     | `/api/activities`
     | `/api/auth/me`
+    | `/api/auth/refresh`
+    | `/api/auth/sign-in`
     | `/api/ai/relationship-intelligence`
     | `/api/auth/sign-out`
     | `/api/auth/sign-up`
-    | `/api/auth/sign-in`
-    | `/api/auth/refresh`
-    | `/api/contacts/bulk-delete`
-    | `/api/contacts`
-    | `/api/deals`
+    | `/api/companies`
     | `/api/contacts/export`
-    | `/api/invites/accept`
     | `/api/contacts/import`
+    | `/api/contacts`
+    | `/api/contacts/bulk-delete`
+    | `/api/deals`
     | `/api/invoices`
     | `/api/memberships`
+    | `/api/invites/accept`
+    | `/api/invites`
+    | `/api/notifications`
     | `/api/notes`
-    | `/api/companies`
     | `/api/onboarding/invites`
     | `/api/onboarding/workspace`
     | `/api/onboarding/stages`
-    | `/api/notifications`
     | `/api/session`
-    | `/api/stages/reorder`
     | `/api/reminders`
-    | `/api/invites`
-    | `/api/users`
-    | `/api/workspaces/switch`
-    | `/api/workspaces`
-    | `/api/tasks`
     | `/api/notifications/mark-all-read`
+    | `/api/users`
+    | `/api/stages/reorder`
     | `/api/stages`
+    | `/api/workspaces`
+    | `/api/workspaces/switch`
     | `/api/visits`
+    | `/api/tasks`
     | `/`
-    | `/support`
     | `/privacy`
+    | `/support`
     | `/terms`
-    | `/callops`
     | `/companies/new`
+    | `/callops`
     | `/calendar`
+    | `/contacts/import`
     | `/companies`
-    | `/contacts/new`
     | `/contacts`
+    | `/contacts/new`
+    | `/dashboard`
     | `/deals/new`
     | `/deals`
     | `/invoices`
-    | `/profile`
+    | `/invoices/new`
     | `/reports`
-    | `/tasks/new`
-    | `/contacts/import`
-    | `/tasks`
-    | `/dashboard`
+    | `/settings`
     | `/visits`
-    | `/auth`
+    | `/tasks/new`
     | `/auth/sign-in`
     | `/auth/sign-up`
+    | `/profile`
+    | `/tasks`
+    | `/auth`
     | `/onboarding`
-    | `/settings`
-    | `/invoices/new`
   type DynamicRoutes<T extends string = string> = 
     | `/api/companies/${SafeSlug<T>}`
+    | `/api/contacts/${SafeSlug<T>}`
     | `/api/deals/${SafeSlug<T>}`
-    | `/api/invites/${SafeSlug<T>}`
-    | `/api/invoices/${SafeSlug<T>}`
     | `/api/memberships/${SafeSlug<T>}`
+    | `/api/invoices/${SafeSlug<T>}`
     | `/api/notes/${SafeSlug<T>}`
     | `/api/notifications/${SafeSlug<T>}`
-    | `/api/contacts/${SafeSlug<T>}`
+    | `/api/invites/${SafeSlug<T>}`
+    | `/api/stages/${SafeSlug<T>}`
     | `/api/reminders/${SafeSlug<T>}`
     | `/api/tasks/${SafeSlug<T>}`
     | `/api/visits/${SafeSlug<T>}`
-    | `/api/stages/${SafeSlug<T>}`
     | `/print/invoices/${SafeSlug<T>}`
     | `/companies/${SafeSlug<T>}/edit`
-    | `/contacts/${SafeSlug<T>}`
     | `/companies/${SafeSlug<T>}`
-    | `/deals/${SafeSlug<T>}/edit`
-    | `/invoices/${SafeSlug<T>}/edit`
-    | `/invoices/${SafeSlug<T>}`
-    | `/deals/${SafeSlug<T>}`
-    | `/auth/invite/${SafeSlug<T>}`
-    | `/tasks/${SafeSlug<T>}`
+    | `/contacts/${SafeSlug<T>}`
     | `/contacts/${SafeSlug<T>}/edit`
+    | `/deals/${SafeSlug<T>}`
+    | `/deals/${SafeSlug<T>}/edit`
+    | `/invoices/${SafeSlug<T>}`
+    | `/tasks/${SafeSlug<T>}`
+    | `/auth/invite/${SafeSlug<T>}`
+    | `/invoices/${SafeSlug<T>}/edit`
 
   type RouteImpl<T> = 
     | StaticRoutes

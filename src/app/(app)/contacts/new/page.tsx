@@ -5,11 +5,8 @@ import { Building2, Link2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
-import {
-  getResponseError,
-  showErrorAlert,
-  showSuccessAlert
-} from "@/lib/sweet-alert";
+import { getDirectionalArrowSymbol } from "@/lib/ui-direction";
+import { getResponseError, showErrorAlert, showSuccessAlert } from "@/lib/sweet-alert";
 
 type CompanyOption = {
   id: string;
@@ -43,18 +40,18 @@ export default function NewContactPage() {
     async function loadOptions() {
       const [companiesResult, dealsResult] = await Promise.allSettled([
         fetch("/api/companies"),
-        fetch("/api/deals")
+        fetch("/api/deals"),
       ]);
 
       if (cancelled) return;
 
       if (companiesResult.status === "fulfilled" && companiesResult.value.ok) {
-        const payload = await companiesResult.value.json() as { rows?: CompanyOption[] };
+        const payload = (await companiesResult.value.json()) as { rows?: CompanyOption[] };
         if (!cancelled) setCompanies(payload.rows ?? []);
       }
 
       if (dealsResult.status === "fulfilled" && dealsResult.value.ok) {
-        const payload = await dealsResult.value.json() as { rows?: DealOption[] };
+        const payload = (await dealsResult.value.json()) as { rows?: DealOption[] };
         if (!cancelled) setDeals(payload.rows ?? []);
       }
     }
@@ -84,25 +81,31 @@ export default function NewContactPage() {
           email: email.trim() || undefined,
           phone: phone.trim() || undefined,
           companyId: companyId || undefined,
-          tags: []
-        })
+          tags: [],
+        }),
       });
 
       if (!response.ok) {
         await showErrorAlert(
           tr("Unable to create contact", "تعذر إنشاء جهة الاتصال"),
-          await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
+          await getResponseError(
+            response,
+            tr(
+              "Please check your input and try again.",
+              "يرجى التحقق من البيانات والمحاولة مرة أخرى.",
+            ),
+          ),
         );
         return;
       }
 
-      const createdContact = await response.json() as { id: string };
+      const createdContact = (await response.json()) as { id: string };
 
       if (opportunityId) {
         await fetch(`/api/deals/${opportunityId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ primaryContactId: createdContact.id })
+          body: JSON.stringify({ primaryContactId: createdContact.id }),
         });
       }
 
@@ -112,7 +115,10 @@ export default function NewContactPage() {
     } catch {
       await showErrorAlert(
         tr("Unable to create contact", "تعذر إنشاء جهة الاتصال"),
-        tr("Something went wrong. Please check your connection and try again.", "حدث خطأ ما. يرجى التحقق من الاتصال والمحاولة مرة أخرى.")
+        tr(
+          "Something went wrong. Please check your connection and try again.",
+          "حدث خطأ ما. يرجى التحقق من الاتصال والمحاولة مرة أخرى.",
+        ),
       );
     } finally {
       setLoading(false);
@@ -122,9 +128,16 @@ export default function NewContactPage() {
   return (
     <main className="app-page">
       <header>
-        <Link href="/contacts" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to contacts", "← العودة إلى جهات الاتصال")}</Link>
+        <Link href="/contacts" className="text-sm text-mutedfg hover:text-fg">
+          {`${getDirectionalArrowSymbol(language, "back")} ${tr("Back to contacts", "العودة إلى جهات الاتصال")}`}
+        </Link>
         <h1 className="page-title mt-2">{tr("New contact", "جهة اتصال جديدة")}</h1>
-        <p className="page-subtitle">{tr("Capture person details, account link, and opportunity context.", "سجّل تفاصيل الشخص وربط الحساب وسياق الفرصة.")}</p>
+        <p className="page-subtitle">
+          {tr(
+            "Capture person details, account link, and opportunity context.",
+            "سجّل تفاصيل الشخص وربط الحساب وسياق الفرصة.",
+          )}
+        </p>
       </header>
 
       <form className="panel max-w-3xl space-y-4 p-5" onSubmit={submit}>
@@ -140,7 +153,9 @@ export default function NewContactPage() {
               >
                 <option value="">{tr("Select account", "اختر حسابًا")}</option>
                 {companies.map((company) => (
-                  <option key={company.id} value={company.id}>{company.name}</option>
+                  <option key={company.id} value={company.id}>
+                    {company.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -148,27 +163,55 @@ export default function NewContactPage() {
 
           <label className="text-sm">
             {tr("First name", "الاسم الأول")} <span className="text-red-500">*</span>
-            <input className="input mt-1 w-full" onChange={(event) => setFirstName(event.target.value)} placeholder={tr("First", "الاسم الأول")} required value={firstName} />
+            <input
+              className="input mt-1 w-full"
+              onChange={(event) => setFirstName(event.target.value)}
+              placeholder={tr("First", "الاسم الأول")}
+              required
+              value={firstName}
+            />
           </label>
 
           <label className="text-sm">
             {tr("Last name", "الاسم الأخير")} <span className="text-red-500">*</span>
-            <input className="input mt-1 w-full" onChange={(event) => setLastName(event.target.value)} placeholder={tr("Last", "الاسم الأخير")} required value={lastName} />
+            <input
+              className="input mt-1 w-full"
+              onChange={(event) => setLastName(event.target.value)}
+              placeholder={tr("Last", "الاسم الأخير")}
+              required
+              value={lastName}
+            />
           </label>
 
           <label className="text-sm">
             {tr("Email", "البريد الإلكتروني")}
-            <input className="input mt-1 w-full" onChange={(event) => setEmail(event.target.value)} placeholder="name@company.com" type="email" value={email} />
+            <input
+              className="input mt-1 w-full"
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="name@company.com"
+              type="email"
+              value={email}
+            />
           </label>
 
           <label className="text-sm">
             {tr("Phone", "الهاتف")}
-            <input className="input mt-1 w-full" onChange={(event) => setPhone(event.target.value)} placeholder={tr("Phone number", "رقم الهاتف")} value={phone} />
+            <input
+              className="input mt-1 w-full"
+              onChange={(event) => setPhone(event.target.value)}
+              placeholder={tr("Phone number", "رقم الهاتف")}
+              value={phone}
+            />
           </label>
 
           <label className="text-sm">
             {tr("Title (optional)", "المنصب (اختياري)")}
-            <input className="input mt-1 w-full" onChange={(event) => setJobTitle(event.target.value)} placeholder={tr("Co-founder, CEO", "شريك مؤسس، مدير تنفيذي")} value={jobTitle} />
+            <input
+              className="input mt-1 w-full"
+              onChange={(event) => setJobTitle(event.target.value)}
+              placeholder={tr("Co-founder, CEO", "شريك مؤسس، مدير تنفيذي")}
+              value={jobTitle}
+            />
           </label>
 
           <label className="text-sm">
@@ -182,7 +225,9 @@ export default function NewContactPage() {
               >
                 <option value="">{tr("No opportunity", "بدون فرصة")}</option>
                 {deals.map((deal) => (
-                  <option key={deal.id} value={deal.id}>{deal.title}</option>
+                  <option key={deal.id} value={deal.id}>
+                    {deal.title}
+                  </option>
                 ))}
               </select>
             </div>
@@ -190,9 +235,13 @@ export default function NewContactPage() {
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
-          <Link href="/contacts" className="btn">{tr("Cancel", "إلغاء")}</Link>
+          <Link href="/contacts" className="btn">
+            {tr("Cancel", "إلغاء")}
+          </Link>
           <button className="btn btn-primary" disabled={loading} type="submit">
-            {loading ? tr("Creating...", "جاري الإنشاء...") : tr("Create contact", "إنشاء جهة اتصال")}
+            {loading
+              ? tr("Creating...", "جاري الإنشاء...")
+              : tr("Create contact", "إنشاء جهة اتصال")}
           </button>
         </div>
       </form>

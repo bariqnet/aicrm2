@@ -3,10 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
-import {
-  showErrorAlert,
-  showSuccessAlert
-} from "@/lib/sweet-alert";
+import { getDirectionalArrowSymbol } from "@/lib/ui-direction";
+import { showErrorAlert, showSuccessAlert } from "@/lib/sweet-alert";
 
 const SAMPLE = "firstName,lastName,email,phone\nJane,Doe,jane@example.com,555-0100";
 
@@ -21,10 +19,13 @@ export default function ContactImportPage() {
     const response = await fetch("/api/contacts/import", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ csv })
+      body: JSON.stringify({ csv }),
     });
 
-    const payload = (await response.json().catch(() => null)) as { imported?: number; error?: string } | null;
+    const payload = (await response.json().catch(() => null)) as {
+      imported?: number;
+      error?: string;
+    } | null;
     if (!response.ok) {
       const fallback = payload?.error ?? tr("Import failed", "فشل الاستيراد");
       setMessage(fallback);
@@ -33,26 +34,45 @@ export default function ContactImportPage() {
     }
 
     setMessage(
-      tr(`Imported ${payload?.imported ?? 0} contacts.`, `تم استيراد ${payload?.imported ?? 0} جهة اتصال.`)
+      tr(
+        `Imported ${payload?.imported ?? 0} contacts.`,
+        `تم استيراد ${payload?.imported ?? 0} جهة اتصال.`,
+      ),
     );
     await showSuccessAlert(
       tr("Contacts imported", "تم استيراد جهات الاتصال"),
-      tr(`Imported ${payload?.imported ?? 0} contact(s).`, `تم استيراد ${payload?.imported ?? 0} جهة اتصال.`)
+      tr(
+        `Imported ${payload?.imported ?? 0} contact(s).`,
+        `تم استيراد ${payload?.imported ?? 0} جهة اتصال.`,
+      ),
     );
   }
 
   return (
     <main className="app-page">
       <header>
-        <Link href="/contacts" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to contacts", "← العودة إلى جهات الاتصال")}</Link>
+        <Link href="/contacts" className="text-sm text-mutedfg hover:text-fg">
+          {`${getDirectionalArrowSymbol(language, "back")} ${tr("Back to contacts", "العودة إلى جهات الاتصال")}`}
+        </Link>
         <h1 className="page-title mt-2">{tr("Import contacts", "استيراد جهات الاتصال")}</h1>
-        <p className="page-subtitle">{tr("Paste CSV data to create contacts in bulk.", "الصق بيانات CSV لإنشاء جهات اتصال دفعة واحدة.")}</p>
+        <p className="page-subtitle">
+          {tr(
+            "Paste CSV data to create contacts in bulk.",
+            "الصق بيانات CSV لإنشاء جهات اتصال دفعة واحدة.",
+          )}
+        </p>
       </header>
 
       <div className="panel max-w-3xl space-y-3 p-4">
-        <textarea className="input h-auto min-h-48 w-full" value={csv} onChange={(event) => setCsv(event.target.value)} />
+        <textarea
+          className="input h-auto min-h-48 w-full"
+          value={csv}
+          onChange={(event) => setCsv(event.target.value)}
+        />
         <div className="flex justify-end">
-          <button className="btn btn-primary" type="button" onClick={submit}>{tr("Import CSV", "استيراد CSV")}</button>
+          <button className="btn btn-primary" type="button" onClick={submit}>
+            {tr("Import CSV", "استيراد CSV")}
+          </button>
         </div>
         {message ? <p className="text-sm text-mutedfg">{message}</p> : null}
       </div>

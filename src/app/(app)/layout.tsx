@@ -18,5 +18,5 @@ export default async function Layout({ children }: { children: React.ReactNode }
     throw error;
   }
 
-  return <AppShell>{children}</AppShell>;
+  return <AppShell user={session.user}>{children}</AppShell>;
 }

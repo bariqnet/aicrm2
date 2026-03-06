@@ -1,15 +1,20 @@
 import Link from "next/link";
+import type { Route } from "next";
 import { notFound, redirect } from "next/navigation";
 import { InvoiceDetailActions } from "@/components/InvoiceDetailActions";
 import { InvoiceInlineEditor } from "@/components/InvoiceInlineEditor";
+import { DetailHero } from "@/components/detail/DetailHero";
+import { DetailListCard } from "@/components/detail/DetailListCard";
 import type { Activity, Company, Contact, Invoice } from "@/lib/crm-types";
 import { getDateLocale, getServerLanguage, pickByLanguage } from "@/lib/server-language";
+import { getDirectionalArrowSymbol } from "@/lib/ui-direction";
 import {
   serverApiRequest,
   serverApiRequestOrNull,
   SessionInvalidError,
-  type ServerListResponse
+  type ServerListResponse,
 } from "@/lib/server-crm";
+import { fmtMoney } from "@/lib/utils";
 
 function fmtDateTime(value: string | null | undefined, locale: string): string {
   if (!value) return "-";
@@ -19,15 +24,18 @@ function fmtDateTime(value: string | null | undefined, locale: string): string {
 }
 
 function statusClass(status: Invoice["status"]): string {
-  if (status === "PAID") return "bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-300";
-  if (status === "OVERDUE") return "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300";
-  if (status === "SENT") return "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300";
-  if (status === "PARTIALLY_PAID") return "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300";
-  if (status === "VOID") return "bg-zinc-100 text-zinc-700 dark:bg-zinc-700/30 dark:text-zinc-300";
-  return "bg-surface2 text-mutedfg";
+  if (status === "PAID") return "border-green-200 bg-green-50 text-green-700";
+  if (status === "OVERDUE") return "border-red-200 bg-red-50 text-red-700";
+  if (status === "SENT") return "border-blue-200 bg-blue-50 text-blue-700";
+  if (status === "PARTIALLY_PAID") return "border-amber-200 bg-amber-50 text-amber-700";
+  if (status === "VOID") return "border-zinc-200 bg-zinc-100 text-zinc-700";
+  return "border-border bg-surface2 text-mutedfg";
 }
 
-function statusLabel(status: Invoice["status"], tr: (english: string, arabic: string) => string): string {
+function statusLabel(
+  status: Invoice["status"],
+  tr: (english: string, arabic: string) => string,
+): string {
   if (status === "DRAFT") return tr("Draft", "مسودة");
   if (status === "SENT") return tr("Sent", "مرسلة");
   if (status === "PARTIALLY_PAID") return tr("Partially paid", "مدفوعة جزئيًا");
@@ -73,8 +81,8 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           ? serverApiRequestOrNull<Company>(`/companies/${invoice.companyId}`)
           : Promise.resolve(null),
       serverApiRequest<ServerListResponse<Activity>>("/activities", {
-        query: { entityType: "invoice", entityId: id }
-      })
+        query: { entityType: "invoice", entityId: id },
+      }),
     ]);
   } catch (error) {
     if (error instanceof SessionInvalidError) {
@@ -89,21 +97,57 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
 
   return (
     <main className="app-page">
-      <header className="space-y-2">
-        <Link href="/invoices" className="text-sm text-mutedfg hover:text-fg">{tr("← Back to invoices", "← العودة إلى الفواتير")}</Link>
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="page-title">{tr("Invoice detail", "تفاصيل الفاتورة")}</h1>
-            <p className="page-subtitle">{tr("Billing context, status, and linked records.", "سياق الفوترة والحالة والسجلات المرتبطة.")}</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusClass(invoice.status)}`}>
-              {statusLabel(invoice.status, tr)}
-            </span>
-            <InvoiceDetailActions invoiceId={id} />
-          </div>
-        </div>
-      </header>
+      <DetailHero
+        backHref="/invoices"
+        backLabel={`${getDirectionalArrowSymbol(language, "back")} ${tr("Back to invoices", "العودة إلى الفواتير")}`}
+        category={tr("Invoice detail", "تفاصيل الفاتورة")}
+        title={invoice.invoiceNumber}
+        description={invoice.title}
+        actions={<InvoiceDetailActions invoiceId={id} />}
+        badge={
+          <span
+            className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${statusClass(invoice.status)}`}
+          >
+            {statusLabel(invoice.status, tr)}
+          </span>
+        }
+        metrics={[
+          { label: tr("Total", "الإجمالي"), value: fmtMoney(invoice.amount, invoice.currency) },
+          { label: tr("Activity", "النشاط"), value: activity.length },
+          { label: tr("Issued", "الإصدار"), value: fmtDateTime(invoice.issuedAt, locale) },
+          { label: tr("Due", "الاستحقاق"), value: fmtDateTime(invoice.dueAt, locale) },
+        ]}
+        fields={[
+          {
+            label: tr("Company", "الشركة"),
+            value: relatedCompany ? (
+              <Link
+                href={`/companies/${relatedCompany.id}` as Route}
+                className="text-accent hover:underline"
+              >
+                {relatedCompany.name}
+              </Link>
+            ) : (
+              "-"
+            ),
+          },
+          {
+            label: tr("Contact", "جهة الاتصال"),
+            value: relatedContact ? (
+              <Link
+                href={`/contacts/${relatedContact.id}` as Route}
+                className="text-accent hover:underline"
+              >
+                {relatedContact.firstName} {relatedContact.lastName}
+              </Link>
+            ) : (
+              "-"
+            ),
+          },
+          { label: tr("Currency", "العملة"), value: invoice.currency },
+          { label: tr("Paid at", "تاريخ الدفع"), value: fmtDateTime(invoice.paidAt, locale) },
+        ]}
+      />
 
       <InvoiceInlineEditor
         invoiceId={id}
@@ -112,21 +156,27 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         initialRelatedCompany={relatedCompany}
       />
 
-      <section className="panel p-4">
-        <h2 className="text-sm font-semibold">{tr("Recent activity", "آخر الأنشطة")}</h2>
-        {activity.length === 0 ? (
-          <p className="mt-2 text-sm text-mutedfg">{tr("No activity yet.", "لا يوجد نشاط بعد.")}</p>
-        ) : (
-          <ul className="mt-2 space-y-2">
-            {activity.slice(0, 8).map((entry) => (
-              <li key={entry.id} className="rounded-md border border-border bg-surface2 px-3 py-2 text-sm">
-                <p className="font-medium">{entry.type}</p>
-                <p className="text-xs text-mutedfg">{fmtDateTime(entry.createdAt, locale)}</p>
-              </li>
-            ))}
-          </ul>
+      <DetailListCard
+        title={tr("Recent activity", "آخر الأنشطة")}
+        description={tr(
+          "Latest billing and workflow events tied to this invoice.",
+          "أحدث أحداث الفوترة وسير العمل المرتبطة بهذه الفاتورة.",
         )}
-      </section>
+        emptyText={tr("No activity yet.", "لا يوجد نشاط بعد.")}
+        hasItems={activity.length > 0}
+      >
+        <ul className="space-y-2">
+          {activity.slice(0, 8).map((entry) => (
+            <li
+              key={entry.id}
+              className="rounded-2xl border border-border bg-surface2/70 px-4 py-3"
+            >
+              <p className="font-medium">{entry.type}</p>
+              <p className="mt-1 text-xs text-mutedfg">{fmtDateTime(entry.createdAt, locale)}</p>
+            </li>
+          ))}
+        </ul>
+      </DetailListCard>
     </main>
   );
 }

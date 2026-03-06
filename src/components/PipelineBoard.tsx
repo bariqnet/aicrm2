@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Expand, Minimize2 } from "lucide-react";
+import { getDateLocale } from "@/lib/locale";
 import { getResponseError, showErrorAlert } from "@/lib/sweet-alert";
 import type { AppLanguage } from "@/lib/i18n";
 import type { Company, Contact, Deal, Stage } from "@/lib/crm-types";
@@ -20,7 +21,7 @@ function formatMoney(amount: number, currency: string, locale: string): string {
     return new Intl.NumberFormat(locale, {
       style: "currency",
       currency,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(amount);
   } catch {
     return `${currency} ${amount.toLocaleString(locale)}`;
@@ -30,7 +31,7 @@ function formatMoney(amount: number, currency: string, locale: string): string {
 function formatCloseDate(
   value: string | null | undefined,
   locale: string,
-  tr: (english: string, arabic: string) => string
+  tr: (english: string, arabic: string) => string,
 ): string {
   if (!value) return tr("No date", "بدون تاريخ");
   const parsed = new Date(value);
@@ -38,7 +39,10 @@ function formatCloseDate(
   return parsed.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" });
 }
 
-function statusLabel(status: Deal["status"], tr: (english: string, arabic: string) => string): string {
+function statusLabel(
+  status: Deal["status"],
+  tr: (english: string, arabic: string) => string,
+): string {
   if (status === "WON") return tr("Won", "رابحة");
   if (status === "LOST") return tr("Lost", "خاسرة");
   return tr("Open", "مفتوحة");
@@ -59,7 +63,7 @@ function patchPayloadFromDeal(deal: Deal, targetStageId: string) {
     companyId: deal.companyId ?? undefined,
     primaryContactId: deal.primaryContactId ?? undefined,
     expectedCloseDate: deal.expectedCloseDate ?? undefined,
-    status: deal.status
+    status: deal.status,
   };
 }
 
@@ -68,10 +72,10 @@ export function PipelineBoard({
   stages,
   companies,
   contacts,
-  language
+  language,
 }: PipelineBoardProps) {
   const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
-  const locale = language === "ar" ? "ar-IQ" : "en-US";
+  const locale = getDateLocale(language);
   const [deals, setDeals] = useState<Deal[]>(initialDeals);
   const [draggingDealId, setDraggingDealId] = useState<string | null>(null);
   const [activeDropStageId, setActiveDropStageId] = useState<string | null>(null);
@@ -93,11 +97,11 @@ export function PipelineBoard({
 
   const companiesById = useMemo(
     () => new Map(companies.map((company) => [company.id, company] as const)),
-    [companies]
+    [companies],
   );
   const contactsById = useMemo(
     () => new Map(contacts.map((contact) => [contact.id, contact] as const)),
-    [contacts]
+    [contacts],
   );
 
   const openCards = deals.filter((deal) => deal.status === "OPEN");
@@ -111,7 +115,7 @@ export function PipelineBoard({
 
     const previousStageId = deal.stageId;
     setDeals((previous) =>
-      previous.map((item) => (item.id === dealId ? { ...item, stageId: targetStageId } : item))
+      previous.map((item) => (item.id === dealId ? { ...item, stageId: targetStageId } : item)),
     );
     setUpdatingDealIds((previous) => [...previous, dealId]);
 
@@ -119,20 +123,20 @@ export function PipelineBoard({
       const response = await fetch(`/api/deals/${dealId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(patchPayloadFromDeal(deal, targetStageId))
+        body: JSON.stringify(patchPayloadFromDeal(deal, targetStageId)),
       });
 
       if (!response.ok) {
         throw new Error(
           await getResponseError(
             response,
-            tr("Unable to move card. Please try again.", "تعذر نقل البطاقة. حاول مرة أخرى.")
-          )
+            tr("Unable to move card. Please try again.", "تعذر نقل البطاقة. حاول مرة أخرى."),
+          ),
         );
       }
     } catch (error) {
       setDeals((previous) =>
-        previous.map((item) => (item.id === dealId ? { ...item, stageId: previousStageId } : item))
+        previous.map((item) => (item.id === dealId ? { ...item, stageId: previousStageId } : item)),
       );
       const message =
         error instanceof Error
@@ -157,7 +161,10 @@ export function PipelineBoard({
       return (
         <div className="panel panel-dashed p-8 text-sm text-mutedfg">
           <p>{tr("No stages configured yet.", "لا توجد مراحل مهيأة بعد.")}</p>
-          <Link href="/settings" className="mt-3 inline-flex text-sm font-medium text-accent hover:underline">
+          <Link
+            href="/settings"
+            className="mt-3 inline-flex text-sm font-medium text-accent hover:underline"
+          >
             {tr("Configure stages in settings", "قم بتهيئة المراحل من الإعدادات")}
           </Link>
         </div>
@@ -177,7 +184,7 @@ export function PipelineBoard({
           className={[
             fitAllColumns ? "min-w-0 flex h-full flex-col" : "w-[320px] shrink-0",
             "rounded-xl border border-border bg-surface shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition",
-            isDropTarget ? "ring-2 ring-accent/35" : ""
+            isDropTarget ? "ring-2 ring-accent/35" : "",
           ].join(" ")}
           onDragOver={(event) => {
             event.preventDefault();
@@ -202,7 +209,10 @@ export function PipelineBoard({
             <p className="mt-1 text-xs text-mutedfg">
               {tr("Open", "مفتوحة")}: {stageOpenCount}
             </p>
-            <Link href={`/deals/new?stageId=${encodeURIComponent(stage.id)}`} className="btn mt-3 h-8 w-full text-xs">
+            <Link
+              href={`/deals/new?stageId=${encodeURIComponent(stage.id)}`}
+              className="btn mt-3 h-8 w-full text-xs"
+            >
               {tr("Add card", "إضافة بطاقة")}
             </Link>
           </header>
@@ -223,7 +233,9 @@ export function PipelineBoard({
                 const companyName = deal.companyId
                   ? (companiesById.get(deal.companyId)?.name ?? tr("Unknown", "غير معروف"))
                   : "-";
-                const contact = deal.primaryContactId ? contactsById.get(deal.primaryContactId) : null;
+                const contact = deal.primaryContactId
+                  ? contactsById.get(deal.primaryContactId)
+                  : null;
                 const contactName = contact
                   ? `${contact.firstName} ${contact.lastName}`
                   : deal.primaryContactId
@@ -247,7 +259,7 @@ export function PipelineBoard({
                     }}
                     className={[
                       "group block rounded-xl border border-border bg-surface2 px-3 py-3 text-sm transition hover:-translate-y-0.5 hover:border-fg/20 hover:bg-surface hover:shadow-[0_8px_20px_rgba(15,23,42,0.08)]",
-                      isUpdating ? "cursor-wait opacity-70" : "cursor-grab active:cursor-grabbing"
+                      isUpdating ? "cursor-wait opacity-70" : "cursor-grab active:cursor-grabbing",
                     ].join(" ")}
                     onClick={(event) => {
                       if (draggingDealId === deal.id) event.preventDefault();
@@ -255,7 +267,9 @@ export function PipelineBoard({
                   >
                     <div className="flex items-start justify-between gap-2">
                       <p className="font-medium leading-5 text-fg">{deal.title}</p>
-                      <span className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${statusBadgeClasses(deal.status)}`}>
+                      <span
+                        className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${statusBadgeClasses(deal.status)}`}
+                      >
                         {statusLabel(deal.status, tr)}
                       </span>
                     </div>
@@ -265,12 +279,17 @@ export function PipelineBoard({
                     </p>
 
                     <div className="mt-2 space-y-1 text-xs text-mutedfg">
-                      <p>{tr("Company", "الشركة")}: {companyName}</p>
-                      <p>{tr("Contact", "جهة الاتصال")}: {contactName}</p>
+                      <p>
+                        {tr("Company", "الشركة")}: {companyName}
+                      </p>
+                      <p>
+                        {tr("Contact", "جهة الاتصال")}: {contactName}
+                      </p>
                     </div>
 
                     <p className="mt-2 text-[11px] text-mutedfg">
-                      {tr("Expected close", "الإغلاق المتوقع")}: {formatCloseDate(deal.expectedCloseDate, locale, tr)}
+                      {tr("Expected close", "الإغلاق المتوقع")}:{" "}
+                      {formatCloseDate(deal.expectedCloseDate, locale, tr)}
                     </p>
                   </Link>
                 );
@@ -311,7 +330,7 @@ export function PipelineBoard({
           <p className="page-subtitle">
             {tr(
               "Trello-style board. Drag cards between stages to update pipeline.",
-              "لوحة بأسلوب Trello. اسحب البطاقات بين المراحل لتحديث خط المبيعات."
+              "لوحة بأسلوب Trello. اسحب البطاقات بين المراحل لتحديث خط المبيعات.",
             )}
           </p>
         </div>

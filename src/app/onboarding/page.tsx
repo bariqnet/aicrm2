@@ -13,14 +13,20 @@ import {
   Check,
   LoaderCircle,
   Plus,
-  Trash2
+  Trash2,
 } from "lucide-react";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useI18n } from "@/hooks/useI18n";
 import { normalizeSessionPayload, persistSession } from "@/lib/auth-flow";
 import { CRM_TYPE_CONFIGS, getCrmTypeConfig } from "@/lib/crm-type";
 import type { CrmTypeId, MembershipRole, Stage } from "@/lib/crm-types";
-import { getResponseError, showErrorAlert, showInfoAlert, showSuccessAlert } from "@/lib/sweet-alert";
+import { getDirectionalArrowSymbol } from "@/lib/ui-direction";
+import {
+  getResponseError,
+  showErrorAlert,
+  showInfoAlert,
+  showSuccessAlert,
+} from "@/lib/sweet-alert";
 import { workspaceSchema } from "@/lib/validators";
 
 type OnboardingStep = 1 | 2 | 3;
@@ -35,7 +41,8 @@ type UserProfile = {
 const ROLE_OPTIONS: MembershipRole[] = ["MEMBER", "ADMIN", "OWNER"];
 
 function makeLocalId(prefix: string): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return `${prefix}_${crypto.randomUUID()}`;
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto)
+    return `${prefix}_${crypto.randomUUID()}`;
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
@@ -52,7 +59,7 @@ function slugify(value: string): string {
 function toStageDrafts(typeId: CrmTypeId): StageDraft[] {
   return getCrmTypeConfig(typeId).stageTemplates.map((template) => ({
     id: makeLocalId("stage"),
-    name: template.name
+    name: template.name,
   }));
 }
 
@@ -77,7 +84,9 @@ export default function OnboardingPage() {
   const [workspaceReady, setWorkspaceReady] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile>({});
 
-  const [stageDrafts, setStageDrafts] = useState<StageDraft[]>(() => toStageDrafts("software-company"));
+  const [stageDrafts, setStageDrafts] = useState<StageDraft[]>(() =>
+    toStageDrafts("software-company"),
+  );
   const [stagesTouched, setStagesTouched] = useState(false);
   const [stagesReady, setStagesReady] = useState(false);
 
@@ -92,13 +101,13 @@ export default function OnboardingPage() {
       try {
         const response = await fetch("/api/auth/me", { cache: "no-store" });
         if (!response.ok) return;
-        const payload = (await response.json().catch(() => null)) as
-          | { user?: { name?: string; email?: string } }
-          | null;
+        const payload = (await response.json().catch(() => null)) as {
+          user?: { name?: string; email?: string };
+        } | null;
         if (cancelled || !payload?.user) return;
         setUserProfile({
           name: payload.user.name,
-          email: payload.user.email
+          email: payload.user.email,
         });
       } catch {
         // Non-blocking.
@@ -126,7 +135,7 @@ export default function OnboardingPage() {
 
   const crmTypeOptions = useMemo(
     () => Object.values(CRM_TYPE_CONFIGS).map((config) => ({ id: config.id, label: config.label })),
-    []
+    [],
   );
 
   const cleanStages = useMemo(
@@ -135,13 +144,13 @@ export default function OnboardingPage() {
         .map((draft) => draft.name.trim())
         .filter((name) => name.length > 0)
         .map((name, index) => ({ name, order: index + 1 })),
-    [stageDrafts]
+    [stageDrafts],
   );
 
   async function maybePersistSessionFromPayload(payload: unknown): Promise<void> {
     const normalized = normalizeSessionPayload(payload, {
       email: userProfile.email ?? "user@que.local",
-      name: userProfile.name
+      name: userProfile.name,
     });
     if (normalized) {
       await persistSession(normalized);
@@ -170,13 +179,13 @@ export default function OnboardingPage() {
 
     const validated = workspaceSchema.safeParse({
       name: normalizedName,
-      slug: normalizedSlug
+      slug: normalizedSlug,
     });
     if (!validated.success) {
       const issue = validated.error.issues[0];
       await showErrorAlert(
         t("onboarding.alert.invalidWorkspaceTitle"),
-        issue ? `${issue.path}: ${issue.message}` : t("onboarding.alert.invalidWorkspaceText")
+        issue ? `${issue.path}: ${issue.message}` : t("onboarding.alert.invalidWorkspaceText"),
       );
       return;
     }
@@ -189,8 +198,8 @@ export default function OnboardingPage() {
         body: JSON.stringify({
           name: normalizedName,
           slug: normalizedSlug,
-          crmTypeId
-        })
+          crmTypeId,
+        }),
       });
 
       if (onboardingResponse.ok) {
@@ -200,7 +209,7 @@ export default function OnboardingPage() {
         setCurrentStep(2);
         await showSuccessAlert(
           t("onboarding.alert.workspaceConfiguredTitle"),
-          t("onboarding.alert.workspaceConfiguredText")
+          t("onboarding.alert.workspaceConfiguredText"),
         );
         return;
       }
@@ -208,23 +217,25 @@ export default function OnboardingPage() {
       const createWorkspaceResponse = await fetch("/api/workspaces", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: normalizedName, slug: normalizedSlug })
+        body: JSON.stringify({ name: normalizedName, slug: normalizedSlug }),
       });
       if (!createWorkspaceResponse.ok) {
         throw new Error(
           await getResponseError(
             createWorkspaceResponse,
-            t("onboarding.alert.workspaceSetupFailedFallback")
-          )
+            t("onboarding.alert.workspaceSetupFailedFallback"),
+          ),
         );
       }
 
-      const createdWorkspace = (await createWorkspaceResponse.json().catch(() => null)) as { id?: string } | null;
+      const createdWorkspace = (await createWorkspaceResponse.json().catch(() => null)) as {
+        id?: string;
+      } | null;
       if (createdWorkspace?.id) {
         const switchResponse = await fetch("/api/workspaces/switch", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ workspaceId: createdWorkspace.id })
+          body: JSON.stringify({ workspaceId: createdWorkspace.id }),
         });
         if (switchResponse.ok) {
           const switchPayload = await switchResponse.json().catch(() => null);
@@ -236,10 +247,11 @@ export default function OnboardingPage() {
       setCurrentStep(2);
       await showSuccessAlert(
         t("onboarding.alert.workspaceConfiguredTitle"),
-        t("onboarding.alert.workspaceConfiguredText")
+        t("onboarding.alert.workspaceConfiguredText"),
       );
     } catch (error) {
-      const message = error instanceof Error ? error.message : t("onboarding.alert.workspaceSetupFailedFallback");
+      const message =
+        error instanceof Error ? error.message : t("onboarding.alert.workspaceSetupFailedFallback");
       await showErrorAlert(t("onboarding.alert.workspaceSetupFailedTitle"), message);
     } finally {
       setBusyStep(null);
@@ -249,9 +261,13 @@ export default function OnboardingPage() {
   async function syncStagesFallback(targetStages: Array<{ name: string; order: number }>) {
     const existingResponse = await fetch("/api/stages", { cache: "no-store" });
     if (!existingResponse.ok) {
-      throw new Error(await getResponseError(existingResponse, t("onboarding.alert.loadStagesFailed")));
+      throw new Error(
+        await getResponseError(existingResponse, t("onboarding.alert.loadStagesFailed")),
+      );
     }
-    const existingPayload = (await existingResponse.json().catch(() => null)) as { rows?: Stage[] } | null;
+    const existingPayload = (await existingResponse.json().catch(() => null)) as {
+      rows?: Stage[];
+    } | null;
     const existing = [...(existingPayload?.rows ?? [])].sort((a, b) => a.order - b.order);
 
     for (const [index, stage] of targetStages.entries()) {
@@ -262,20 +278,20 @@ export default function OnboardingPage() {
         ? await fetch(`/api/stages/${existingStage.id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body
+            body,
           })
         : await fetch("/api/stages", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body
+            body,
           });
 
       if (!response.ok) {
         throw new Error(
           await getResponseError(
             response,
-            t("onboarding.alert.saveStageFailed", { name: stage.name })
-          )
+            t("onboarding.alert.saveStageFailed", { name: stage.name }),
+          ),
         );
       }
     }
@@ -291,7 +307,7 @@ export default function OnboardingPage() {
     if (uniqueNames.size !== cleanStages.length) {
       await showErrorAlert(
         t("onboarding.alert.duplicateStagesTitle"),
-        t("onboarding.alert.duplicateStagesText")
+        t("onboarding.alert.duplicateStagesText"),
       );
       return;
     }
@@ -303,8 +319,8 @@ export default function OnboardingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           crmTypeId,
-          stages: cleanStages
-        })
+          stages: cleanStages,
+        }),
       });
 
       if (!onboardingResponse.ok) {
@@ -315,10 +331,11 @@ export default function OnboardingPage() {
       setCurrentStep(3);
       await showSuccessAlert(
         t("onboarding.alert.stagesConfiguredTitle"),
-        t("onboarding.alert.stagesConfiguredText")
+        t("onboarding.alert.stagesConfiguredText"),
       );
     } catch (error) {
-      const message = error instanceof Error ? error.message : t("onboarding.alert.stageSetupFailedFallback");
+      const message =
+        error instanceof Error ? error.message : t("onboarding.alert.stageSetupFailedFallback");
       await showErrorAlert(t("onboarding.alert.stageSetupFailedTitle"), message);
     } finally {
       setBusyStep(null);
@@ -330,14 +347,20 @@ export default function OnboardingPage() {
     if (!normalizedEmail) return;
 
     if (!isEmail(normalizedEmail)) {
-      showErrorAlert(t("onboarding.alert.invalidEmailTitle"), t("onboarding.alert.invalidEmailText")).catch(() => {
+      showErrorAlert(
+        t("onboarding.alert.invalidEmailTitle"),
+        t("onboarding.alert.invalidEmailText"),
+      ).catch(() => {
         // best effort
       });
       return;
     }
 
     if (invites.some((invite) => invite.email.toLowerCase() === normalizedEmail)) {
-      showInfoAlert(t("onboarding.alert.alreadyAddedTitle"), t("onboarding.alert.alreadyAddedText")).catch(() => {
+      showInfoAlert(
+        t("onboarding.alert.alreadyAddedTitle"),
+        t("onboarding.alert.alreadyAddedText"),
+      ).catch(() => {
         // best effort
       });
       return;
@@ -345,7 +368,7 @@ export default function OnboardingPage() {
 
     setInvites((previous) => [
       ...previous,
-      { id: makeLocalId("invite"), email: normalizedEmail, role: inviteRole }
+      { id: makeLocalId("invite"), email: normalizedEmail, role: inviteRole },
     ]);
     setInviteEmail("");
     setInviteRole("MEMBER");
@@ -356,14 +379,14 @@ export default function OnboardingPage() {
       const response = await fetch("/api/invites", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: invite.email, role: invite.role })
+        body: JSON.stringify({ email: invite.email, role: invite.role }),
       });
       if (!response.ok) {
         throw new Error(
           await getResponseError(
             response,
-            t("onboarding.alert.inviteFailed", { email: invite.email })
-          )
+            t("onboarding.alert.inviteFailed", { email: invite.email }),
+          ),
         );
       }
     }
@@ -376,7 +399,7 @@ export default function OnboardingPage() {
         const onboardingResponse = await fetch("/api/onboarding/invites", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ invites: invites.map(({ email, role }) => ({ email, role })) })
+          body: JSON.stringify({ invites: invites.map(({ email, role }) => ({ email, role })) }),
         });
 
         if (!onboardingResponse.ok) {
@@ -388,12 +411,13 @@ export default function OnboardingPage() {
         t("onboarding.alert.completeTitle"),
         sendInvites && invites.length > 0
           ? t("onboarding.alert.completeWithInvitesText")
-          : t("onboarding.alert.completeWithoutInvitesText")
+          : t("onboarding.alert.completeWithoutInvitesText"),
       );
       router.replace("/dashboard");
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : t("onboarding.alert.finishFailedFallback");
+      const message =
+        error instanceof Error ? error.message : t("onboarding.alert.finishFailedFallback");
       await showErrorAlert(t("onboarding.alert.finishFailedTitle"), message);
     } finally {
       setBusyStep(null);
@@ -402,7 +426,9 @@ export default function OnboardingPage() {
 
   function updateStageName(id: string, name: string) {
     setStagesTouched(true);
-    setStageDrafts((previous) => previous.map((stage) => (stage.id === id ? { ...stage, name } : stage)));
+    setStageDrafts((previous) =>
+      previous.map((stage) => (stage.id === id ? { ...stage, name } : stage)),
+    );
   }
 
   function moveStage(id: string, direction: "up" | "down") {
@@ -438,7 +464,7 @@ export default function OnboardingPage() {
   const roleLabels: Record<MembershipRole, string> = {
     MEMBER: t("roles.member"),
     ADMIN: t("roles.admin"),
-    OWNER: t("roles.owner")
+    OWNER: t("roles.owner"),
   };
 
   const stepDots: OnboardingStep[] = [1, 2, 3];
@@ -446,19 +472,19 @@ export default function OnboardingPage() {
   const doneSteps: Record<OnboardingStep, boolean> = {
     1: workspaceReady,
     2: stagesReady,
-    3: false
+    3: false,
   };
 
   const stepNames: Record<OnboardingStep, string> = {
     1: tr("Workspace setup", "إعداد مساحة العمل"),
     2: tr("Pipeline setup", "إعداد خط المبيعات"),
-    3: tr("Team invites", "دعوات الفريق")
+    3: tr("Team invites", "دعوات الفريق"),
   };
 
   const stepHints: Record<OnboardingStep, string> = {
     1: t("onboarding.step.workspace.hint"),
     2: t("onboarding.step.pipeline.hint"),
-    3: t("onboarding.step.team.hint")
+    3: t("onboarding.step.team.hint"),
   };
 
   const fieldClass =
@@ -471,7 +497,14 @@ export default function OnboardingPage() {
       <header className="relative border-b border-black/7 bg-[#f5f6f8]/85 backdrop-blur-lg">
         <div className="mx-auto flex h-24 w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
           <Link href={"/" as Route} className="inline-flex items-center">
-            <Image src="/fav.png" alt="Que CRM" width={1076} height={400} className="h-12 w-auto sm:h-14" priority />
+            <Image
+              src="/fav.png"
+              alt="Que CRM"
+              width={1076}
+              height={400}
+              className="h-12 w-auto sm:h-14"
+              priority
+            />
           </Link>
 
           <div className="hidden items-center gap-2 md:flex">
@@ -489,7 +522,7 @@ export default function OnboardingPage() {
                       : done
                         ? "border-black/20 bg-black/5 text-black"
                         : "border-black/15 bg-white text-black/55",
-                    step < currentStep ? "cursor-pointer" : "cursor-default"
+                    step < currentStep ? "cursor-pointer" : "cursor-default",
                   ].join(" ")}
                   aria-label={t("onboarding.stepLabel", { number: step })}
                   onClick={() => {
@@ -504,7 +537,9 @@ export default function OnboardingPage() {
 
           <div className="flex items-center gap-2 sm:gap-3">
             <LanguageToggle />
-            {userProfile.email ? <p className="hidden text-sm text-black/58 xl:block">{userProfile.email}</p> : null}
+            {userProfile.email ? (
+              <p className="hidden text-sm text-black/58 xl:block">{userProfile.email}</p>
+            ) : null}
             <button
               type="button"
               className="inline-flex h-10 items-center rounded-full border border-black/12 bg-white px-4 text-sm font-semibold text-black transition hover:border-black/28 disabled:cursor-not-allowed disabled:opacity-60"
@@ -578,8 +613,14 @@ export default function OnboardingPage() {
                 </label>
 
                 <div className="rounded-2xl border border-black/10 bg-[#f8f9fb] px-4 py-3 text-sm text-black/62">
-                  <p className="mb-1 text-xs uppercase tracking-[0.1em]">{t("onboarding.workspace.suggestedTemplate")}</p>
-                  <p>{getCrmTypeConfig(crmTypeId).stageTemplates.map((stage) => stage.name).join(" → ")}</p>
+                  <p className="mb-1 text-xs uppercase tracking-[0.1em]">
+                    {t("onboarding.workspace.suggestedTemplate")}
+                  </p>
+                  <p>
+                    {getCrmTypeConfig(crmTypeId)
+                      .stageTemplates.map((stage) => stage.name)
+                      .join(` ${getDirectionalArrowSymbol(language, "forward")} `)}
+                  </p>
                 </div>
 
                 <button
@@ -607,7 +648,10 @@ export default function OnboardingPage() {
               <div>
                 <div className="space-y-2">
                   {stageDrafts.map((stage, index) => (
-                    <div key={stage.id} className="flex flex-wrap items-center gap-2 rounded-2xl border border-black/10 bg-[#f8f9fb] px-3 py-2.5">
+                    <div
+                      key={stage.id}
+                      className="flex flex-wrap items-center gap-2 rounded-2xl border border-black/10 bg-[#f8f9fb] px-3 py-2.5"
+                    >
                       <span className="w-7 text-center text-sm text-black/55">{index + 1}</span>
                       <input
                         className="h-11 min-w-[180px] flex-1 rounded-xl border border-black/12 bg-white px-3 text-sm text-[#0f1218] outline-none transition focus:border-black/25 focus:shadow-[0_0_0_4px_rgba(17,19,25,0.08)]"
@@ -729,7 +773,10 @@ export default function OnboardingPage() {
                     </p>
                   ) : (
                     invites.map((invite) => (
-                      <div key={invite.id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-black/10 bg-[#f8f9fb] px-4 py-3 text-sm">
+                      <div
+                        key={invite.id}
+                        className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-black/10 bg-[#f8f9fb] px-4 py-3 text-sm"
+                      >
                         <p className="font-medium text-[#0f1218]">{invite.email}</p>
                         <div className="flex items-center gap-2">
                           <span className="rounded-full border border-black/14 bg-white px-3 py-1 text-xs text-black/58">
@@ -739,7 +786,11 @@ export default function OnboardingPage() {
                             className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-black/12 bg-white text-black/70 transition hover:border-black/25 hover:text-black"
                             type="button"
                             aria-label={t("onboarding.team.removeInvite", { email: invite.email })}
-                            onClick={() => setInvites((previous) => previous.filter((item) => item.id !== invite.id))}
+                            onClick={() =>
+                              setInvites((previous) =>
+                                previous.filter((item) => item.id !== invite.id),
+                              )
+                            }
                           >
                             <Trash2 size={14} />
                           </button>
@@ -805,7 +856,7 @@ export default function OnboardingPage() {
                         ? "border-white/24 bg-white/10"
                         : done
                           ? "border-white/18 bg-white/[0.06]"
-                          : "border-white/12 bg-white/[0.03]"
+                          : "border-white/12 bg-white/[0.03]",
                     ].join(" ")}
                   >
                     <div className="flex items-center justify-between">
@@ -841,10 +892,19 @@ export default function OnboardingPage() {
       <footer className="relative border-t border-black/7 px-5 py-5 sm:px-8">
         <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 text-sm text-black/58">
           <div className="flex items-center gap-3">
-            <Image src="/fav.png" alt="Que logo" width={1076} height={400} className="h-6 w-auto opacity-90" />
+            <Image
+              src="/fav.png"
+              alt="Que logo"
+              width={1076}
+              height={400}
+              className="h-6 w-auto opacity-90"
+            />
             <span>{tr("AI-driven CRM", "CRM مدعوم بالذكاء الاصطناعي")}</span>
           </div>
-          <Link href={"/" as Route} className="font-semibold text-black transition hover:text-black/70">
+          <Link
+            href={"/" as Route}
+            className="font-semibold text-black transition hover:text-black/70"
+          >
             {tr("Back to home", "العودة إلى الصفحة الرئيسية")}
           </Link>
         </div>

@@ -5,19 +5,16 @@ import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
+import { getDateLocale } from "@/lib/locale";
 import type { Company, Contact, Invoice, InvoiceStatus } from "@/lib/crm-types";
 import {
   buildInvoiceNotes,
   computeInvoiceItemsTotal,
   parseInvoiceNotes,
-  sanitizeInvoiceLineItems
+  sanitizeInvoiceLineItems,
 } from "@/lib/invoice-items";
 import { INVOICE_STATUS_VALUES } from "@/lib/invoices";
-import {
-  getResponseError,
-  showErrorAlert,
-  showSuccessAlert
-} from "@/lib/sweet-alert";
+import { getResponseError, showErrorAlert, showSuccessAlert } from "@/lib/sweet-alert";
 import { fmtMoney } from "@/lib/utils";
 
 type DraftInvoiceItem = {
@@ -35,14 +32,15 @@ type InvoiceInlineEditorProps = {
 };
 
 function createDraftInvoiceItem(): DraftInvoiceItem {
-  const idSeed = typeof crypto !== "undefined" && "randomUUID" in crypto
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random()}`;
+  const idSeed =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random()}`;
   return {
     id: idSeed,
     description: "",
     quantity: "",
-    unitPrice: ""
+    unitPrice: "",
   };
 }
 
@@ -71,11 +69,11 @@ export function InvoiceInlineEditor({
   invoiceId,
   initialInvoice,
   initialRelatedContact,
-  initialRelatedCompany
+  initialRelatedCompany,
 }: InvoiceInlineEditorProps) {
   const { language } = useI18n();
   const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
-  const locale = language === "ar" ? "ar-IQ" : "en-US";
+  const locale = getDateLocale(language);
 
   const router = useRouter();
 
@@ -103,7 +101,7 @@ export function InvoiceInlineEditor({
   const parsedViewNotes = useMemo(() => parseInvoiceNotes(invoice.notes), [invoice.notes]);
   const viewItems = useMemo(
     () => sanitizeInvoiceLineItems(invoice.items ?? parsedViewNotes.items),
-    [invoice.items, parsedViewNotes.items]
+    [invoice.items, parsedViewNotes.items],
   );
   const viewItemsTotal = useMemo(() => computeInvoiceItemsTotal(viewItems), [viewItems]);
   const hasViewItems = viewItems.length > 0;
@@ -111,10 +109,10 @@ export function InvoiceInlineEditor({
 
   const filledItemRows = useMemo(
     () =>
-      items.filter((item) =>
-        item.description.trim() || item.quantity.trim() || item.unitPrice.trim()
+      items.filter(
+        (item) => item.description.trim() || item.quantity.trim() || item.unitPrice.trim(),
       ),
-    [items]
+    [items],
   );
 
   const normalizedItems = useMemo(
@@ -123,10 +121,10 @@ export function InvoiceInlineEditor({
         filledItemRows.map((item) => ({
           description: item.description.trim(),
           quantity: Number(item.quantity),
-          unitPrice: Number(item.unitPrice)
-        }))
+          unitPrice: Number(item.unitPrice),
+        })),
       ),
-    [filledItemRows]
+    [filledItemRows],
   );
 
   const itemsTotal = useMemo(() => computeInvoiceItemsTotal(normalizedItems), [normalizedItems]);
@@ -134,33 +132,36 @@ export function InvoiceInlineEditor({
 
   const relatedOptions = useMemo(
     () => (relatedType === "contact" ? contacts : relatedType === "company" ? companies : []),
-    [relatedType, contacts, companies]
+    [relatedType, contacts, companies],
   );
 
   const contactNameById = useMemo(
-    () => new Map(contacts.map((contact) => [contact.id, `${contact.firstName} ${contact.lastName}`.trim()])),
-    [contacts]
+    () =>
+      new Map(
+        contacts.map((contact) => [contact.id, `${contact.firstName} ${contact.lastName}`.trim()]),
+      ),
+    [contacts],
   );
   const companyNameById = useMemo(
     () => new Map(companies.map((company) => [company.id, company.name])),
-    [companies]
+    [companies],
   );
 
-  const currentContactId = invoice.relatedType === "contact"
-    ? invoice.relatedId
-    : invoice.contactId;
-  const currentCompanyId = invoice.relatedType === "company"
-    ? invoice.relatedId
-    : invoice.companyId;
+  const currentContactId =
+    invoice.relatedType === "contact" ? invoice.relatedId : invoice.contactId;
+  const currentCompanyId =
+    invoice.relatedType === "company" ? invoice.relatedId : invoice.companyId;
 
   const currentContactName = currentContactId
-    ? contactNameById.get(currentContactId)
-      ?? (initialRelatedContact?.id === currentContactId ? `${initialRelatedContact.firstName} ${initialRelatedContact.lastName}`.trim() : null)
+    ? (contactNameById.get(currentContactId) ??
+      (initialRelatedContact?.id === currentContactId
+        ? `${initialRelatedContact.firstName} ${initialRelatedContact.lastName}`.trim()
+        : null))
     : null;
 
   const currentCompanyName = currentCompanyId
-    ? companyNameById.get(currentCompanyId)
-      ?? (initialRelatedCompany?.id === currentCompanyId ? initialRelatedCompany.name : null)
+    ? (companyNameById.get(currentCompanyId) ??
+      (initialRelatedCompany?.id === currentCompanyId ? initialRelatedCompany.name : null))
     : null;
 
   useEffect(() => {
@@ -173,15 +174,15 @@ export function InvoiceInlineEditor({
     try {
       const [contactsResponse, companiesResponse] = await Promise.all([
         fetch("/api/contacts"),
-        fetch("/api/companies")
+        fetch("/api/companies"),
       ]);
 
       if (contactsResponse.ok) {
-        const contactsPayload = await contactsResponse.json() as { rows?: Contact[] };
+        const contactsPayload = (await contactsResponse.json()) as { rows?: Contact[] };
         setContacts(contactsPayload.rows ?? []);
       }
       if (companiesResponse.ok) {
-        const companiesPayload = await companiesResponse.json() as { rows?: Company[] };
+        const companiesPayload = (await companiesResponse.json()) as { rows?: Company[] };
         setCompanies(companiesPayload.rows ?? []);
       }
     } finally {
@@ -195,7 +196,9 @@ export function InvoiceInlineEditor({
 
     setInvoiceNumber(source.invoiceNumber ?? "");
     setTitle(source.title ?? "");
-    setAmount(String(sourceItems.length > 0 ? computeInvoiceItemsTotal(sourceItems) : source.amount ?? 0));
+    setAmount(
+      String(sourceItems.length > 0 ? computeInvoiceItemsTotal(sourceItems) : (source.amount ?? 0)),
+    );
     setCurrency(source.currency ?? "USD");
     setStatus(source.status ?? "DRAFT");
     setNotes(parsedNotes.plainNotes);
@@ -213,8 +216,8 @@ export function InvoiceInlineEditor({
         id: createDraftInvoiceItem().id,
         description: item.description,
         quantity: String(item.quantity),
-        unitPrice: String(item.unitPrice)
-      }))
+        unitPrice: String(item.unitPrice),
+      })),
     );
   }
 
@@ -233,9 +236,13 @@ export function InvoiceInlineEditor({
     setItems((current) => [...current, createDraftInvoiceItem()]);
   }
 
-  function updateItemRow(id: string, field: "description" | "quantity" | "unitPrice", value: string) {
+  function updateItemRow(
+    id: string,
+    field: "description" | "quantity" | "unitPrice",
+    value: string,
+  ) {
     setItems((current) =>
-      current.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+      current.map((item) => (item.id === id ? { ...item, [field]: value } : item)),
     );
   }
 
@@ -248,21 +255,36 @@ export function InvoiceInlineEditor({
     if (saving) return;
 
     if (relatedType && !relatedId) {
-      await showErrorAlert(tr("Missing related record", "السجل المرتبط مفقود"), tr("Select a related record or clear the related type.", "اختر سجلًا مرتبطًا أو امسح نوع الارتباط."));
+      await showErrorAlert(
+        tr("Missing related record", "السجل المرتبط مفقود"),
+        tr(
+          "Select a related record or clear the related type.",
+          "اختر سجلًا مرتبطًا أو امسح نوع الارتباط.",
+        ),
+      );
       return;
     }
 
     if (filledItemRows.length !== normalizedItems.length) {
       await showErrorAlert(
         tr("Invalid line item", "عنصر فاتورة غير صالح"),
-        tr("Each line item must include description, quantity greater than 0, and unit price 0 or higher.", "كل عنصر يجب أن يحتوي على وصف وكمية أكبر من 0 وسعر وحدة يساوي 0 أو أكثر.")
+        tr(
+          "Each line item must include description, quantity greater than 0, and unit price 0 or higher.",
+          "كل عنصر يجب أن يحتوي على وصف وكمية أكبر من 0 وسعر وحدة يساوي 0 أو أكثر.",
+        ),
       );
       return;
     }
 
     const parsedAmount = usingItemsTotal ? itemsTotal : Number(amount);
     if (!usingItemsTotal && (!Number.isFinite(parsedAmount) || parsedAmount < 0)) {
-      await showErrorAlert(tr("Invalid amount", "مبلغ غير صالح"), tr("Amount must be a valid non-negative number when no items are provided.", "يجب أن يكون المبلغ رقمًا صالحًا غير سالب عند عدم إضافة عناصر."));
+      await showErrorAlert(
+        tr("Invalid amount", "مبلغ غير صالح"),
+        tr(
+          "Amount must be a valid non-negative number when no items are provided.",
+          "يجب أن يكون المبلغ رقمًا صالحًا غير سالب عند عدم إضافة عناصر.",
+        ),
+      );
       return;
     }
 
@@ -283,19 +305,26 @@ export function InvoiceInlineEditor({
           relatedId: relatedId || undefined,
           issuedAt: toIsoDateTime(issuedAt),
           dueAt: toIsoDateTime(dueAt),
-          paidAt: toIsoDateTime(paidAt) ?? (status === "PAID" ? new Date().toISOString() : undefined)
-        })
+          paidAt:
+            toIsoDateTime(paidAt) ?? (status === "PAID" ? new Date().toISOString() : undefined),
+        }),
       });
 
       if (!response.ok) {
         await showErrorAlert(
           tr("Unable to update invoice", "تعذر تحديث الفاتورة"),
-          await getResponseError(response, tr("Please check your input and try again.", "يرجى التحقق من البيانات والمحاولة مرة أخرى."))
+          await getResponseError(
+            response,
+            tr(
+              "Please check your input and try again.",
+              "يرجى التحقق من البيانات والمحاولة مرة أخرى.",
+            ),
+          ),
         );
         return;
       }
 
-      const updatedInvoice = await response.json() as Invoice;
+      const updatedInvoice = (await response.json()) as Invoice;
       setInvoice({
         ...invoice,
         ...updatedInvoice,
@@ -303,13 +332,16 @@ export function InvoiceInlineEditor({
         notes: updatedInvoice.notes ?? encodedNotes ?? null,
         items: normalizedItems.length > 0 ? normalizedItems : null,
         relatedType: relatedType || null,
-        relatedId: relatedId || null
+        relatedId: relatedId || null,
       });
       setEditing(false);
       await showSuccessAlert(tr("Invoice updated", "تم تحديث الفاتورة"));
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : tr("Unable to update invoice", "تعذر تحديث الفاتورة");
+      const message =
+        error instanceof Error
+          ? error.message
+          : tr("Unable to update invoice", "تعذر تحديث الفاتورة");
       await showErrorAlert(tr("Unable to update invoice", "تعذر تحديث الفاتورة"), message);
     } finally {
       setSaving(false);
@@ -329,16 +361,36 @@ export function InvoiceInlineEditor({
         </div>
 
         <div className="grid gap-2 text-sm sm:grid-cols-2">
-          <p>{tr("Invoice", "الفاتورة")}: <span className="font-medium">{invoice.invoiceNumber}</span></p>
-          <p>{tr("Title", "العنوان")}: <span className="text-mutedfg">{invoice.title}</span></p>
-          <p>{tr("Amount", "المبلغ")}: <span className="text-mutedfg">{fmtMoney(displayAmount, invoice.currency)}</span></p>
-          <p>{tr("Issued", "الإصدار")}: <span className="text-mutedfg">{fmtDateTime(invoice.issuedAt, locale)}</span></p>
-          <p>{tr("Due", "الاستحقاق")}: <span className="text-mutedfg">{fmtDateTime(invoice.dueAt, locale)}</span></p>
-          <p>{tr("Paid", "الدفع")}: <span className="text-mutedfg">{fmtDateTime(invoice.paidAt, locale)}</span></p>
+          <p>
+            {tr("Invoice", "الفاتورة")}:{" "}
+            <span className="font-medium">{invoice.invoiceNumber}</span>
+          </p>
+          <p>
+            {tr("Title", "العنوان")}: <span className="text-mutedfg">{invoice.title}</span>
+          </p>
+          <p>
+            {tr("Amount", "المبلغ")}:{" "}
+            <span className="text-mutedfg">{fmtMoney(displayAmount, invoice.currency)}</span>
+          </p>
+          <p>
+            {tr("Issued", "الإصدار")}:{" "}
+            <span className="text-mutedfg">{fmtDateTime(invoice.issuedAt, locale)}</span>
+          </p>
+          <p>
+            {tr("Due", "الاستحقاق")}:{" "}
+            <span className="text-mutedfg">{fmtDateTime(invoice.dueAt, locale)}</span>
+          </p>
+          <p>
+            {tr("Paid", "الدفع")}:{" "}
+            <span className="text-mutedfg">{fmtDateTime(invoice.paidAt, locale)}</span>
+          </p>
           <p>
             {tr("Related contact", "جهة الاتصال المرتبطة")}:{" "}
             {currentContactId ? (
-              <Link href={`/contacts/${currentContactId}` as Route} className="text-accent hover:underline">
+              <Link
+                href={`/contacts/${currentContactId}` as Route}
+                className="text-accent hover:underline"
+              >
                 {currentContactName ?? currentContactId}
               </Link>
             ) : (
@@ -348,7 +400,10 @@ export function InvoiceInlineEditor({
           <p>
             {tr("Related company", "الشركة المرتبطة")}:{" "}
             {currentCompanyId ? (
-              <Link href={`/companies/${currentCompanyId}` as Route} className="text-accent hover:underline">
+              <Link
+                href={`/companies/${currentCompanyId}` as Route}
+                className="text-accent hover:underline"
+              >
                 {currentCompanyName ?? currentCompanyId}
               </Link>
             ) : (
@@ -373,15 +428,23 @@ export function InvoiceInlineEditor({
                   <tr key={`${item.description}-${index}`} className="border-t border-border">
                     <td className="px-3 py-2">{item.description}</td>
                     <td className="px-3 py-2 text-right text-mutedfg">{item.quantity}</td>
-                    <td className="px-3 py-2 text-right text-mutedfg">{fmtMoney(item.unitPrice, invoice.currency)}</td>
-                    <td className="px-3 py-2 text-right font-medium">{fmtMoney(item.quantity * item.unitPrice, invoice.currency)}</td>
+                    <td className="px-3 py-2 text-right text-mutedfg">
+                      {fmtMoney(item.unitPrice, invoice.currency)}
+                    </td>
+                    <td className="px-3 py-2 text-right font-medium">
+                      {fmtMoney(item.quantity * item.unitPrice, invoice.currency)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr className="border-t border-border bg-surface2/60">
-                  <td colSpan={3} className="px-3 py-2 text-right font-medium">{tr("Subtotal", "الإجمالي الفرعي")}</td>
-                  <td className="px-3 py-2 text-right font-semibold">{fmtMoney(viewItemsTotal, invoice.currency)}</td>
+                  <td colSpan={3} className="px-3 py-2 text-right font-medium">
+                    {tr("Subtotal", "الإجمالي الفرعي")}
+                  </td>
+                  <td className="px-3 py-2 text-right font-semibold">
+                    {fmtMoney(viewItemsTotal, invoice.currency)}
+                  </td>
                 </tr>
               </tfoot>
             </table>
@@ -456,20 +519,28 @@ export function InvoiceInlineEditor({
             </div>
 
             {items.length === 0 ? (
-              <p className="mt-3 text-sm text-mutedfg">{tr("No items yet. Add at least one line item for invoice breakdown.", "لا توجد عناصر بعد. أضف عنصرًا واحدًا على الأقل لتفصيل الفاتورة.")}</p>
+              <p className="mt-3 text-sm text-mutedfg">
+                {tr(
+                  "No items yet. Add at least one line item for invoice breakdown.",
+                  "لا توجد عناصر بعد. أضف عنصرًا واحدًا على الأقل لتفصيل الفاتورة.",
+                )}
+              </p>
             ) : (
               <div className="mt-3 space-y-3">
                 {items.map((item, index) => {
                   const quantity = Number(item.quantity);
                   const unitPrice = Number(item.unitPrice);
-                  const lineTotal = Number.isFinite(quantity) && Number.isFinite(unitPrice)
-                    ? Math.max(0, quantity) * Math.max(0, unitPrice)
-                    : 0;
+                  const lineTotal =
+                    Number.isFinite(quantity) && Number.isFinite(unitPrice)
+                      ? Math.max(0, quantity) * Math.max(0, unitPrice)
+                      : 0;
 
                   return (
                     <div key={item.id} className="rounded-lg border border-border bg-surface p-3">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-mutedfg">{tr("Item", "عنصر")} {index + 1}</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-mutedfg">
+                          {tr("Item", "عنصر")} {index + 1}
+                        </p>
                         <button
                           className="text-xs text-red-600 hover:underline"
                           type="button"
@@ -484,7 +555,9 @@ export function InvoiceInlineEditor({
                           <input
                             className="input mt-1 h-9 w-full"
                             value={item.description}
-                            onChange={(event) => updateItemRow(item.id, "description", event.target.value)}
+                            onChange={(event) =>
+                              updateItemRow(item.id, "description", event.target.value)
+                            }
                           />
                         </label>
                         <label className="text-xs sm:col-span-2">
@@ -495,7 +568,9 @@ export function InvoiceInlineEditor({
                             min="0"
                             step="0.01"
                             value={item.quantity}
-                            onChange={(event) => updateItemRow(item.id, "quantity", event.target.value)}
+                            onChange={(event) =>
+                              updateItemRow(item.id, "quantity", event.target.value)
+                            }
                           />
                         </label>
                         <label className="text-xs sm:col-span-2">
@@ -506,7 +581,9 @@ export function InvoiceInlineEditor({
                             min="0"
                             step="0.01"
                             value={item.unitPrice}
-                            onChange={(event) => updateItemRow(item.id, "unitPrice", event.target.value)}
+                            onChange={(event) =>
+                              updateItemRow(item.id, "unitPrice", event.target.value)
+                            }
                           />
                         </label>
                         <div className="text-xs sm:col-span-2">
@@ -524,7 +601,9 @@ export function InvoiceInlineEditor({
 
             <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-sm">
               <span className="font-medium">{tr("Items subtotal", "إجمالي العناصر الفرعي")}</span>
-              <span className="font-semibold">{fmtMoney(itemsTotal, currency.trim().toUpperCase() || "USD")}</span>
+              <span className="font-semibold">
+                {fmtMoney(itemsTotal, currency.trim().toUpperCase() || "USD")}
+              </span>
             </div>
           </section>
 
@@ -541,7 +620,12 @@ export function InvoiceInlineEditor({
               required
             />
             {usingItemsTotal ? (
-              <p className="mt-1 text-xs text-mutedfg">{tr("Amount is auto-calculated from line items.", "يتم حساب المبلغ تلقائيًا من عناصر الفاتورة.")}</p>
+              <p className="mt-1 text-xs text-mutedfg">
+                {tr(
+                  "Amount is auto-calculated from line items.",
+                  "يتم حساب المبلغ تلقائيًا من عناصر الفاتورة.",
+                )}
+              </p>
             ) : null}
           </label>
           <label className="text-sm">
@@ -556,15 +640,30 @@ export function InvoiceInlineEditor({
           </label>
           <label className="text-sm">
             {tr("Issued at", "تاريخ الإصدار")}
-            <input className="input mt-1 w-full" type="date" value={issuedAt} onChange={(event) => setIssuedAt(event.target.value)} />
+            <input
+              className="input mt-1 w-full"
+              type="date"
+              value={issuedAt}
+              onChange={(event) => setIssuedAt(event.target.value)}
+            />
           </label>
           <label className="text-sm">
             {tr("Due at", "تاريخ الاستحقاق")}
-            <input className="input mt-1 w-full" type="date" value={dueAt} onChange={(event) => setDueAt(event.target.value)} />
+            <input
+              className="input mt-1 w-full"
+              type="date"
+              value={dueAt}
+              onChange={(event) => setDueAt(event.target.value)}
+            />
           </label>
           <label className="text-sm">
             {tr("Paid at", "تاريخ الدفع")}
-            <input className="input mt-1 w-full" type="date" value={paidAt} onChange={(event) => setPaidAt(event.target.value)} />
+            <input
+              className="input mt-1 w-full"
+              type="date"
+              value={paidAt}
+              onChange={(event) => setPaidAt(event.target.value)}
+            />
           </label>
           <label className="text-sm">
             {tr("Related type", "نوع الارتباط")}
@@ -598,7 +697,9 @@ export function InvoiceInlineEditor({
               </option>
               {relatedOptions.map((option) => (
                 <option key={option.id} value={option.id}>
-                  {"firstName" in option ? `${option.firstName} ${option.lastName}`.trim() : option.name}
+                  {"firstName" in option
+                    ? `${option.firstName} ${option.lastName}`.trim()
+                    : option.name}
                 </option>
               ))}
             </select>

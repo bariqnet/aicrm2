@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
+import { getDateLocale } from "@/lib/locale";
+import { isRtlLanguage } from "@/lib/ui-direction";
 import type { Task, Visit } from "@/lib/crm-types";
 import { showErrorAlert } from "@/lib/sweet-alert";
 
@@ -74,7 +76,7 @@ function buildCalendarCells(cursor: Date): CalendarCell[] {
     cells.push({
       dateKey: toDateKeyLocal(date),
       dayOfMonth: date.getDate(),
-      isCurrentMonth: false
+      isCurrentMonth: false,
     });
   }
 
@@ -83,7 +85,7 @@ function buildCalendarCells(cursor: Date): CalendarCell[] {
     cells.push({
       dateKey: toDateKeyLocal(date),
       dayOfMonth: day,
-      isCurrentMonth: true
+      isCurrentMonth: true,
     });
   }
 
@@ -93,7 +95,7 @@ function buildCalendarCells(cursor: Date): CalendarCell[] {
     cells.push({
       dateKey: toDateKeyLocal(date),
       dayOfMonth: date.getDate(),
-      isCurrentMonth: false
+      isCurrentMonth: false,
     });
   }
 
@@ -117,17 +119,26 @@ function taskStatusClasses(status: Task["status"]): string {
   return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300";
 }
 
-function visitStatusLabel(status: Visit["status"], tr: (english: string, arabic: string) => string): string {
+function visitStatusLabel(
+  status: Visit["status"],
+  tr: (english: string, arabic: string) => string,
+): string {
   if (status === "COMPLETED") return tr("Completed", "مكتملة");
   if (status === "CANCELLED") return tr("Cancelled", "ملغاة");
   return tr("Scheduled", "مجدولة");
 }
 
-function taskStatusLabel(status: Task["status"], tr: (english: string, arabic: string) => string): string {
+function taskStatusLabel(
+  status: Task["status"],
+  tr: (english: string, arabic: string) => string,
+): string {
   return status === "DONE" ? tr("Done", "مكتملة") : tr("Open", "مفتوحة");
 }
 
-function relatedTypeLabel(type: Task["relatedType"], tr: (english: string, arabic: string) => string): string {
+function relatedTypeLabel(
+  type: Task["relatedType"],
+  tr: (english: string, arabic: string) => string,
+): string {
   if (type === "contact") return tr("Contact", "جهة اتصال");
   if (type === "company") return tr("Company", "شركة");
   if (type === "deal") return tr("Deal", "صفقة");
@@ -136,7 +147,8 @@ function relatedTypeLabel(type: Task["relatedType"], tr: (english: string, arabi
 
 export default function CalendarPage() {
   const { language } = useI18n();
-  const locale = language === "ar" ? "ar-IQ" : "en-US";
+  const locale = getDateLocale(language);
+  const isRtl = isRtlLanguage(language);
   const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
 
   const today = useMemo(() => new Date(), []);
@@ -149,16 +161,17 @@ export default function CalendarPage() {
     async function loadCalendarData() {
       const [visitsResult, tasksResult] = await Promise.allSettled([
         fetch("/api/visits", { cache: "no-store" }),
-        fetch("/api/tasks", { cache: "no-store" })
+        fetch("/api/tasks", { cache: "no-store" }),
       ]);
 
       let visitsError: string | null = null;
       let tasksError: string | null = null;
 
       if (visitsResult.status === "fulfilled") {
-        const payload = (await visitsResult.value.json().catch(() => null)) as
-          | { rows?: Visit[]; error?: string }
-          | null;
+        const payload = (await visitsResult.value.json().catch(() => null)) as {
+          rows?: Visit[];
+          error?: string;
+        } | null;
         if (visitsResult.value.ok) {
           setVisits(payload?.rows ?? []);
         } else {
@@ -169,9 +182,10 @@ export default function CalendarPage() {
       }
 
       if (tasksResult.status === "fulfilled") {
-        const payload = (await tasksResult.value.json().catch(() => null)) as
-          | { rows?: Task[]; error?: string }
-          | null;
+        const payload = (await tasksResult.value.json().catch(() => null)) as {
+          rows?: Task[];
+          error?: string;
+        } | null;
         if (tasksResult.value.ok) {
           setTasks(payload?.rows ?? []);
         } else {
@@ -203,8 +217,8 @@ export default function CalendarPage() {
         sortMinutes: parseMinutesFromTime(visit.time),
         title: visit.contactName,
         timeLabel: visit.time,
-        detail: `${visit.durationMinutes} ${tr("min", "د") } • ${visit.reason}`,
-        status: visit.status
+        detail: `${visit.durationMinutes} ${tr("min", "د")} • ${visit.reason}`,
+        status: visit.status,
       };
       const rows = grouped.get(entry.dateKey) ?? [];
       rows.push(entry);
@@ -227,7 +241,7 @@ export default function CalendarPage() {
           ? dueDate.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })
           : tr("Due", "استحقاق"),
         detail: `${relatedTypeLabel(task.relatedType, tr)} • ${taskStatusLabel(task.status, tr)}`,
-        status: task.status
+        status: task.status,
       };
       const rows = grouped.get(entry.dateKey) ?? [];
       rows.push(entry);
@@ -241,10 +255,7 @@ export default function CalendarPage() {
     return grouped;
   }, [visits, tasks, language]);
 
-  const tasksWithoutDueDate = useMemo(
-    () => tasks.filter((task) => !task.dueAt),
-    [tasks]
-  );
+  const tasksWithoutDueDate = useMemo(() => tasks.filter((task) => !task.dueAt), [tasks]);
 
   const cells = useMemo(() => buildCalendarCells(cursor), [cursor]);
   const selectedDate = useMemo(() => parseDateKey(selectedDateKey), [selectedDateKey]);
@@ -254,9 +265,9 @@ export default function CalendarPage() {
     () =>
       new Intl.DateTimeFormat(locale, {
         month: "long",
-        year: "numeric"
+        year: "numeric",
       }).format(cursor),
-    [cursor, locale]
+    [cursor, locale],
   );
 
   const selectedDateLabel = useMemo(
@@ -265,9 +276,9 @@ export default function CalendarPage() {
         weekday: "long",
         month: "long",
         day: "numeric",
-        year: "numeric"
+        year: "numeric",
       }).format(selectedDate),
-    [selectedDate, locale]
+    [selectedDate, locale],
   );
 
   const todayKey = toDateKeyLocal(today);
@@ -287,18 +298,25 @@ export default function CalendarPage() {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="page-title">{tr("Calendar", "التقويم")}</h1>
-          <p className="page-subtitle">{tr("Monthly view of visits and task due dates.", "عرض شهري للزيارات وتواريخ استحقاق المهام.")}</p>
+          <p className="page-subtitle">
+            {tr(
+              "Monthly view of visits and task due dates.",
+              "عرض شهري للزيارات وتواريخ استحقاق المهام.",
+            )}
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button className="btn" onClick={() => moveMonth(-1)} type="button">
-            <ChevronLeft size={14} />
+            {isRtl ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
             {tr("Previous", "السابق")}
           </button>
-          <button className="btn" onClick={goToToday} type="button">{tr("Today", "اليوم")}</button>
+          <button className="btn" onClick={goToToday} type="button">
+            {tr("Today", "اليوم")}
+          </button>
           <button className="btn" onClick={() => moveMonth(1)} type="button">
             {tr("Next", "التالي")}
-            <ChevronRight size={14} />
+            {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
           </button>
         </div>
       </header>
@@ -311,7 +329,9 @@ export default function CalendarPage() {
 
           <div className="grid grid-cols-7 border-b border-border bg-surface2 text-xs uppercase tracking-[0.08em] text-mutedfg">
             {weekdays.map((day) => (
-              <div key={day} className="px-2 py-2 text-center">{day}</div>
+              <div key={day} className="px-2 py-2 text-center">
+                {day}
+              </div>
             ))}
           </div>
 
@@ -329,13 +349,15 @@ export default function CalendarPage() {
                     "last:border-r-0 hover:bg-muted/45",
                     !cell.isCurrentMonth ? "bg-surface2/45 text-mutedfg" : "bg-surface",
                     isSelected ? "bg-muted" : "",
-                    isToday ? "outline outline-1 outline-accent/45" : ""
+                    isToday ? "outline outline-1 outline-accent/45" : "",
                   ].join(" ")}
                   onClick={() => setSelectedDateKey(cell.dateKey)}
                   type="button"
                 >
                   <div className="flex items-center justify-between">
-                    <span className={isToday ? "font-semibold text-accent" : "text-sm"}>{cell.dayOfMonth}</span>
+                    <span className={isToday ? "font-semibold text-accent" : "text-sm"}>
+                      {cell.dayOfMonth}
+                    </span>
                     {rows.length > 0 ? (
                       <span className="rounded-md border border-border bg-surface2 px-1.5 py-0.5 text-[11px] text-mutedfg">
                         {rows.length}
@@ -346,12 +368,18 @@ export default function CalendarPage() {
                   {rows.length > 0 ? (
                     <div className="mt-2 space-y-1">
                       {rows.slice(0, 2).map((row) => (
-                        <div key={`${row.kind}-${row.id}`} className="truncate rounded-sm bg-muted px-1.5 py-0.5 text-[11px]">
-                          {row.kind === "visit" ? tr("Visit", "زيارة") : tr("Task", "مهمة")}: {row.timeLabel} {row.title}
+                        <div
+                          key={`${row.kind}-${row.id}`}
+                          className="truncate rounded-sm bg-muted px-1.5 py-0.5 text-[11px]"
+                        >
+                          {row.kind === "visit" ? tr("Visit", "زيارة") : tr("Task", "مهمة")}:{" "}
+                          {row.timeLabel} {row.title}
                         </div>
                       ))}
                       {rows.length > 2 ? (
-                        <div className="text-[11px] text-mutedfg">+{rows.length - 2} {tr("more", "أكثر")}</div>
+                        <div className="text-[11px] text-mutedfg">
+                          +{rows.length - 2} {tr("more", "أكثر")}
+                        </div>
                       ) : null}
                     </div>
                   ) : null}
@@ -365,16 +393,25 @@ export default function CalendarPage() {
           <h2 className="text-sm font-semibold">{selectedDateLabel}</h2>
 
           {selectedEntries.length === 0 ? (
-            <p className="mt-3 text-sm text-mutedfg">{tr("No tasks or visits scheduled for this date.", "لا توجد مهام أو زيارات مجدولة لهذا التاريخ.")}</p>
+            <p className="mt-3 text-sm text-mutedfg">
+              {tr(
+                "No tasks or visits scheduled for this date.",
+                "لا توجد مهام أو زيارات مجدولة لهذا التاريخ.",
+              )}
+            </p>
           ) : (
             <div className="mt-3 space-y-2">
               {selectedEntries.map((entry) => (
-                <article key={`${entry.kind}-${entry.id}`} className="rounded-md border border-border bg-surface2 p-3">
+                <article
+                  key={`${entry.kind}-${entry.id}`}
+                  className="rounded-md border border-border bg-surface2 p-3"
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-medium">{entry.title}</p>
                       <p className="mt-0.5 text-xs text-mutedfg">
-                        {entry.kind === "visit" ? tr("Visit", "زيارة") : tr("Task", "مهمة")} • {entry.timeLabel}
+                        {entry.kind === "visit" ? tr("Visit", "زيارة") : tr("Task", "مهمة")} •{" "}
+                        {entry.timeLabel}
                       </p>
                     </div>
                     <span
@@ -391,11 +428,17 @@ export default function CalendarPage() {
                   </div>
                   <p className="mt-2 text-sm text-mutedfg">{entry.detail}</p>
                   {entry.kind === "task" ? (
-                    <Link href={`/tasks/${entry.id}`} className="mt-2 inline-flex text-xs text-accent hover:underline">
+                    <Link
+                      href={`/tasks/${entry.id}`}
+                      className="mt-2 inline-flex text-xs text-accent hover:underline"
+                    >
                       {tr("Open task", "فتح المهمة")}
                     </Link>
                   ) : (
-                    <Link href="/visits" className="mt-2 inline-flex text-xs text-accent hover:underline">
+                    <Link
+                      href="/visits"
+                      className="mt-2 inline-flex text-xs text-accent hover:underline"
+                    >
                       {tr("Open visits", "فتح الزيارات")}
                     </Link>
                   )}
@@ -407,7 +450,8 @@ export default function CalendarPage() {
           {tasksWithoutDueDate.length > 0 ? (
             <section className="mt-5 border-t border-border pt-4">
               <h3 className="text-xs font-semibold uppercase tracking-[0.1em] text-mutedfg">
-                {tr("Tasks without due date", "مهام بدون تاريخ استحقاق")} ({tasksWithoutDueDate.length})
+                {tr("Tasks without due date", "مهام بدون تاريخ استحقاق")} (
+                {tasksWithoutDueDate.length})
               </h3>
               <div className="mt-2 space-y-1.5">
                 {tasksWithoutDueDate.slice(0, 8).map((task) => (

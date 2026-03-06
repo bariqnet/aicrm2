@@ -5,10 +5,15 @@ import { SidebarNav } from "@/components/SidebarNav";
 import { Topbar } from "@/components/Topbar";
 import { CommandPalette } from "@/components/CommandPalette";
 import { DetailDrawer } from "@/components/DetailDrawer";
+import type { SessionUser } from "@/lib/crm-types";
 import { useUIStore } from "@/store/ui-store";
 import { cn } from "@/lib/utils";
 
-export function AppShell({ children }: React.PropsWithChildren) {
+type AppShellProps = React.PropsWithChildren<{
+  user?: SessionUser | null;
+}>;
+
+export function AppShell({ children, user }: AppShellProps) {
   const { dark, mobileNavOpen, setMobileNavOpen } = useUIStore();
 
   useEffect(() => {
@@ -26,7 +31,7 @@ export function AppShell({ children }: React.PropsWithChildren) {
 
   return (
     <div className="flex min-h-screen bg-bg text-fg">
-      <SidebarNav className="transition-all duration-200" />
+      <SidebarNav className="transition-all duration-200" user={user} />
       <div
         className={cn(
           "fixed inset-0 z-30 bg-black/35 transition-opacity md:hidden",
@@ -37,6 +42,7 @@ export function AppShell({ children }: React.PropsWithChildren) {
       <SidebarNav
         mobile
         onNavigate={() => setMobileNavOpen(false)}
+        user={user}
         className={cn(
           "fixed inset-y-0 left-0 z-40 transition-transform duration-200 md:hidden",
           mobileNavOpen ? "translate-x-0" : "-translate-x-full"
