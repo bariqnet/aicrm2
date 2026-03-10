@@ -32,7 +32,7 @@ type KeyValueGridProps = {
   }>;
 };
 
-export function PageHeader({ actions, description: _description, eyebrow, meta, title }: PageHeaderProps) {
+export function PageHeader({ actions, description, eyebrow, meta, title }: PageHeaderProps) {
   return (
     <header className="border-b border-border/70 pb-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -44,6 +44,7 @@ export function PageHeader({ actions, description: _description, eyebrow, meta, 
             </div>
           ) : null}
           <h1 className="page-title">{title}</h1>
+          {description ? <p className="page-subtitle">{description}</p> : null}
         </div>
         {actions ? <div className="page-actions">{actions}</div> : null}
       </div>
@@ -62,11 +63,11 @@ export function MetricGrid({
   );
 }
 
-export function MetricCard({ hint: _hint, label, tone = "default", value }: MetricCardProps) {
+export function MetricCard({ hint, label, tone = "default", value }: MetricCardProps) {
   return (
     <article
       className={cn(
-        "metric-card flex items-center justify-between gap-3",
+        "metric-card flex items-start justify-between gap-3",
         tone === "accent" && "metric-card-accent",
         tone === "success" && "metric-card-success",
         tone === "warning" && "metric-card-warning",
@@ -75,6 +76,7 @@ export function MetricCard({ hint: _hint, label, tone = "default", value }: Metr
     >
       <div className="min-w-0">
         <p className="metric-label">{label}</p>
+        {hint ? <p className="metric-hint">{hint}</p> : null}
       </div>
       <div className="metric-value shrink-0 text-right">{value}</div>
     </article>
@@ -85,15 +87,16 @@ export function SectionPanel({
   action,
   children,
   className,
-  description: _description,
+  description,
   title,
 }: SectionPanelProps) {
   return (
     <section className={cn("panel p-4", className)}>
-      {title || action ? (
+      {title || description || action ? (
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-3">
           <div>
             {title ? <h2 className="section-title">{title}</h2> : null}
+            {description ? <p className="section-description mt-1">{description}</p> : null}
           </div>
           {action}
         </div>

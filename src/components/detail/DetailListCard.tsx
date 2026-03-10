@@ -15,7 +15,7 @@ export function DetailListCard({
   action,
   children,
   className,
-  description: _description,
+  description,
   emptyText,
   hasItems,
   title,
@@ -25,6 +25,7 @@ export function DetailListCard({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-fg">{title}</h2>
+          {description ? <p className="section-description mt-1">{description}</p> : null}
         </div>
         {action}
       </div>

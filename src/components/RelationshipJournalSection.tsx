@@ -23,7 +23,7 @@ export function RelationshipJournalSection({
   relatedType,
   relatedId,
   title,
-  description: _description,
+  description,
   notes,
   activities,
   emptyText,
@@ -59,6 +59,7 @@ export function RelationshipJournalSection({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-fg">{title}</h2>
+            <p className="section-description mt-1">{description}</p>
           </div>
           <button className="btn btn-primary" type="button" onClick={() => setOpen(true)}>
             {tr("Add new journal", "إضافة سجل جديد")}

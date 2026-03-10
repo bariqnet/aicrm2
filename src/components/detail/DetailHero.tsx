@@ -31,7 +31,7 @@ export function DetailHero({
   backLabel,
   badge,
   category,
-  description: _description,
+  description,
   fields = [],
   metrics = [],
   title,
@@ -61,6 +61,7 @@ export function DetailHero({
               <h1 className="page-title">{title}</h1>
               {badge ? <div className="shrink-0">{badge}</div> : null}
             </div>
+            {description ? <p className="page-subtitle">{description}</p> : null}
           </div>
         </div>
 
