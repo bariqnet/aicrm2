@@ -3,19 +3,25 @@
 import { LogOut } from "lucide-react";
 import { useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
+import { cn } from "@/lib/utils";
 import {
   confirmAlert,
   getResponseError,
   showErrorAlert,
-  showSuccessAlert
+  showSuccessAlert,
 } from "@/lib/sweet-alert";
 
 type SignOutButtonProps = {
   className?: string;
+  containerClassName?: string;
   label?: string;
 };
 
-export function SignOutButton({ className = "btn", label }: SignOutButtonProps) {
+export function SignOutButton({
+  className = "btn",
+  containerClassName,
+  label,
+}: SignOutButtonProps) {
   const { t } = useI18n();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +30,7 @@ export function SignOutButton({ className = "btn", label }: SignOutButtonProps) 
     const confirmed = await confirmAlert(
       t("signout.confirmTitle"),
       t("signout.confirmText"),
-      t("signout.confirmButton")
+      t("signout.confirmButton"),
     );
     if (!confirmed) return;
 
@@ -49,12 +55,12 @@ export function SignOutButton({ className = "btn", label }: SignOutButtonProps) 
   }
 
   return (
-    <div className="space-y-1">
+    <div className={cn("space-y-1", containerClassName)}>
       <button type="button" className={className} onClick={signOut} disabled={submitting}>
         <LogOut size={14} />
         {submitting ? t("signout.signingOut") : (label ?? t("signout.label"))}
       </button>
-      {error ? <p className="text-xs text-red-600">{error}</p> : null}
+      {error ? <p className="text-xs text-rose-400">{error}</p> : null}
     </div>
   );
 }

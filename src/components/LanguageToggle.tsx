@@ -32,9 +32,9 @@ export function LanguageToggle({ className, mode = "compact" }: LanguageTogglePr
     <div
       className={cn(
         isFullMode
-          ? "inline-flex items-center gap-1 rounded-xl border border-border/80 bg-surface p-1"
-          : "inline-flex items-center rounded-md border border-border bg-surface p-0.5",
-        className
+          ? "inline-flex items-center gap-1 rounded-full border border-border bg-surface p-1 dark:border-white/10 dark:bg-zinc-950"
+          : "inline-flex items-center rounded-full border border-border bg-surface p-0.5 dark:border-white/10 dark:bg-zinc-950",
+        className,
       )}
       role="group"
       aria-label={t("language.switch")}
@@ -42,8 +42,8 @@ export function LanguageToggle({ className, mode = "compact" }: LanguageTogglePr
       <span
         className={cn(
           isFullMode
-            ? "inline-flex h-7 w-7 items-center justify-center rounded-lg bg-black/[0.04] text-black/65"
-            : "px-2 text-mutedfg"
+            ? "inline-flex h-7 w-7 items-center justify-center rounded-full bg-muted text-mutedfg dark:bg-white/5 dark:text-zinc-500"
+            : "px-2 text-mutedfg dark:text-zinc-500",
         )}
         aria-hidden
       >
@@ -52,14 +52,16 @@ export function LanguageToggle({ className, mode = "compact" }: LanguageTogglePr
       <button
         type="button"
         className={cn(
-          isFullMode ? "h-7 rounded-lg px-3 text-xs font-semibold transition-all" : "rounded-md px-2 py-1 text-xs font-medium transition",
+          isFullMode
+            ? "h-7 rounded-full border border-transparent px-3 text-xs font-semibold transition-all"
+            : "rounded-full border border-transparent px-2 py-1 text-xs font-medium transition",
           language === "en"
             ? isFullMode
-              ? "bg-[#111319] text-white shadow-[0_1px_3px_rgba(17,19,25,0.25)]"
-              : "bg-muted text-fg"
+              ? "border-border/90 bg-surface2 text-fg dark:border-white/12 dark:bg-white/[0.08] dark:text-white"
+              : "border-border/80 bg-surface2 text-fg dark:border-white/12 dark:bg-white/[0.08] dark:text-white"
             : isFullMode
-              ? "text-black/62 hover:bg-black/[0.05] hover:text-black"
-              : "text-mutedfg hover:text-fg"
+              ? "text-mutedfg hover:border-fg/12 hover:bg-surface2 hover:text-fg dark:text-zinc-500 dark:hover:border-white/12 dark:hover:bg-white/[0.08] dark:hover:text-white"
+              : "text-mutedfg hover:border-fg/12 hover:bg-surface2 hover:text-fg dark:text-zinc-500 dark:hover:border-white/12 dark:hover:bg-white/[0.08] dark:hover:text-white",
         )}
         aria-label={t("language.english")}
         onClick={() => changeLanguage("en")}
@@ -69,14 +71,16 @@ export function LanguageToggle({ className, mode = "compact" }: LanguageTogglePr
       <button
         type="button"
         className={cn(
-          isFullMode ? "h-7 rounded-lg px-3 text-xs font-semibold transition-all" : "rounded-md px-2 py-1 text-xs font-medium transition",
+          isFullMode
+            ? "h-7 rounded-full border border-transparent px-3 text-xs font-semibold transition-all"
+            : "rounded-full border border-transparent px-2 py-1 text-xs font-medium transition",
           language === "ar"
             ? isFullMode
-              ? "bg-[#111319] text-white shadow-[0_1px_3px_rgba(17,19,25,0.25)]"
-              : "bg-muted text-fg"
+              ? "border-border/90 bg-surface2 text-fg dark:border-white/12 dark:bg-white/[0.08] dark:text-white"
+              : "border-border/80 bg-surface2 text-fg dark:border-white/12 dark:bg-white/[0.08] dark:text-white"
             : isFullMode
-              ? "text-black/62 hover:bg-black/[0.05] hover:text-black"
-              : "text-mutedfg hover:text-fg"
+              ? "text-mutedfg hover:border-fg/12 hover:bg-surface2 hover:text-fg dark:text-zinc-500 dark:hover:border-white/12 dark:hover:bg-white/[0.08] dark:hover:text-white"
+              : "text-mutedfg hover:border-fg/12 hover:bg-surface2 hover:text-fg dark:text-zinc-500 dark:hover:border-white/12 dark:hover:bg-white/[0.08] dark:hover:text-white",
         )}
         aria-label={t("language.arabic")}
         onClick={() => changeLanguage("ar")}

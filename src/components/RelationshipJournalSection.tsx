@@ -8,6 +8,7 @@ import type { Activity, Note } from "@/lib/crm-types";
 import { cn } from "@/lib/utils";
 
 type RelationshipJournalSectionProps = {
+  className?: string;
   relatedType: "contact" | "company";
   relatedId: string;
   title: string;
@@ -18,13 +19,14 @@ type RelationshipJournalSectionProps = {
 };
 
 export function RelationshipJournalSection({
+  className,
   relatedType,
   relatedId,
   title,
-  description,
+  description: _description,
   notes,
   activities,
-  emptyText
+  emptyText,
 }: RelationshipJournalSectionProps) {
   const { language } = useI18n();
   const tr = (english: string, arabic: string) => (language === "ar" ? arabic : english);
@@ -53,11 +55,10 @@ export function RelationshipJournalSection({
 
   return (
     <>
-      <article className="panel p-4 md:col-span-2">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+      <article className={cn("panel p-4", className)}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold">{title}</h2>
-            <p className="mt-1 text-sm text-mutedfg">{description}</p>
+            <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-fg">{title}</h2>
           </div>
           <button className="btn btn-primary" type="button" onClick={() => setOpen(true)}>
             {tr("Add new journal", "إضافة سجل جديد")}
@@ -72,7 +73,7 @@ export function RelationshipJournalSection({
           <div
             className={cn(
               "mx-auto my-0 flex w-full flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-2xl sm:my-4",
-              fullScreen ? "h-full max-w-none" : "h-auto max-h-[92vh] max-w-4xl"
+              fullScreen ? "h-full max-w-none" : "h-auto max-h-[92vh] max-w-4xl",
             )}
             role="dialog"
             aria-modal="true"
@@ -80,8 +81,15 @@ export function RelationshipJournalSection({
           >
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div>
-                <p className="text-sm font-semibold">{tr("Add relationship journal entry", "إضافة سجل علاقة")}</p>
-                <p className="text-xs text-mutedfg">{tr("Capture conversation context, outcomes, and next steps.", "سجّل سياق المحادثة والنتائج والخطوات التالية.")}</p>
+                <p className="text-sm font-semibold">
+                  {tr("Add relationship journal entry", "إضافة سجل علاقة")}
+                </p>
+                <p className="text-xs text-mutedfg">
+                  {tr(
+                    "Capture conversation context, outcomes, and next steps.",
+                    "سجّل سياق المحادثة والنتائج والخطوات التالية.",
+                  )}
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -91,7 +99,11 @@ export function RelationshipJournalSection({
                 >
                   {fullScreen ? tr("Windowed", "نافذة") : tr("Full screen", "ملء الشاشة")}
                 </button>
-                <button className="btn h-8 px-2 text-xs" type="button" onClick={() => setOpen(false)}>
+                <button
+                  className="btn h-8 px-2 text-xs"
+                  type="button"
+                  onClick={() => setOpen(false)}
+                >
                   {tr("Close", "إغلاق")}
                 </button>
               </div>

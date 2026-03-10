@@ -15,17 +15,16 @@ export function DetailListCard({
   action,
   children,
   className,
-  description,
+  description: _description,
   emptyText,
   hasItems,
-  title
+  title,
 }: DetailListCardProps) {
   return (
     <article className={cn("panel p-4", className)}>
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold">{title}</h2>
-          {description ? <p className="mt-1 text-sm text-mutedfg">{description}</p> : null}
+          <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-fg">{title}</h2>
         </div>
         {action}
       </div>
@@ -33,7 +32,7 @@ export function DetailListCard({
       {hasItems ? (
         <div className="mt-3">{children}</div>
       ) : (
-        <p className="mt-3 rounded-2xl border border-dashed border-border bg-surface2/70 px-4 py-4 text-sm text-mutedfg">
+        <p className="mt-4 rounded-2xl border border-dashed border-border bg-surface2/70 px-4 py-4 text-sm leading-6 text-mutedfg">
           {emptyText}
         </p>
       )}

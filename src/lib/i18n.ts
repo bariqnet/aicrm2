@@ -11,11 +11,16 @@ const EN: TranslationDictionary = {
   "language.arabic": "Arabic",
 
   "sidebar.section.workspace": "Workspace",
+  "sidebar.section.overview": "Overview",
+  "sidebar.section.relationships": "Relationships",
+  "sidebar.section.revenue": "Revenue",
   "sidebar.section.operations": "Operations",
   "sidebar.section.system": "System",
   "sidebar.defaultWorkspace": "Default workspace",
+  "sidebar.searchLabel": "Search",
 
   "nav.dashboard": "Dashboard",
+  "nav.leads": "Leads",
   "nav.contacts": "Contacts",
   "nav.companies": "Companies",
   "nav.deals": "Pipeline",
@@ -39,9 +44,12 @@ const EN: TranslationDictionary = {
   "topbar.themeToggle": "Theme toggle",
 
   "command.searchPlaceholder": "Search everything...",
+  "command.open": "Open",
+  "command.preview": "Preview",
   "command.type.contact": "contact",
   "command.type.company": "company",
   "command.type.deal": "pipeline card",
+  "command.type.task": "task",
   "command.empty": "No results found",
 
   "signout.label": "Sign out",
@@ -59,14 +67,17 @@ const EN: TranslationDictionary = {
   "detail.type.contact": "Contact",
   "detail.type.company": "Company",
   "detail.type.deal": "Pipeline card",
+  "detail.type.task": "Task",
   "detail.tab.overview": "overview",
   "detail.tab.timeline": "timeline",
   "detail.tab.tasks": "tasks",
   "detail.overviewHint": "Core fields and notes for selected record.",
+  "detail.openRecord": "Open full record",
 
   "auth.badge": "Que · AI-driven CRM",
   "auth.heroTitle": "Run your pipeline with calm, clear workflows.",
-  "auth.heroDescription": "A Notion/Vercel-style workspace for contacts, deals, tasks, and reporting with consistent operations.",
+  "auth.heroDescription":
+    "A Notion/Vercel-style workspace for contacts, deals, tasks, and reporting with consistent operations.",
 
   "signin.fallbackTitle": "Welcome back",
   "signin.fallbackLoading": "Loading sign-in form...",
@@ -100,7 +111,8 @@ const EN: TranslationDictionary = {
   "signup.stepTeam": "3. Team + pipeline",
   "signup.title": "Create your Que account",
   "signup.subtitle": "Step 1 of onboarding. Set up your identity to start configuring your CRM.",
-  "signup.inviteDetected": "Invite token detected. Your account will be linked to the invited workspace.",
+  "signup.inviteDetected":
+    "Invite token detected. Your account will be linked to the invited workspace.",
   "signup.fullName": "Full name",
   "signup.fullNamePlaceholder": "Jane Doe",
   "signup.email": "Email",
@@ -108,7 +120,8 @@ const EN: TranslationDictionary = {
   "signup.passwordPlaceholder": "Minimum 8 characters",
   "signup.submit": "Continue onboarding",
   "signup.submitting": "Creating account...",
-  "signup.nextStepHint": "Next step after account creation: workspace preferences, default stages, and invite settings.",
+  "signup.nextStepHint":
+    "Next step after account creation: workspace preferences, default stages, and invite settings.",
   "signup.hasAccount": "Already have an account?",
   "signup.signIn": "Sign in",
   "signup.invalidDataTitle": "Invalid sign-up data",
@@ -119,7 +132,8 @@ const EN: TranslationDictionary = {
   "signup.failureFallback": "Unable to create account",
 
   "onboarding.title": "Set up your Que workspace",
-  "onboarding.subtitle": "Smart onboarding to configure your workspace, pipeline, and team in minutes.",
+  "onboarding.subtitle":
+    "Smart onboarding to configure your workspace, pipeline, and team in minutes.",
   "onboarding.stepLabel": "Step {number}",
   "onboarding.step.workspace.title": "Workspace",
   "onboarding.step.workspace.hint": "Identity and CRM template",
@@ -164,7 +178,7 @@ const EN: TranslationDictionary = {
   "onboarding.alert.workspaceSetupFailedTitle": "Workspace setup failed",
   "onboarding.alert.workspaceSetupFailedFallback": "Unable to configure workspace",
   "onboarding.alert.loadStagesFailed": "Unable to load existing stages",
-  "onboarding.alert.saveStageFailed": "Unable to save stage \"{name}\"",
+  "onboarding.alert.saveStageFailed": 'Unable to save stage "{name}"',
   "onboarding.alert.noStagesTitle": "No stages configured",
   "onboarding.alert.noStagesText": "Add at least one stage to continue.",
   "onboarding.alert.duplicateStagesTitle": "Duplicate stage names",
@@ -180,13 +194,14 @@ const EN: TranslationDictionary = {
   "onboarding.alert.inviteFailed": "Unable to invite {email}",
   "onboarding.alert.completeTitle": "Onboarding complete",
   "onboarding.alert.completeWithInvitesText": "Workspace, stages, and invites are ready.",
-  "onboarding.alert.completeWithoutInvitesText": "Workspace and stages are ready. You can invite teammates later.",
+  "onboarding.alert.completeWithoutInvitesText":
+    "Workspace and stages are ready. You can invite teammates later.",
   "onboarding.alert.finishFailedTitle": "Onboarding failed",
   "onboarding.alert.finishFailedFallback": "Unable to finish onboarding",
 
   "roles.member": "Member",
   "roles.admin": "Admin",
-  "roles.owner": "Owner"
+  "roles.owner": "Owner",
 };
 
 const AR: TranslationDictionary = {
@@ -197,11 +212,16 @@ const AR: TranslationDictionary = {
   "language.arabic": "العربية",
 
   "sidebar.section.workspace": "مساحة العمل",
+  "sidebar.section.overview": "نظرة عامة",
+  "sidebar.section.relationships": "العلاقات",
+  "sidebar.section.revenue": "الإيرادات",
   "sidebar.section.operations": "العمليات",
   "sidebar.section.system": "النظام",
   "sidebar.defaultWorkspace": "مساحة العمل الافتراضية",
+  "sidebar.searchLabel": "بحث",
 
   "nav.dashboard": "لوحة التحكم",
+  "nav.leads": "العملاء المحتملون",
   "nav.contacts": "جهات الاتصال",
   "nav.companies": "الشركات",
   "nav.deals": "خط المبيعات",
@@ -225,9 +245,12 @@ const AR: TranslationDictionary = {
   "topbar.themeToggle": "تبديل المظهر",
 
   "command.searchPlaceholder": "ابحث في كل شيء...",
+  "command.open": "فتح",
+  "command.preview": "معاينة",
   "command.type.contact": "جهة اتصال",
   "command.type.company": "شركة",
   "command.type.deal": "بطاقة مبيعات",
+  "command.type.task": "مهمة",
   "command.empty": "لا توجد نتائج",
 
   "signout.label": "تسجيل الخروج",
@@ -245,14 +268,17 @@ const AR: TranslationDictionary = {
   "detail.type.contact": "جهة الاتصال",
   "detail.type.company": "الشركة",
   "detail.type.deal": "بطاقة خط المبيعات",
+  "detail.type.task": "المهمة",
   "detail.tab.overview": "نظرة عامة",
   "detail.tab.timeline": "الجدول الزمني",
   "detail.tab.tasks": "المهام",
   "detail.overviewHint": "الحقول الأساسية والملاحظات للسجل المحدد.",
+  "detail.openRecord": "فتح السجل الكامل",
 
   "auth.badge": "كيو · CRM مدعوم بالذكاء الاصطناعي",
   "auth.heroTitle": "أدِر خط مبيعاتك بوضوح وسلاسة.",
-  "auth.heroDescription": "مساحة عمل حديثة لإدارة جهات الاتصال والصفقات والمهام والتقارير ضمن عمليات متسقة.",
+  "auth.heroDescription":
+    "مساحة عمل حديثة لإدارة جهات الاتصال والصفقات والمهام والتقارير ضمن عمليات متسقة.",
 
   "signin.fallbackTitle": "مرحبًا بعودتك",
   "signin.fallbackLoading": "جاري تحميل نموذج تسجيل الدخول...",
@@ -294,7 +320,8 @@ const AR: TranslationDictionary = {
   "signup.passwordPlaceholder": "8 أحرف على الأقل",
   "signup.submit": "متابعة الإعداد",
   "signup.submitting": "جاري إنشاء الحساب...",
-  "signup.nextStepHint": "بعد إنشاء الحساب ستنتقل لإعداد مساحة العمل والمراحل الافتراضية وخيارات دعوة الفريق.",
+  "signup.nextStepHint":
+    "بعد إنشاء الحساب ستنتقل لإعداد مساحة العمل والمراحل الافتراضية وخيارات دعوة الفريق.",
   "signup.hasAccount": "لديك حساب بالفعل؟",
   "signup.signIn": "تسجيل الدخول",
   "signup.invalidDataTitle": "بيانات تسجيل غير صالحة",
@@ -350,7 +377,7 @@ const AR: TranslationDictionary = {
   "onboarding.alert.workspaceSetupFailedTitle": "فشل إعداد مساحة العمل",
   "onboarding.alert.workspaceSetupFailedFallback": "تعذر إعداد مساحة العمل",
   "onboarding.alert.loadStagesFailed": "تعذر تحميل المراحل الحالية",
-  "onboarding.alert.saveStageFailed": "تعذر حفظ المرحلة \"{name}\"",
+  "onboarding.alert.saveStageFailed": 'تعذر حفظ المرحلة "{name}"',
   "onboarding.alert.noStagesTitle": "لا توجد مراحل",
   "onboarding.alert.noStagesText": "أضف مرحلة واحدة على الأقل للمتابعة.",
   "onboarding.alert.duplicateStagesTitle": "أسماء مراحل مكررة",
@@ -366,18 +393,19 @@ const AR: TranslationDictionary = {
   "onboarding.alert.inviteFailed": "تعذر دعوة {email}",
   "onboarding.alert.completeTitle": "اكتمل الإعداد",
   "onboarding.alert.completeWithInvitesText": "أصبحت مساحة العمل والمراحل ودعوات الفريق جاهزة.",
-  "onboarding.alert.completeWithoutInvitesText": "أصبحت مساحة العمل والمراحل جاهزة. يمكنك إرسال الدعوات لاحقًا.",
+  "onboarding.alert.completeWithoutInvitesText":
+    "أصبحت مساحة العمل والمراحل جاهزة. يمكنك إرسال الدعوات لاحقًا.",
   "onboarding.alert.finishFailedTitle": "فشل إنهاء الإعداد",
   "onboarding.alert.finishFailedFallback": "تعذر إنهاء الإعداد",
 
   "roles.member": "عضو",
   "roles.admin": "مشرف",
-  "roles.owner": "مالك"
+  "roles.owner": "مالك",
 };
 
 const DICTIONARY: Record<AppLanguage, TranslationDictionary> = {
   en: EN,
-  ar: AR
+  ar: AR,
 };
 
 export const APP_LANGUAGES: AppLanguage[] = ["en", "ar"];

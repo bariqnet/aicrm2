@@ -38,7 +38,7 @@ export const useUIStore = create<UIState>()(
     (set) => ({
       commandOpen: false,
       drawer: null,
-      dark: false,
+      dark: true,
       mobileNavOpen: false,
       sidebarCollapsed: false,
       language: getInitialLanguage(),
@@ -47,7 +47,7 @@ export const useUIStore = create<UIState>()(
       openDrawer: (drawer) => set({ drawer }),
       toggleTheme: () => set((state) => ({ dark: !state.dark })),
       setLanguage: (language) => set({ language }),
-      toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed }))
+      toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
     }),
     {
       name: "que-ui",
@@ -57,14 +57,14 @@ export const useUIStore = create<UIState>()(
         return {
           ...currentState,
           ...persisted,
-          language: getInitialLanguage()
+          language: getInitialLanguage(),
         };
       },
       partialize: (state): PersistedUIState => ({
         dark: state.dark,
         sidebarCollapsed: state.sidebarCollapsed,
-        language: state.language
-      })
-    }
-  )
+        language: state.language,
+      }),
+    },
+  ),
 );

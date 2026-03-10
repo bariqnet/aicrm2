@@ -1,6 +1,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 type DetailMetric = {
   label: string;
@@ -30,57 +31,60 @@ export function DetailHero({
   backLabel,
   badge,
   category,
-  description,
+  description: _description,
   fields = [],
   metrics = [],
-  title
+  title,
 }: DetailHeroProps) {
+  const detailItems = [
+    ...metrics.map((metric) => ({ label: metric.label, value: metric.value })),
+    ...fields.map((field) => ({ label: field.label, value: field.value })),
+  ];
+
   return (
-    <header className="space-y-4">
+    <header className="panel p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link href={backHref as Route} className="text-sm font-medium text-mutedfg transition hover:text-fg">
+        <Link
+          href={backHref as Route}
+          className="inline-flex items-center gap-2 text-sm font-medium text-mutedfg transition hover:text-fg"
+        >
           {backLabel}
         </Link>
         {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
       </div>
 
-      <section className="overflow-hidden rounded-[1.75rem] border border-black/7 bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(244,247,255,0.96))] p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-black/45">{category}</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-black sm:text-4xl">{title}</h1>
-            {description ? (
-              <p className="mt-2 max-w-3xl text-sm leading-7 text-black/63 sm:text-base">{description}</p>
-            ) : null}
+      <div className="mt-3 border-t border-border/70 pt-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="muted-label">{category}</p>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <h1 className="page-title">{title}</h1>
+              {badge ? <div className="shrink-0">{badge}</div> : null}
+            </div>
           </div>
-          {badge ? <div className="shrink-0">{badge}</div> : null}
         </div>
 
-        {metrics.length > 0 ? (
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {metrics.map((metric) => (
+        {detailItems.length > 0 ? (
+          <dl
+            className={cn(
+              "mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4",
+              detailItems.length <= 2 && "xl:grid-cols-2",
+            )}
+          >
+            {detailItems.map((item, index) => (
               <div
-                key={metric.label}
-                className="rounded-2xl border border-black/6 bg-white/85 px-4 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+                key={`${item.label}-${index}`}
+                className="rounded-2xl border border-border/80 bg-surface2/72 px-3 py-2.5"
               >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-black/42">{metric.label}</p>
-                <div className="mt-2 text-lg font-semibold tracking-[-0.02em] text-black">{metric.value}</div>
-              </div>
-            ))}
-          </div>
-        ) : null}
-
-        {fields.length > 0 ? (
-          <dl className="mt-6 grid gap-3 border-t border-black/6 pt-5 sm:grid-cols-2 xl:grid-cols-4">
-            {fields.map((field) => (
-              <div key={field.label} className="rounded-2xl bg-black/[0.025] px-4 py-3">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-black/42">{field.label}</dt>
-                <dd className="mt-2 text-sm font-medium text-black/78">{field.value}</dd>
+                <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-mutedfg">
+                  {item.label}
+                </dt>
+                <dd className="mt-1.5 text-sm font-medium text-fg">{item.value}</dd>
               </div>
             ))}
           </dl>
         ) : null}
-      </section>
+      </div>
     </header>
   );
 }

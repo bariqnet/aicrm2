@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { SettingsWorkspaceManager } from "@/components/SettingsWorkspaceManager";
+import { PageHeader, SectionPanel } from "@/components/ui/workspace";
 import { getSessionData } from "@/lib/auth";
 import { getServerLanguage, pickByLanguage } from "@/lib/server-language";
 
@@ -14,17 +15,24 @@ export default async function SettingsPage() {
 
   return (
     <main className="app-page">
-      <header>
-        <h1 className="page-title">{tr("Settings", "الإعدادات")}</h1>
-        <p className="page-subtitle">
-          {tr(
-            "Manage workspace stages, invites, and team access from one place.",
-            "قم بإدارة مراحل مساحة العمل والدعوات وصلاحيات الفريق من مكان واحد."
-          )}
-        </p>
-      </header>
+      <PageHeader
+        eyebrow={tr("Workspace administration", "إدارة مساحة العمل")}
+        title={tr("Settings", "الإعدادات")}
+        description={tr(
+          "This page is the control surface for stages, invites, and membership access. The redesign keeps configuration work calm and predictable.",
+          "هذه الصفحة هي سطح التحكم للمراحل والدعوات وصلاحيات العضوية. يحافظ التصميم الجديد على هدوء عمل الإعدادات وقابليته للتوقع.",
+        )}
+      />
 
-      <SettingsWorkspaceManager workspaceId={session.workspaceId ?? null} />
+      <SectionPanel
+        title={tr("Workspace controls", "عناصر تحكم مساحة العمل")}
+        description={tr(
+          "Manage stage order, invite teammates, and review access without leaving the workspace.",
+          "أدِر ترتيب المراحل وادعُ أعضاء الفريق وراجع الوصول دون مغادرة مساحة العمل.",
+        )}
+      >
+        <SettingsWorkspaceManager workspaceId={session.workspaceId ?? null} />
+      </SectionPanel>
     </main>
   );
 }

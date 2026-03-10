@@ -74,40 +74,10 @@ export default async function InvoicesPage() {
 
   return (
     <main className="app-page">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="page-title">{tr("Invoices", "الفواتير")}</h1>
-          <p className="page-subtitle">{tr("Track billing status from draft to paid.", "تابع حالة الفوترة من المسودة حتى السداد.")}</p>
-        </div>
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-3">
+        <h1 className="page-title">{tr("Invoices", "الفواتير")}</h1>
         <Link href="/invoices/new" className="btn btn-primary">{tr("New invoice", "فاتورة جديدة")}</Link>
       </header>
-
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-        <article className="metric-card">
-          <p className="muted-label">{tr("Draft", "مسودة")}</p>
-          <p className="mt-2 text-3xl font-semibold">{metrics.draft}</p>
-        </article>
-        <article className="metric-card">
-          <p className="muted-label">{tr("Sent", "مرسلة")}</p>
-          <p className="mt-2 text-3xl font-semibold">{metrics.sent}</p>
-        </article>
-        <article className="metric-card">
-          <p className="muted-label">{tr("Partially paid", "مدفوعة جزئيًا")}</p>
-          <p className="mt-2 text-3xl font-semibold">{metrics.partiallyPaid}</p>
-        </article>
-        <article className="metric-card">
-          <p className="muted-label">{tr("Paid", "مدفوعة")}</p>
-          <p className="mt-2 text-3xl font-semibold">{metrics.paid}</p>
-        </article>
-        <article className="metric-card">
-          <p className="muted-label">{tr("Overdue", "متأخرة")}</p>
-          <p className="mt-2 text-3xl font-semibold">{metrics.overdue}</p>
-        </article>
-        <article className="metric-card">
-          <p className="muted-label">{tr("Outstanding", "مستحقة")}</p>
-          <p className="mt-2 text-3xl font-semibold">{metrics.outstanding}</p>
-        </article>
-      </section>
 
       {invoices.length === 0 ? (
         <p className="panel panel-dashed p-8 text-sm text-mutedfg">{tr("No invoices created yet.", "لا توجد فواتير بعد.")}</p>
@@ -180,6 +150,25 @@ export default async function InvoicesPage() {
           </table>
         </div>
       )}
+
+      <section className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        <article className="metric-card">
+          <p className="muted-label">{tr("Draft", "مسودة")}</p>
+          <p className="mt-1 text-xl font-semibold">{metrics.draft}</p>
+        </article>
+        <article className="metric-card">
+          <p className="muted-label">{tr("Sent", "مرسلة")}</p>
+          <p className="mt-1 text-xl font-semibold">{metrics.sent}</p>
+        </article>
+        <article className="metric-card">
+          <p className="muted-label">{tr("Overdue", "متأخرة")}</p>
+          <p className="mt-1 text-xl font-semibold">{metrics.overdue}</p>
+        </article>
+        <article className="metric-card">
+          <p className="muted-label">{tr("Outstanding", "مستحقة")}</p>
+          <p className="mt-1 text-xl font-semibold">{metrics.outstanding}</p>
+        </article>
+      </section>
     </main>
   );
 }

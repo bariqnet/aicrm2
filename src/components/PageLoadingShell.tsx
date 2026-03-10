@@ -9,19 +9,24 @@ function SkeletonBlock({ className }: { className: string }) {
 export function PageLoadingShell({ title }: PageLoadingShellProps) {
   return (
     <main className="app-page" aria-busy="true" aria-live="polite">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div className="space-y-2">
-          <SkeletonBlock className="h-8 w-48 rounded-lg" />
-          <SkeletonBlock className="h-4 w-72 max-w-[80vw] rounded-md" />
+      <header className="space-y-5">
+        <div className="space-y-3">
+          <SkeletonBlock className="h-3 w-32 rounded-full" />
+          <SkeletonBlock className="h-10 w-80 max-w-[80vw] rounded-2xl" />
+          <SkeletonBlock className="h-5 w-[36rem] max-w-[88vw] rounded-2xl" />
         </div>
-        <SkeletonBlock className="h-9 w-32 rounded-md" />
+        <div className="flex gap-2">
+          <SkeletonBlock className="h-10 w-32 rounded-xl" />
+          <SkeletonBlock className="h-10 w-40 rounded-xl" />
+        </div>
       </header>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <article key={index} className="metric-card space-y-3 p-4">
+          <article key={index} className="metric-card space-y-3 p-5">
             <SkeletonBlock className="h-3 w-20 rounded" />
-            <SkeletonBlock className="h-8 w-16 rounded-md" />
+            <SkeletonBlock className="h-9 w-20 rounded-xl" />
+            <SkeletonBlock className="h-4 w-32 rounded-xl" />
           </article>
         ))}
       </section>
@@ -29,13 +34,13 @@ export function PageLoadingShell({ title }: PageLoadingShellProps) {
       <section className="table-shell p-4">
         <div className="mb-3 flex items-center justify-between gap-2">
           <SkeletonBlock className="h-4 w-40 rounded-md" />
-          <SkeletonBlock className="h-4 w-20 rounded-md" />
+          <SkeletonBlock className="h-10 w-56 rounded-xl" />
         </div>
         <div className="space-y-2">
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface2/70 px-3 py-3"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface2/70 px-4 py-4"
             >
               <div className="space-y-2">
                 <SkeletonBlock className="h-4 w-52 max-w-[75vw] rounded-md" />

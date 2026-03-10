@@ -1,6 +1,5 @@
 import { cookies } from "next/headers";
 import { type AppLanguage } from "@/lib/i18n";
-import { getDateLocale } from "@/lib/locale";
 
 export { getDateLocale } from "@/lib/locale";
 

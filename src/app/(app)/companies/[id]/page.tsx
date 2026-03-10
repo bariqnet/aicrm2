@@ -144,8 +144,9 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
         ]}
       />
 
-      <section className="grid gap-3 md:grid-cols-2">
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_360px]">
         <RelationshipJournalSection
+          className="xl:min-h-[420px]"
           relatedType="company"
           relatedId={id}
           title={tr("Relationship journal", "سجل العلاقة")}
@@ -185,7 +186,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
             {contacts.map((contact) => (
               <li
                 key={contact.id}
-                className="rounded-2xl border border-border bg-surface2/70 px-4 py-3 transition hover:border-black/10 hover:bg-white"
+                className="rounded-2xl border border-border bg-surface2/70 px-4 py-3 transition hover:border-fg/12 hover:bg-surface dark:hover:border-white/12 dark:hover:bg-white/[0.04]"
               >
                 <Link
                   href={`/contacts/${contact.id}` as Route}
@@ -214,7 +215,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
             {deals.map((deal) => (
               <li
                 key={deal.id}
-                className="rounded-2xl border border-border bg-surface2/70 px-4 py-3 transition hover:border-black/10 hover:bg-white"
+                className="rounded-2xl border border-border bg-surface2/70 px-4 py-3 transition hover:border-fg/12 hover:bg-surface dark:hover:border-white/12 dark:hover:bg-white/[0.04]"
               >
                 <Link href={`/deals/${deal.id}` as Route} className="font-medium hover:underline">
                   {deal.title}
@@ -243,7 +244,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
             {invoices.map((invoice) => (
               <li
                 key={invoice.id}
-                className="rounded-2xl border border-border bg-surface2/70 px-4 py-3 transition hover:border-black/10 hover:bg-white"
+                className="rounded-2xl border border-border bg-surface2/70 px-4 py-3 transition hover:border-fg/12 hover:bg-surface dark:hover:border-white/12 dark:hover:bg-white/[0.04]"
               >
                 <Link
                   href={`/invoices/${invoice.id}` as Route}
@@ -273,7 +274,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
             {tasks.map((task) => (
               <li
                 key={task.id}
-                className="rounded-2xl border border-border bg-surface2/70 px-4 py-3 transition hover:border-black/10 hover:bg-white"
+                className="rounded-2xl border border-border bg-surface2/70 px-4 py-3 transition hover:border-fg/12 hover:bg-surface dark:hover:border-white/12 dark:hover:bg-white/[0.04]"
               >
                 <Link href={`/tasks/${task.id}` as Route} className="font-medium hover:underline">
                   {task.title}

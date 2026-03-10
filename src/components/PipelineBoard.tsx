@@ -1,12 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Expand, Minimize2 } from "lucide-react";
+import { Badge } from "@/components/Badge";
+import { EmptyState } from "@/components/EmptyState";
+import { FilterChips } from "@/components/FilterChips";
+import { MetricCard, MetricGrid, PageHeader, SectionPanel } from "@/components/ui/workspace";
 import { getDateLocale } from "@/lib/locale";
 import { getResponseError, showErrorAlert } from "@/lib/sweet-alert";
 import type { AppLanguage } from "@/lib/i18n";
 import type { Company, Contact, Deal, Stage } from "@/lib/crm-types";
+import { dealStatusMeta, formatCurrency, summarizeCurrencyTotals } from "@/lib/crm-presentation";
 
 type PipelineBoardProps = {
   initialDeals: Deal[];
@@ -15,18 +20,6 @@ type PipelineBoardProps = {
   contacts: Contact[];
   language: AppLanguage;
 };
-
-function formatMoney(amount: number, currency: string, locale: string): string {
-  try {
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  } catch {
-    return `${currency} ${amount.toLocaleString(locale)}`;
-  }
-}
 
 function formatCloseDate(
   value: string | null | undefined,
@@ -37,21 +30,6 @@ function formatCloseDate(
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
   return parsed.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" });
-}
-
-function statusLabel(
-  status: Deal["status"],
-  tr: (english: string, arabic: string) => string,
-): string {
-  if (status === "WON") return tr("Won", "رابحة");
-  if (status === "LOST") return tr("Lost", "خاسرة");
-  return tr("Open", "مفتوحة");
-}
-
-function statusBadgeClasses(status: Deal["status"]): string {
-  if (status === "WON") return "border-emerald-300/70 bg-emerald-50 text-emerald-700";
-  if (status === "LOST") return "border-rose-300/70 bg-rose-50 text-rose-700";
-  return "border-sky-300/70 bg-sky-50 text-sky-700";
 }
 
 function patchPayloadFromDeal(deal: Deal, targetStageId: string) {
@@ -81,6 +59,9 @@ export function PipelineBoard({
   const [activeDropStageId, setActiveDropStageId] = useState<string | null>(null);
   const [updatingDealIds, setUpdatingDealIds] = useState<string[]>([]);
   const [boardFullscreen, setBoardFullscreen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<Deal["status"] | "all">("OPEN");
+  const [searchValue, setSearchValue] = useState("");
+  const deferredSearch = useDeferredValue(searchValue.trim().toLowerCase());
 
   useEffect(() => {
     setDeals(initialDeals);
@@ -104,8 +85,32 @@ export function PipelineBoard({
     [contacts],
   );
 
-  const openCards = deals.filter((deal) => deal.status === "OPEN");
-  const totalValue = deals.reduce((sum, deal) => sum + deal.amount, 0);
+  const visibleDeals = deals
+    .filter((deal) => statusFilter === "all" || deal.status === statusFilter)
+    .filter((deal) => {
+      if (!deferredSearch) return true;
+      return [
+        deal.title,
+        deal.description ?? "",
+        deal.currency,
+        companiesById.get(deal.companyId ?? "")?.name ?? "",
+        contactsById.get(deal.primaryContactId ?? "")?.firstName ?? "",
+        contactsById.get(deal.primaryContactId ?? "")?.lastName ?? "",
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(deferredSearch);
+    });
+
+  const openVisibleDeals = visibleDeals.filter((deal) => deal.status === "OPEN");
+  const lateStageDeals = openVisibleDeals
+    .filter(
+      (deal) =>
+        stages.findIndex((stage) => stage.id === deal.stageId) >= Math.max(stages.length - 2, 0),
+    )
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 5);
+  const activeStageCount = new Set(visibleDeals.map((deal) => deal.stageId)).size;
 
   async function moveCardToStage(dealId: string, targetStageId: string) {
     const deal = deals.find((item) => item.id === dealId);
@@ -159,23 +164,25 @@ export function PipelineBoard({
   function renderBoard(fitAllColumns: boolean, fullHeight = false) {
     if (stages.length === 0) {
       return (
-        <div className="panel panel-dashed p-8 text-sm text-mutedfg">
-          <p>{tr("No stages configured yet.", "لا توجد مراحل مهيأة بعد.")}</p>
-          <Link
-            href="/settings"
-            className="mt-3 inline-flex text-sm font-medium text-accent hover:underline"
-          >
-            {tr("Configure stages in settings", "قم بتهيئة المراحل من الإعدادات")}
-          </Link>
-        </div>
+        <EmptyState
+          title={tr("No stages configured yet", "لا توجد مراحل مهيأة بعد")}
+          hint={tr(
+            "Configure stages in settings before using the pipeline board.",
+            "قم بتهيئة المراحل من الإعدادات قبل استخدام لوحة خط المبيعات.",
+          )}
+          action={
+            <Link href="/settings" className="btn">
+              {tr("Configure stages", "تهيئة المراحل")}
+            </Link>
+          }
+        />
       );
     }
 
     const renderColumn = (stage: Stage) => {
-      const stageDeals = deals
+      const stageDeals = visibleDeals
         .filter((deal) => deal.stageId === stage.id)
         .sort((a, b) => b.amount - a.amount);
-      const stageOpenCount = stageDeals.filter((deal) => deal.status === "OPEN").length;
       const isDropTarget = activeDropStageId === stage.id;
 
       return (
@@ -183,7 +190,7 @@ export function PipelineBoard({
           key={stage.id}
           className={[
             fitAllColumns ? "min-w-0 flex h-full flex-col" : "w-[320px] shrink-0",
-            "rounded-xl border border-border bg-surface shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition",
+            "rounded-[24px] border border-border/90 bg-surface2/68 transition",
             isDropTarget ? "ring-2 ring-accent/35" : "",
           ].join(" ")}
           onDragOver={(event) => {
@@ -197,50 +204,49 @@ export function PipelineBoard({
             await moveCardToStage(dealId, stage.id);
           }}
         >
-          <header className="border-b border-border px-3 py-3">
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="truncate text-sm font-semibold" title={stage.name}>
-                {stage.name}
-              </h2>
-              <span className="rounded-full border border-border bg-surface2 px-2 py-0.5 text-xs text-mutedfg">
-                {stageDeals.length}
-              </span>
+          <header className="border-b border-border/85 px-4 py-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold tracking-[-0.02em] text-fg">{stage.name}</h2>
+                <p className="mt-1 text-xs text-mutedfg">
+                  {summarizeCurrencyTotals(
+                    stageDeals,
+                    locale,
+                    tr("No value", "بدون قيمة"),
+                    (count) => tr(`${count} currencies`, `${count} عملات`),
+                  )}
+                </p>
+              </div>
+              <Badge tone={stageDeals.length > 0 ? "info" : "neutral"}>{stageDeals.length}</Badge>
             </div>
-            <p className="mt-1 text-xs text-mutedfg">
-              {tr("Open", "مفتوحة")}: {stageOpenCount}
-            </p>
             <Link
               href={`/deals/new?stageId=${encodeURIComponent(stage.id)}`}
-              className="btn mt-3 h-8 w-full text-xs"
+              className="btn mt-4 h-9 w-full"
             >
-              {tr("Add card", "إضافة بطاقة")}
+              {tr("Add opportunity", "إضافة فرصة")}
             </Link>
           </header>
 
           <div
             className={
               fitAllColumns
-                ? "min-h-0 flex-1 space-y-2 overflow-y-auto p-2"
-                : "max-h-[calc(100vh-320px)] space-y-2 overflow-y-auto p-2"
+                ? "min-h-0 flex-1 space-y-2 overflow-y-auto p-3"
+                : "max-h-[calc(100vh-370px)] space-y-2 overflow-y-auto p-3"
             }
           >
             {stageDeals.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-border bg-surface2 px-3 py-6 text-center text-xs text-mutedfg">
-                {tr("Drop cards here.", "أسقط البطاقات هنا.")}
+              <p className="rounded-2xl border border-dashed border-border bg-surface px-4 py-8 text-center text-sm text-mutedfg">
+                {tr("Drop opportunities here.", "أسقط الفرص هنا.")}
               </p>
             ) : (
               stageDeals.map((deal) => {
                 const companyName = deal.companyId
                   ? (companiesById.get(deal.companyId)?.name ?? tr("Unknown", "غير معروف"))
-                  : "-";
+                  : tr("No company", "بدون شركة");
                 const contact = deal.primaryContactId
                   ? contactsById.get(deal.primaryContactId)
                   : null;
-                const contactName = contact
-                  ? `${contact.firstName} ${contact.lastName}`
-                  : deal.primaryContactId
-                    ? tr("Unknown", "غير معروف")
-                    : "-";
+                const status = dealStatusMeta(deal.status, tr);
                 const isUpdating = updatingDealIds.includes(deal.id);
 
                 return (
@@ -258,39 +264,32 @@ export function PipelineBoard({
                       setActiveDropStageId(null);
                     }}
                     className={[
-                      "group block rounded-xl border border-border bg-surface2 px-3 py-3 text-sm transition hover:-translate-y-0.5 hover:border-fg/20 hover:bg-surface hover:shadow-[0_8px_20px_rgba(15,23,42,0.08)]",
+                      "group block rounded-[22px] border border-border/90 bg-surface px-4 py-4 text-sm transition hover:border-fg/12 hover:bg-surface2 hover:shadow-[0_14px_28px_rgba(15,23,42,0.08)] dark:hover:border-white/12 dark:hover:bg-white/[0.04]",
                       isUpdating ? "cursor-wait opacity-70" : "cursor-grab active:cursor-grabbing",
                     ].join(" ")}
                     onClick={(event) => {
                       if (draggingDealId === deal.id) event.preventDefault();
                     }}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="font-medium leading-5 text-fg">{deal.title}</p>
-                      <span
-                        className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${statusBadgeClasses(deal.status)}`}
-                      >
-                        {statusLabel(deal.status, tr)}
-                      </span>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate font-medium leading-5 text-fg">{deal.title}</p>
+                        <p className="mt-1 truncate text-xs text-mutedfg">
+                          {companyName}
+                          {contact ? ` · ${contact.firstName} ${contact.lastName}` : ""}
+                        </p>
+                      </div>
+                      <Badge tone={status.tone}>{status.label}</Badge>
                     </div>
 
-                    <p className="mt-2 text-sm font-semibold text-fg">
-                      {formatMoney(deal.amount, deal.currency, locale)}
+                    <p className="mt-4 text-lg font-semibold tracking-[-0.03em] text-fg">
+                      {formatCurrency(deal.amount, deal.currency, locale)}
                     </p>
 
-                    <div className="mt-2 space-y-1 text-xs text-mutedfg">
-                      <p>
-                        {tr("Company", "الشركة")}: {companyName}
-                      </p>
-                      <p>
-                        {tr("Contact", "جهة الاتصال")}: {contactName}
-                      </p>
+                    <div className="mt-3 flex items-center justify-between gap-3 text-xs text-mutedfg">
+                      <span>{tr("Expected close", "الإغلاق المتوقع")}</span>
+                      <span>{formatCloseDate(deal.expectedCloseDate, locale, tr)}</span>
                     </div>
-
-                    <p className="mt-2 text-[11px] text-mutedfg">
-                      {tr("Expected close", "الإغلاق المتوقع")}:{" "}
-                      {formatCloseDate(deal.expectedCloseDate, locale, tr)}
-                    </p>
                   </Link>
                 );
               })
@@ -302,7 +301,7 @@ export function PipelineBoard({
 
     if (fitAllColumns) {
       return (
-        <div className={fullHeight ? "min-h-0 flex-1" : "h-[calc(100vh-240px)]"}>
+        <div className={fullHeight ? "min-h-0 flex-1" : "h-[calc(100vh-320px)]"}>
           <div
             className="grid h-full gap-3"
             style={{ gridTemplateColumns: `repeat(${Math.max(stages.length, 1)}, minmax(0, 1fr))` }}
@@ -324,46 +323,158 @@ export function PipelineBoard({
 
   return (
     <>
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="page-title">{tr("Pipeline", "خط المبيعات")}</h1>
-          <p className="page-subtitle">
-            {tr(
-              "Trello-style board. Drag cards between stages to update pipeline.",
-              "لوحة بأسلوب Trello. اسحب البطاقات بين المراحل لتحديث خط المبيعات.",
-            )}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button className="btn" type="button" onClick={() => setBoardFullscreen(true)}>
-            <Expand size={14} />
-            {tr("Full screen", "ملء الشاشة")}
-          </button>
-          <Link href="/settings" className="btn">
-            {tr("Manage stages", "إدارة المراحل")}
-          </Link>
-          <Link href="/deals/new" className="btn btn-primary">
-            {tr("New pipeline card", "بطاقة جديدة في خط المبيعات")}
-          </Link>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow={tr("Pipeline workspace", "مساحة خط المبيعات")}
+        title={tr("Pipeline", "خط المبيعات")}
+        description={tr(
+          "Use the board for stage movement, but keep scanning anchored in value, search, and status filters.",
+          "استخدم اللوحة لتحريك المراحل مع إبقاء الفحص مرتكزًا على القيمة والبحث ومرشحات الحالة.",
+        )}
+        actions={
+          <>
+            <button className="btn" type="button" onClick={() => setBoardFullscreen(true)}>
+              <Expand size={14} />
+              {tr("Full screen", "ملء الشاشة")}
+            </button>
+            <Link href="/settings" className="btn">
+              {tr("Manage stages", "إدارة المراحل")}
+            </Link>
+            <Link href="/deals/new" className="btn btn-primary">
+              {tr("New opportunity", "فرصة جديدة")}
+            </Link>
+          </>
+        }
+      />
 
-      <section className="grid gap-3 sm:grid-cols-3">
-        <article className="panel p-4">
-          <p className="muted-label">{tr("Total cards", "إجمالي البطاقات")}</p>
-          <p className="mt-2 text-2xl font-semibold">{deals.length}</p>
-        </article>
-        <article className="panel p-4">
-          <p className="muted-label">{tr("Open cards", "البطاقات المفتوحة")}</p>
-          <p className="mt-2 text-2xl font-semibold">{openCards.length}</p>
-        </article>
-        <article className="panel p-4">
-          <p className="muted-label">{tr("Pipeline value", "قيمة خط المبيعات")}</p>
-          <p className="mt-2 text-2xl font-semibold">{formatMoney(totalValue, "USD", locale)}</p>
-        </article>
+      <MetricGrid>
+        <MetricCard
+          label={tr("Visible cards", "البطاقات الظاهرة")}
+          value={visibleDeals.length}
+          hint={tr("Filtered opportunity count", "عدد الفرص بعد التصفية")}
+        />
+        <MetricCard
+          label={tr("Open value", "القيمة المفتوحة")}
+          value={summarizeCurrencyTotals(
+            openVisibleDeals,
+            locale,
+            tr("No value", "بدون قيمة"),
+            (count) => tr(`${count} currencies`, `${count} عملات`),
+          )}
+          hint={tr("Current visible pipeline", "خط المبيعات المرئي حاليًا")}
+          tone="accent"
+        />
+        <MetricCard
+          label={tr("Active stages", "المراحل النشطة")}
+          value={activeStageCount}
+          hint={tr("Stages containing visible cards", "المراحل التي تحتوي على بطاقات مرئية")}
+        />
+        <MetricCard
+          label={tr("Late-stage focus", "التركيز المتأخر")}
+          value={lateStageDeals.length}
+          hint={tr("Late-stage open opportunities", "الفرص المفتوحة في المراحل المتأخرة")}
+        />
+      </MetricGrid>
+
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_360px]">
+        <SectionPanel
+          title={tr("Pipeline board", "لوحة خط المبيعات")}
+          description={tr(
+            "Search and status filters make the board usable even as volume grows.",
+            "يجعل البحث ومرشحات الحالة اللوحة قابلة للاستخدام حتى مع زيادة الحجم.",
+          )}
+        >
+          <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <FilterChips
+              chips={[
+                {
+                  key: "open",
+                  label: tr("Open", "مفتوحة"),
+                  active: statusFilter === "OPEN",
+                  onClick: () => setStatusFilter("OPEN"),
+                  count: deals.filter((deal) => deal.status === "OPEN").length,
+                },
+                {
+                  key: "all",
+                  label: tr("All", "الكل"),
+                  active: statusFilter === "all",
+                  onClick: () => setStatusFilter("all"),
+                  count: deals.length,
+                },
+                {
+                  key: "won",
+                  label: tr("Won", "رابحة"),
+                  active: statusFilter === "WON",
+                  onClick: () => setStatusFilter("WON"),
+                  count: deals.filter((deal) => deal.status === "WON").length,
+                },
+                {
+                  key: "lost",
+                  label: tr("Lost", "خاسرة"),
+                  active: statusFilter === "LOST",
+                  onClick: () => setStatusFilter("LOST"),
+                  count: deals.filter((deal) => deal.status === "LOST").length,
+                },
+              ]}
+            />
+            <input
+              className="input w-full lg:max-w-sm"
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              placeholder={tr(
+                "Search opportunities, companies, or contacts",
+                "ابحث عن فرص أو شركات أو جهات اتصال",
+              )}
+            />
+          </div>
+
+          {visibleDeals.length === 0 ? (
+            <EmptyState
+              title={tr("No opportunities match this view", "لا توجد فرص تطابق هذا العرض")}
+              hint={tr(
+                "Try broadening the filters or create a new opportunity directly in the pipeline.",
+                "جرّب توسيع المرشحات أو أنشئ فرصة جديدة مباشرة داخل خط المبيعات.",
+              )}
+              action={
+                <Link href="/deals/new" className="btn btn-primary">
+                  {tr("Create opportunity", "إنشاء فرصة")}
+                </Link>
+              }
+            />
+          ) : (
+            renderBoard(false)
+          )}
+        </SectionPanel>
+
+        <SectionPanel
+          title={tr("Late-stage queue", "قائمة المراحل المتأخرة")}
+          description={tr(
+            "These visible deals deserve the clearest next step and owner confidence.",
+            "هذه الصفقات المرئية تستحق أوضح خطوة تالية وثقة بالمسؤول.",
+          )}
+        >
+          {lateStageDeals.length === 0 ? (
+            <p className="rounded-2xl border border-dashed border-border bg-surface2/70 px-4 py-4 text-sm text-mutedfg">
+              {tr("No late-stage opportunities in this view.", "لا توجد فرص متأخرة في هذا العرض.")}
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {lateStageDeals.map((deal) => (
+                <Link
+                  key={deal.id}
+                  href={`/deals/${deal.id}`}
+                  className="block rounded-2xl border border-border/85 bg-surface2/70 px-4 py-3 transition hover:border-fg/12 hover:bg-surface"
+                >
+                  <p className="text-sm font-medium text-fg">{deal.title}</p>
+                  <p className="mt-1 text-xs text-mutedfg">
+                    {formatCurrency(deal.amount, deal.currency, locale)} ·{" "}
+                    {formatCloseDate(deal.expectedCloseDate, locale, tr)}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          )}
+        </SectionPanel>
       </section>
-
-      {renderBoard(false)}
 
       {boardFullscreen ? (
         <div className="fixed inset-0 z-[80] bg-bg p-3 sm:p-4">

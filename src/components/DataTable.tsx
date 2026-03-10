@@ -5,47 +5,61 @@ type DataTableColumn<TRow> = {
   label: string;
   render: (row: TRow) => React.ReactNode;
   className?: string;
+  headerClassName?: string;
 };
 
 type DataTableProps<TRow extends { id: string | number }> = {
+  className?: string;
   columns: DataTableColumn<TRow>[];
+  emptyState?: React.ReactNode;
+  footer?: React.ReactNode;
   rows: TRow[];
-  onRowClick?: (row: TRow) => void;
+  getRowClassName?: (row: TRow) => string | undefined;
 };
 
 export function DataTable<TRow extends { id: string | number }>({
+  className,
   columns,
+  emptyState,
+  footer,
+  getRowClassName,
   rows,
-  onRowClick
 }: DataTableProps<TRow>) {
   return (
-    <div className="table-shell overflow-x-auto">
-      <table className="min-w-[680px] w-full text-left text-sm">
-        <thead className="border-b border-border bg-surface2 text-xs uppercase tracking-[0.1em] text-mutedfg">
+    <div className={cn("table-shell overflow-x-auto", className)}>
+      <table className="min-w-[720px]">
+        <thead>
           <tr>
             {columns.map((col) => (
-              <th key={col.key} className={cn("px-3 py-2 font-medium", col.className)}>
+              <th key={col.key} className={cn(col.headerClassName, col.className)}>
                 {col.label}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr
-              key={row.id}
-              className="cursor-pointer border-t border-border transition hover:bg-muted/40"
-              onClick={() => onRowClick?.(row)}
-            >
-              {columns.map((col) => (
-                <td key={col.key} className={cn("px-3 py-2", col.className)}>
-                  {col.render(row)}
-                </td>
-              ))}
+          {rows.length === 0 ? (
+            <tr>
+              <td className="px-4 py-12 text-center text-sm text-mutedfg" colSpan={columns.length}>
+                {emptyState ?? "No records found."}
+              </td>
             </tr>
-          ))}
+          ) : (
+            rows.map((row) => (
+              <tr key={row.id} className={cn(getRowClassName?.(row))}>
+                {columns.map((col) => (
+                  <td key={col.key} className={cn(col.className)}>
+                    {col.render(row)}
+                  </td>
+                ))}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
+      {footer ? (
+        <div className="border-t border-border/80 px-5 py-3 text-sm text-mutedfg">{footer}</div>
+      ) : null}
     </div>
   );
 }

@@ -11,19 +11,21 @@ export function Timeline({ activities }: { activities: Activity[] }) {
   return (
     <div className="space-y-3">
       {activities.map((a) => (
-        <div key={a.id} className="rounded-md border p-3">
-          <p className="text-xs uppercase text-mutedfg">{a.type}</p>
-          <p className="font-medium">
+        <div key={a.id} className="rounded-2xl border border-border/85 bg-surface2/70 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-mutedfg">
+            {a.type}
+          </p>
+          <p className="mt-2 font-medium text-fg">
             {a.entityType} · {a.entityId}
           </p>
           {a.metadata ? (
-            <p className="text-sm text-mutedfg">{JSON.stringify(a.metadata)}</p>
+            <p className="mt-2 text-sm leading-6 text-mutedfg">{JSON.stringify(a.metadata)}</p>
           ) : (
-            <p className="text-sm text-mutedfg">
+            <p className="mt-2 text-sm leading-6 text-mutedfg">
               {tr("No additional metadata.", "لا توجد بيانات إضافية.")}
             </p>
           )}
-          <p className="mt-1 text-xs text-mutedfg">
+          <p className="mt-2 text-xs text-mutedfg">
             {fmtDate(a.createdAt, locale)} · {a.actorId}
           </p>
         </div>

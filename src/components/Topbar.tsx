@@ -1,25 +1,23 @@
 "use client";
 
-import Image from "next/image";
+import type { Route } from "next";
 import Link from "next/link";
-import { Bell, Menu, Moon, Plus, Search, Sun } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Menu, Moon, Sun } from "lucide-react";
+import { APP_TOP_NAV_ITEMS } from "@/lib/navigation";
 import { useI18n } from "@/hooks/useI18n";
+import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store/ui-store";
 
 export function Topbar() {
-  const {
-    setCommandOpen,
-    dark,
-    toggleTheme,
-    mobileNavOpen,
-    setMobileNavOpen
-  } = useUIStore();
+  const { setCommandOpen, dark, toggleTheme, mobileNavOpen, setMobileNavOpen } = useUIStore();
   const { t } = useI18n();
+  const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-bg/90 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 py-3 md:flex-nowrap md:gap-3 md:px-8">
-        <div className="flex w-full min-w-0 items-center gap-2 md:flex-1">
+    <header className="sticky top-0 z-20 border-b border-border/90 bg-[hsl(var(--background)/0.96)] backdrop-blur-xl dark:border-white/8 dark:bg-black/92">
+      <div className="flex w-full items-center gap-4 px-4 py-3 md:px-6 xl:px-8">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <button
             className="btn w-9 shrink-0 px-0 md:hidden"
             aria-label={mobileNavOpen ? t("topbar.closeNav") : t("topbar.openNav")}
@@ -27,44 +25,53 @@ export function Topbar() {
           >
             <Menu size={16} />
           </button>
-          <Link href="/dashboard" className="hidden md:inline-flex md:shrink-0" aria-label={t("topbar.queHome")}>
-            <Image
-              src="/fav.png"
-              alt="Que logo"
-              width={102}
-              height={34}
-              className="h-8 w-auto"
-              priority
-            />
-          </Link>
-          <button
-            onClick={() => setCommandOpen(true)}
-            className="input flex h-9 min-w-0 flex-1 items-center justify-between text-mutedfg md:max-w-lg"
-            aria-label={t("topbar.openCommandPalette")}
+          <Link
+            href={"/dashboard" as Route}
+            className="shrink-0 text-[1.08rem] font-semibold tracking-[-0.03em] text-fg"
           >
-            <span className="inline-flex items-center gap-2 truncate">
-              <Search size={14} />
-              <span className="truncate">{t("topbar.searchPlaceholder")}</span>
-            </span>
-            <span className="hidden rounded border border-border bg-surface2 px-1.5 py-0.5 text-[11px] text-mutedfg sm:inline-flex">
-              Cmd K
-            </span>
-          </button>
+            Que CRM
+          </Link>
+          <nav className="hidden items-center gap-1 pl-3 md:flex">
+            {APP_TOP_NAV_ITEMS.map((item) => {
+              const active =
+                pathname === item.href ||
+                (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`));
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href as Route}
+                  className={cn(
+                    "rounded-full border border-transparent px-3 py-1.5 text-sm transition",
+                    active
+                      ? "border-border/90 bg-surface2 text-fg dark:border-white/12 dark:bg-white/[0.08] dark:text-white"
+                      : "text-mutedfg hover:border-fg/12 hover:bg-surface2 hover:text-fg dark:text-zinc-400 dark:hover:border-white/12 dark:hover:bg-white/[0.08] dark:hover:text-white",
+                  )}
+                >
+                  {t(item.labelKey)}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          <Link href="/contacts/new" className="btn btn-primary hidden sm:inline-flex">
-            <Plus size={14} />
-            {t("topbar.newContact")}
-          </Link>
-          <Link href="/contacts/new" className="btn btn-primary w-9 px-0 sm:hidden" aria-label={t("topbar.newContact")}>
-            <Plus size={14} />
-          </Link>
-          <Link href="/deals/new" className="btn hidden xl:inline-flex">{t("topbar.newDeal")}</Link>
-          <button className="btn w-9 px-0" aria-label={t("topbar.notifications")}>
-            <Bell size={14} />
+          <button
+            type="button"
+            onClick={() => setCommandOpen(true)}
+            className="hidden rounded-full border border-border bg-surface2 px-3 py-1.5 text-xs font-medium text-mutedfg transition hover:border-fg/15 hover:bg-surface hover:text-fg dark:border-white/8 dark:bg-white/[0.04] dark:text-zinc-300 dark:hover:border-white/12 dark:hover:bg-white/[0.08] dark:hover:text-white lg:inline-flex"
+            aria-label={t("topbar.openCommandPalette")}
+          >
+            Cmd K
           </button>
-          <button className="btn w-9 px-0" onClick={toggleTheme} aria-label={t("topbar.themeToggle")}>
+          <Link href="/deals/new" className="btn btn-primary h-10">
+            {t("topbar.newDeal")}
+          </Link>
+          <button
+            className="btn w-9 px-0"
+            onClick={toggleTheme}
+            aria-label={t("topbar.themeToggle")}
+          >
             {dark ? <Sun size={14} /> : <Moon size={14} />}
           </button>
         </div>

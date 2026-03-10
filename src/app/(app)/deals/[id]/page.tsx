@@ -152,7 +152,7 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
         ]}
       />
 
-      <section className="grid gap-3 md:grid-cols-2">
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_360px]">
         <DetailListCard
           title={tr("Tasks", "المهام")}
           description={tr(
@@ -166,7 +166,7 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
             {tasks.map((task) => (
               <li
                 key={task.id}
-                className="rounded-2xl border border-border bg-surface2/70 px-4 py-3 transition hover:border-black/10 hover:bg-white"
+                className="rounded-2xl border border-border bg-surface2/70 px-4 py-3 transition hover:border-fg/12 hover:bg-surface dark:hover:border-white/12 dark:hover:bg-white/[0.04]"
               >
                 <Link href={`/tasks/${task.id}` as Route} className="font-medium hover:underline">
                   {task.title}
@@ -202,7 +202,7 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
           </ul>
         </DetailListCard>
 
-        <article className="panel p-4 md:col-span-2">
+        <article className="panel p-5 md:col-span-2">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold">{tr("Notes", "ملاحظات")}</h2>

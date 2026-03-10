@@ -134,8 +134,8 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
         ]}
       />
 
-      <section className="grid gap-3 md:grid-cols-2">
-        <article className="panel p-4">
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_360px]">
+        <article className="panel p-5">
           <div>
             <h2 className="text-sm font-semibold">{tr("Notes", "ملاحظات")}</h2>
             <p className="mt-1 text-sm text-mutedfg">
